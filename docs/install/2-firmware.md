@@ -62,4 +62,20 @@ Edit `config.h` and set:
     By design the firmware sends no servo pulses until the first valid
     command arrives, so nothing moves (or lurches) at boot.
 
+## Troubleshooting
+
+!!! warning "Apple Silicon Macs need Rosetta 2"
+    Arduino's sketch preprocessor bundles an Intel-only `ctags` binary. On an
+    Apple Silicon Mac without Rosetta the build fails with
+    `bad CPU type in executable`. Fix:
+
+    ```bash
+    softwareupdate --install-rosetta --agree-to-license
+    ```
+
+    Do **not** substitute Homebrew's ctags — it lacks Arduino's `returntype`
+    patch and produces `ISO C++ forbids declaration ... with no type` errors.
+    If you tried that first, recompile once with `--clean` (or Sketch →
+    Verify after restarting the IDE) to purge the poisoned build cache.
+
 Next: [Install 3/4 — Host Software](3-host.md).
