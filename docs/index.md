@@ -7,13 +7,9 @@ host (Mac now, Raspberry Pi later) runs the micro-ROS agent and a Foxglove
 bridge for browser-based control.
 
 <figure markdown>
-  ![Hero photo placeholder — the assembled arm](img/hero-placeholder.svg){ width="720" }
-  <figcaption>Photo coming soon — see the <a href="gallery/">gallery</a> as the build progresses.</figcaption>
+  ![The assembled 6DOF arm on the workbench](img/hero.jpg){ width="720" }
+  <figcaption>The assembled arm posed upright during bring-up — see the <a href="gallery/">gallery</a> for more.</figcaption>
 </figure>
-
-!!! note "Photo placeholder"
-    Once the arm is assembled, add a real photo as `docs/img/hero.jpg` and
-    point the image above at it (see the [gallery](gallery.md) workflow).
 
 ## Features
 

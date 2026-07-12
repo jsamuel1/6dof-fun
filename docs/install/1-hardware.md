@@ -24,6 +24,11 @@ must never be violated.
 5. **USB-only power is for single-servo bench testing only.** Never move more
    than one servo without the converter connected.
 
+<figure markdown>
+  ![The 12V 10A DC power supply](../img/power-supply-12v.jpg){ width="600" }
+  <figcaption>The 12V/10A DC supply. Its output feeds <strong>only</strong> the buck-boost converter input — never the servos or the PCA9685 V+ directly.</figcaption>
+</figure>
+
 ## Connections
 
 | From | To | Notes |

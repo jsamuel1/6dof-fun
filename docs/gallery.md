@@ -4,9 +4,22 @@ Photos of the build as it progresses — bench tests, calibration, first poses,
 and the printed mounts. The gallery starts empty and fills in as milestones
 land (first choreographed pose sequence, PLA fit checks, PETG finals).
 
-!!! note "No photos yet"
-    The build is in progress. Photos land here as each bring-up milestone
-    completes.
+## Build photos
+
+<figure markdown>
+  ![The assembled arm, side view](img/arm-full-view.jpg){ width="600" }
+  <figcaption>The fully assembled arm on the bench — all six MG996R servos mounted, wiring loomed back to the base.</figcaption>
+</figure>
+
+<figure markdown>
+  ![Elegoo controller, PCA9685 driver, and USB cables](img/electronics-components.jpg){ width="600" }
+  <figcaption>The electronics before wiring: Elegoo Mega controller, PCA9685 16-channel PWM/servo driver, and USB cables.</figcaption>
+</figure>
+
+<figure markdown>
+  ![Elegoo ESP32 boards in their case](img/esp32-boards.jpg){ width="600" }
+  <figcaption>The Elegoo ESP32 boards (WiFi + Bluetooth, Arduino-IDE compatible) that run the micro-ROS firmware.</figcaption>
+</figure>
 
 ## Adding photos
 

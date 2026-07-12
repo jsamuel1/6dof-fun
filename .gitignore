@@ -17,3 +17,6 @@ host/calibration/captures/
 
 # OS noise
 .DS_Store
+
+# Photo staging area — drop originals here; web-sized copies go to docs/img/
+images/
