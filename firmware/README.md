@@ -88,10 +88,16 @@ No servos or PCA9685 required — USB power only.
    [arm] connected to agent
    ```
 
-3. From any ROS2 Jazzy shell (e.g. `docker compose exec micro-ros-agent
-   bash`), verify the node and topics:
+3. From a ROS2 Jazzy shell, verify the node and topics. There's no ROS2 on
+   the host itself, so shell into the `foxglove-bridge` container and source
+   the ROS environment first (`exec` doesn't auto-source it, and the
+   `micro-ros-agent` container has no `ros2` on its exec PATH — see
+   `host/README.md`):
 
    ```sh
+   docker compose exec foxglove-bridge bash
+   source /opt/ros/jazzy/setup.bash
+
    ros2 node list                 # -> /arm_controller
    ros2 topic hz /joint_states    # -> ~20 Hz
    ros2 topic echo /arm/status    # JSON: uptime_s, rssi, agent_connected, estop

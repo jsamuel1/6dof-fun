@@ -22,8 +22,9 @@ bridge for browser-based control.
 - **Safe by default** — software joint limits clamp every command, servos stay
   idle until the first valid command (no lurch on boot), and if the agent link
   drops for more than 2 seconds the arm holds position instead of going limp.
-- **Browser control UI** — Foxglove with a shipped layout: joint sliders and
-  live joint-state plots. Zero UI code on the microcontroller.
+- **Browser control UI** — Foxglove with a shipped layout: joint command
+  publish panels and live joint-state plots. Zero UI code on the
+  microcontroller.
 - **Portable host** — one `docker-compose.yml` runs identically on macOS and
   Raspberry Pi; migration means changing a single IP address in firmware config.
 - **Documented and reproducible** — this site covers the

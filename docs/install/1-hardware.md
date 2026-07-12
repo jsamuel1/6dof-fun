@@ -1,10 +1,9 @@
 # Install 1/4 — Hardware & Wiring
 
 Wire the electronics before installing any software. The authoritative,
-always-current wiring reference is
-[`hardware/wiring.md`](https://github.com/OWNER/REPO/blob/main/hardware/wiring.md)
-in the repository — this page summarizes it and states the power rules that
-must never be violated.
+always-current wiring reference is `hardware/wiring.md` in the repository —
+this page summarizes it and states the power rules that must never be
+violated.
 
 ## Power rules (read first)
 

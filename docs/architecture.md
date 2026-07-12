@@ -8,7 +8,7 @@ agent is transport plumbing, not a protocol translator.
 
 ```mermaid
 flowchart TD
-    browser["Browser — Foxglove UI<br/>(sliders + joint-state plots)"]
+    browser["Browser — Foxglove UI<br/>(joint command panels + joint-state plots)"]
 
     subgraph host["Mac (now) / Raspberry Pi (later) — Docker, ROS2 Jazzy"]
         agent["micro-ROS Agent<br/>UDP :8888"]

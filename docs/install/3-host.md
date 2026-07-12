@@ -41,8 +41,9 @@ logs -f` tails the logs.
    ws://localhost:8765
    ```
 3. Import the shipped layout: **Layout menu → Import from file…** and select
-   `host/foxglove/arm-layout.json` from the repo. You get joint sliders
-   (publishing `/arm/joint_commands`) and live plots of `/joint_states`.
+   `host/foxglove/arm-layout.json` from the repo. You get joint command
+   Publish panels (publishing to `/arm/joint_commands`) and live plots of
+   `/joint_states` — see `host/foxglove/README.md` for the panel table.
 
 !!! tip "Connecting from another machine"
     Replace `localhost` with the Docker host's LAN IP. The bridge serves any

@@ -1,0 +1,17 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "docs",
+      "runtimeExecutable": "uvx",
+      "runtimeArgs": ["--with", "mkdocs-materialx", "properdocs", "serve", "--dev-addr", "127.0.0.1:8000"],
+      "port": 8000
+    },
+    {
+      "name": "ros2-stack",
+      "runtimeExecutable": "docker",
+      "runtimeArgs": ["compose", "-f", "host/docker-compose.yml", "up"],
+      "port": 8765
+    }
+  ]
+}

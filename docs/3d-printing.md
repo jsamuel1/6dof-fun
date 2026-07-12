@@ -2,7 +2,9 @@
 
 Custom enclosures mount the ESP32 and PCA9685 to the arm's existing metal
 brackets. The designs are parametric OpenSCAD sources in `hardware/openscad/`;
-pre-exported STLs live in `hardware/stl/`.
+you export STLs into `hardware/stl/` yourself after setting the measured
+parameters (the bracket hole spacing is a measured input, so no
+one-size-fits-all STL is committed).
 
 ## Workflow
 

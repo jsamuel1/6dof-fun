@@ -9,6 +9,8 @@
 // Control behavior:
 //   * 50 Hz servo update loop driven by millis(), fully decoupled from ROS
 //     message arrival — commands only retarget the trajectory generators.
+//     Missed periods (blocking agent pings / reconnects) are caught up with
+//     extra fixed-dt steps so in-flight motion keeps wall-clock timing.
 //   * Servos emit NO pulses until the first valid command arrives for that
 //     joint (no lurch on boot; MG996R has no position feedback).
 //   * Software joint limits clamp every command before execution.
@@ -52,6 +54,12 @@
 // ---------------------------------------------------------------------------
 static const uint32_t SERVO_PERIOD_MS = 20;        // 50 Hz servo loop
 static const float SERVO_DT_S = 0.020f;
+// If a loop() iteration is delayed (agent pings while disconnected, entity
+// re-creation, WiFi hiccups), the servo loop catches up by running one
+// fixed-dt trajectory step per missed period, so in-flight motion stays on
+// wall-clock time at the profiled velocity. Catch-up is capped; anything
+// older is dropped, which only ever makes motion slower (the safe direction).
+static const uint32_t MAX_CATCHUP_STEPS = 50;      // = 1 s of missed periods
 static const uint32_t JOINT_STATE_PERIOD_MS = 50;  // 20 Hz /joint_states
 static const uint32_t STATUS_PERIOD_MS = 1000;     // 1 Hz /arm/status
 static const uint32_t PING_PERIOD_MS = 500;        // agent liveness probe
@@ -315,13 +323,21 @@ static void publish_status() {
 // On link loss the trajectories simply stop receiving new targets, so each
 // joint glides to (or holds) its last target and the PCA9685 keeps emitting
 // the last pulse train: HOLD, never limp.
+//
+// `steps` is the number of fixed-dt trajectory steps to advance (normally 1;
+// more when loop() was delayed by blocking micro-ROS calls). Trajectories are
+// stepped `steps` times so profiled motion tracks wall-clock time, but each
+// servo is written only once, at the final position.
 // ---------------------------------------------------------------------------
-static void servo_update() {
+static void servo_update(uint32_t steps) {
   for (int i = 0; i < NUM_JOINTS; ++i) {
     if (!joint_armed[i]) {
       continue;  // no pulses until the first valid command
     }
-    float pos = traj[i].step(SERVO_DT_S);
+    float pos = traj[i].position();
+    for (uint32_t s = 0; s < steps; ++s) {
+      pos = traj[i].step(SERVO_DT_S);
+    }
     servo.writeJointRadians(JOINT_CONFIG[i], pos, SERVO_US_PER_RAD);
   }
 }
@@ -384,9 +400,24 @@ void loop() {
   uint32_t now = millis();
 
   // -- 50 Hz servo loop, decoupled from all ROS activity ------------------
-  if ((uint32_t)(now - last_servo_ms) >= SERVO_PERIOD_MS) {
-    last_servo_ms = now;
-    servo_update();
+  // Runs one fixed-dt trajectory step per elapsed SERVO_PERIOD_MS. When a
+  // loop iteration was stalled (agent ping timeout, entity re-creation) the
+  // backlog of missed periods is executed as catch-up steps so in-flight
+  // trajectories keep wall-clock timing. A stall longer than
+  // MAX_CATCHUP_STEPS periods drops the excess backlog — motion then merely
+  // completes later than profiled, never faster.
+  {
+    uint32_t elapsed = (uint32_t)(now - last_servo_ms);
+    if (elapsed >= SERVO_PERIOD_MS) {
+      uint32_t steps = elapsed / SERVO_PERIOD_MS;
+      if (steps > MAX_CATCHUP_STEPS) {
+        steps = MAX_CATCHUP_STEPS;
+        last_servo_ms = now;  // drop the un-caught-up remainder
+      } else {
+        last_servo_ms += steps * SERVO_PERIOD_MS;
+      }
+      servo_update(steps);
+    }
   }
 
   // -- Agent connection state machine --------------------------------------

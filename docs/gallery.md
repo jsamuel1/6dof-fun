@@ -52,7 +52,6 @@ Images live in `docs/img/` in the repository.
 4. Commit the image and this page together. The docs workflow republishes the
    site on push to `main`.
 
-The [home page](index.md) currently shows a placeholder hero image
-(`docs/img/hero-placeholder.svg`). When you have a good photo of the
-assembled arm, add it as `docs/img/hero.jpg` and update the image reference
-at the top of `docs/index.md`.
+The [home page](index.md) hero image is `docs/img/hero.jpg`. To swap in a
+better photo of the assembled arm later, replace that file (or add a new one
+and update the image reference at the top of `docs/index.md`).

@@ -7,12 +7,17 @@ assumptions.
 
 ## 1. ROS2 smoke tests
 
-Both compose services are ROS2 Jazzy containers, so you can run the `ros2` CLI
-inside either. With the stack up and the ESP32 connected:
+There is no ROS2 on the Mac itself, so run the `ros2` CLI inside the
+`foxglove-bridge` container. Its entrypoint does not auto-source the ROS
+environment for `docker compose exec`, so every command sources
+`setup.bash` explicitly (the `micro-ros-agent` container's entrypoint is the
+agent binary — `ros2` is not on its exec PATH). With the stack up and the
+ESP32 connected:
 
 ```bash
 cd host
-docker compose exec micro-ros-agent ros2 topic list
+docker compose exec foxglove-bridge bash -c \
+  "source /opt/ros/jazzy/setup.bash && ros2 topic list"
 ```
 
 Expect to see:
@@ -26,9 +31,12 @@ Expect to see:
 Then confirm data is flowing:
 
 ```bash
-docker compose exec micro-ros-agent ros2 topic echo /joint_states --once
-docker compose exec micro-ros-agent ros2 topic hz /joint_states   # ~20 Hz
-docker compose exec micro-ros-agent ros2 topic echo /arm/status --once
+docker compose exec foxglove-bridge bash -c \
+  "source /opt/ros/jazzy/setup.bash && ros2 topic echo /joint_states --once"
+docker compose exec foxglove-bridge bash -c \
+  "source /opt/ros/jazzy/setup.bash && ros2 topic hz /joint_states"   # ~20 Hz
+docker compose exec foxglove-bridge bash -c \
+  "source /opt/ros/jazzy/setup.bash && ros2 topic echo /arm/status --once"
 ```
 
 `/arm/status` is a JSON string with uptime, WiFi RSSI, agent-link state, and
@@ -40,13 +48,12 @@ USB power can safely drive **one** unloaded servo. Connect a single MG996R to
 PCA9685 **channel 0**, horn detached, servo not attached to the arm.
 
 ```bash
-docker compose exec micro-ros-agent ros2 topic pub --once \
-  /arm/joint_commands sensor_msgs/msg/JointState \
-  "{name: ['joint1'], position: [0.3]}"
+docker compose exec foxglove-bridge bash -c \
+  'source /opt/ros/jazzy/setup.bash && ros2 topic pub --once /arm/joint_commands sensor_msgs/msg/JointState "{name: [joint1], position: [0.3]}"'
 ```
 
 The servo should move smoothly (no snap) to the target. Send a few targets
-either from the CLI or the Foxglove slider for `joint1` and watch
+either from the CLI or the Foxglove joint command panel (name `joint1`) and watch
 `/joint_states` track the commanded trajectory. If the ESP32 brownouts or the
 servo chatters, stop — that's a wiring/power problem, not a software one.
 
@@ -86,8 +93,8 @@ Only after all six joints are calibrated:
       (switch or unplugging the converter output — know which before you start).
 - [ ] Power up. Nothing should move: servos idle until the first command.
 - [ ] `/arm/status` shows agent link up; `/joint_states` at 20Hz.
-- [ ] Command **one joint, a few degrees, slowly** from the Foxglove sliders.
-      Verify motion direction and magnitude.
+- [ ] Command **one joint, a few degrees, slowly** from the Foxglove joint
+      command (Publish) panel. Verify motion direction and magnitude.
 - [ ] Try to command a joint past its software limit and confirm the firmware
       clamps it.
 - [ ] Watchdog test: stop the agent (`docker compose stop micro-ros-agent`)
