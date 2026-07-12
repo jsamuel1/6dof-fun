@@ -38,14 +38,15 @@ boards to the arm's existing metal brackets.
 | Servo driver | PCA9685 16-ch I2C PWM board, addr 0x40 | owned |
 | Servos | 6× MG996R (4.8–7.2V; ~1A moving, 2.5A+ stall each) | owned |
 | Servo power | 12V/10A car supply → 12–40V-input to 6V/10A 60W buck-boost module | converter ordered |
-| Rail capacitor | ≥1000µF electrolytic across 6V servo rail (stall-spike absorber) | to order |
+| Rail capacitor | ≥1000µF across 6V servo rail (stall-spike absorber) — 1000µF already fitted onboard the PCA9685 | owned |
 | Host | macOS + Docker now; spare Raspberry Pi later | owned |
 | Webcam | Mac camera or USB cam for calibration observation | owned |
 | Printer | Bambu Lab P2S; PLA for fit prototypes, PETG for final mounts | owned |
 
 **Power rules:**
 - 12V supply NEVER connects to servos or PCA9685 V+ directly (destroys MG996Rs).
-- Servo rail: converter 6V output → PCA9685 V+ terminal block, with 1000µF cap.
+- Servo rail: converter 6V output → PCA9685 V+ terminal block (onboard 1000µF
+  cap absorbs stall spikes; keep converter→board wires short and thick).
 - ESP32 powered by USB-C; grounds common with servo rail.
 - USB-only power is limited to single-servo bench testing.
 
