@@ -88,7 +88,7 @@ the arm without translation.
 Adafruit PWM Servo Driver library.
 
 **Modules** (`firmware/arm_controller/`):
-- `ArmController.ino` — setup/loop, micro-ROS node/executor wiring, watchdog.
+- `arm_controller.ino` — setup/loop, micro-ROS node/executor wiring, watchdog.
 - `config.h` — WiFi credentials, agent IP, joint limits, per-servo calibration.
 - `servo_driver.{h,cpp}` — PCA9685 abstraction; radians → PWM µs using
   per-joint `min_us`, `max_us`, `center_offset`, `direction`.

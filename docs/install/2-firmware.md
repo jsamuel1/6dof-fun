@@ -53,7 +53,7 @@ Edit `config.h` and set:
 ## 4. Flash
 
 1. Connect the ESP32 over USB-C and pick the serial port under **Tools → Port**.
-2. Open `firmware/arm_controller/ArmController.ino` and click **Upload**.
+2. Open `firmware/arm_controller/arm_controller.ino` and click **Upload**.
 3. Open **Tools → Serial Monitor** (115200 baud). You should see the board
    join WiFi and start trying to reach the micro-ROS agent. It will retry
    until the agent is up — that's expected; the agent comes next.

@@ -1,4 +1,4 @@
-// ArmController.ino — 6DOF robot arm micro-ROS firmware for ESP32.
+// arm_controller.ino — 6DOF robot arm micro-ROS firmware for ESP32.
 //
 // ROS2 interface (node "arm_controller", micro-ROS over WiFi/UDP):
 //   pub  /joint_states       sensor_msgs/JointState  @ 20 Hz (commanded angles)

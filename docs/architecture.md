@@ -55,7 +55,7 @@ All firmware lives in `firmware/arm_controller/`:
 
 | File | Responsibility |
 |---|---|
-| `ArmController.ino` | `setup()`/`loop()`, micro-ROS node and executor wiring, the agent-link watchdog. |
+| `arm_controller.ino` | `setup()`/`loop()`, micro-ROS node and executor wiring, the agent-link watchdog. |
 | `config.h` | WiFi credentials, agent IP, joint limits, per-servo calibration. Gitignored; copy from the committed `config.example.h`. |
 | `servo_driver.{h,cpp}` | PCA9685 abstraction. Converts radians to PWM microseconds using per-joint `min_us`, `max_us`, `center_offset`, and `direction`. |
 | `trajectory.{h,cpp}` | Trapezoidal-velocity interpolation per joint with configurable maximum velocity and acceleration. |

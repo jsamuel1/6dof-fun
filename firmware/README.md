@@ -66,7 +66,7 @@ Tested with Arduino IDE 2.x.
      (macOS: `/dev/cu.usbserial-*` or `/dev/cu.wchusbserial-*`; if no port
      appears you may need the CP210x or CH34x USB-serial driver for your
      board revision).
-   - Open `arm_controller/ArmController.ino` and click **Upload**. Some
+   - Open `arm_controller/arm_controller.ino` and click **Upload**. Some
      boards need the **BOOT** button held when the IDE prints
      `Connecting...`.
 
