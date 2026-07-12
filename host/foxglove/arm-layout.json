@@ -1,0 +1,102 @@
+{
+  "configById": {
+    "Plot!arm_joint_positions": {
+      "paths": [
+        {
+          "value": "/joint_states.position[0]",
+          "enabled": true,
+          "timestampMethod": "receiveTime",
+          "label": "joint1"
+        },
+        {
+          "value": "/joint_states.position[1]",
+          "enabled": true,
+          "timestampMethod": "receiveTime",
+          "label": "joint2"
+        },
+        {
+          "value": "/joint_states.position[2]",
+          "enabled": true,
+          "timestampMethod": "receiveTime",
+          "label": "joint3"
+        },
+        {
+          "value": "/joint_states.position[3]",
+          "enabled": true,
+          "timestampMethod": "receiveTime",
+          "label": "joint4"
+        },
+        {
+          "value": "/joint_states.position[4]",
+          "enabled": true,
+          "timestampMethod": "receiveTime",
+          "label": "joint5"
+        },
+        {
+          "value": "/joint_states.position[5]",
+          "enabled": true,
+          "timestampMethod": "receiveTime",
+          "label": "joint6"
+        }
+      ],
+      "minYValue": -3.3,
+      "maxYValue": 3.3,
+      "showXAxisLabels": true,
+      "showYAxisLabels": true,
+      "showLegend": true,
+      "legendDisplay": "floating",
+      "showPlotValuesInLegend": true,
+      "isSynced": true,
+      "xAxisVal": "timestamp",
+      "sidebarDimension": 240,
+      "followingViewWidth": 30
+    },
+    "RawMessages!arm_status": {
+      "diffEnabled": false,
+      "diffMethod": "custom",
+      "diffTopicPath": "",
+      "showFullMessageForDiff": false,
+      "topicPath": "/arm/status",
+      "expansion": "all"
+    },
+    "Publish!arm_joint_command": {
+      "topicName": "/arm/joint_commands",
+      "datatype": "sensor_msgs/msg/JointState",
+      "buttonText": "Send joint command",
+      "buttonTooltip": "Publish target angles (radians) to /arm/joint_commands",
+      "buttonColor": "#1f6feb",
+      "advancedView": true,
+      "value": "{\n  \"header\": { \"stamp\": { \"sec\": 0, \"nanosec\": 0 }, \"frame_id\": \"\" },\n  \"name\": [\"joint1\", \"joint2\", \"joint3\", \"joint4\", \"joint5\", \"joint6\"],\n  \"position\": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0],\n  \"velocity\": [],\n  \"effort\": []\n}"
+    },
+    "Publish!arm_home_pose": {
+      "topicName": "/arm/joint_commands",
+      "datatype": "sensor_msgs/msg/JointState",
+      "buttonText": "Home (all joints 0 rad)",
+      "buttonTooltip": "Send every joint to its calibrated center",
+      "buttonColor": "#2da44e",
+      "advancedView": false,
+      "value": "{\n  \"header\": { \"stamp\": { \"sec\": 0, \"nanosec\": 0 }, \"frame_id\": \"\" },\n  \"name\": [\"joint1\", \"joint2\", \"joint3\", \"joint4\", \"joint5\", \"joint6\"],\n  \"position\": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0],\n  \"velocity\": [],\n  \"effort\": []\n}"
+    }
+  },
+  "globalVariables": {},
+  "userNodes": {},
+  "playbackConfig": {
+    "speed": 1
+  },
+  "layout": {
+    "direction": "row",
+    "first": {
+      "direction": "column",
+      "first": "Plot!arm_joint_positions",
+      "second": "RawMessages!arm_status",
+      "splitPercentage": 65
+    },
+    "second": {
+      "direction": "column",
+      "first": "Publish!arm_joint_command",
+      "second": "Publish!arm_home_pose",
+      "splitPercentage": 70
+    },
+    "splitPercentage": 62
+  }
+}

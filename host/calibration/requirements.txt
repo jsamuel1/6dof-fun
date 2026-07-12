@@ -1,0 +1,3 @@
+# Host-side (macOS) dependencies for capture_frames.py.
+# calibrate_sweep.py runs inside the ROS2 container and needs nothing extra.
+opencv-python>=4.9

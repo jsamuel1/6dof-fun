@@ -1,0 +1,19 @@
+# Secrets — real WiFi credentials live only in config.h (copy of config.example.h)
+firmware/arm_controller/config.h
+
+# Docs site build output
+site/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# Test build artifacts
+firmware/test/build/
+
+# Calibration captures (photos promoted to docs/ deliberately)
+host/calibration/captures/
+
+# OS noise
+.DS_Store

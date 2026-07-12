@@ -1,0 +1,67 @@
+# ProperDocs site configuration (ProperDocs is the maintained successor to
+# MkDocs; the MaterialX theme is the maintained successor to mkdocs-material).
+#
+# Local preview:  pip install properdocs mkdocs-materialx && properdocs serve
+# Build:          properdocs build
+# Deploy:         handled by .github/workflows/docs.yml (properdocs gh-deploy)
+
+site_name: 6DOF Robot Arm
+site_description: >-
+  A hand-built 6DOF robot arm driven by an ESP32 running micro-ROS,
+  a PCA9685 PWM driver, and six MG996R servos — ROS2-native from day one.
+
+theme:
+  name: materialx
+  palette:
+    # Follow the visitor's OS preference, with a manual toggle.
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.sections
+    - navigation.top
+    - content.code.copy
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+  - pymdownx.details
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+
+nav:
+  - Home: index.md
+  - Architecture: architecture.md
+  - Parts List: parts-list.md
+  - Install Guide:
+      - 1. Hardware: install/1-hardware.md
+      - 2. Firmware: install/2-firmware.md
+      - 3. Host Software: install/3-host.md
+      - 4. First Motion: install/4-first-motion.md
+  - Design Decisions: design-decisions.md
+  - 3D Printing: 3d-printing.md
+  - Gallery: gallery.md
+
+# docs/superpowers/ holds internal design specs. The files stay in the repo
+# but are intentionally NOT listed in the nav; this silences the
+# "pages exist but are not in nav" build warning for them.
+not_in_nav: |
+  superpowers/

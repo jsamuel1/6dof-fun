@@ -1,0 +1,72 @@
+# ---------------------------------------------------------------------------
+# 6DOF arm — host-side ROS2 stack (ROS2 Jazzy)
+#
+# Usage:
+#   cd host/
+#   docker compose up            # foreground, logs from both services
+#   docker compose up -d         # detached
+#   docker compose down          # stop
+#
+# Services:
+#   micro-ros-agent  — bridges the ESP32 (micro-ROS over XRCE-DDS/UDP) into
+#                      the ROS2 graph. Listens on UDP :8888. Point the ESP32
+#                      firmware (config.h AGENT_IP) at this machine's LAN IP.
+#   foxglove-bridge  — WebSocket server on :8765. Connect the Foxglove app
+#                      (or https://app.foxglove.dev) to ws://<this-host>:8765
+#                      and import host/foxglove/arm-layout.json.
+#
+# Platform notes (verified 2026-07):
+#   * microros/micro-ros-agent:jazzy is multi-arch (linux/amd64 + linux/arm64)
+#     — the same compose file works on Docker Desktop (macOS, runs the arm64
+#     image natively on Apple Silicon) and on a Raspberry Pi 4/5 (arm64 OS
+#     required; 32-bit Raspberry Pi OS is NOT supported).
+#   * There is no official foxglove-bridge Docker image for ROS2, so we build
+#     a tiny one from ros:jazzy-ros-base (also multi-arch amd64/arm64) — see
+#     ./foxglove-bridge/Dockerfile. First `up` builds it automatically.
+#   * macOS/Docker Desktop has no real host networking, so we publish ports
+#     explicitly instead of using network_mode: host. The ESP32 initiates the
+#     UDP exchange, so the agent works fine behind Docker Desktop's NAT.
+#   * The two containers share the default compose bridge network; DDS
+#     discovery between them uses multicast inside that network, which works
+#     because both containers sit on the same virtual bridge.
+#   * On the Raspberry Pi (Linux) you MAY switch both services to
+#     `network_mode: host` (and drop the `ports:` blocks) — this also lets
+#     ros2 CLI / other ROS2 nodes on the Pi itself see the topics without
+#     exec-ing into a container.
+#
+# Smoke test after `docker compose up` (see ../host/README.md for more):
+#   docker compose exec foxglove-bridge bash -c \
+#     "source /opt/ros/jazzy/setup.bash && ros2 topic list"
+# ---------------------------------------------------------------------------
+
+services:
+  micro-ros-agent:
+    image: microros/micro-ros-agent:jazzy
+    container_name: arm-micro-ros-agent
+    # udp4 transport on :8888; -v4 = mid verbosity (use -v6 to debug the
+    # ESP32 session handshake, -v0 for quiet).
+    command: udp4 --port 8888 -v4
+    ports:
+      - "8888:8888/udp"
+    environment:
+      - ROS_DOMAIN_ID=0
+    restart: unless-stopped
+
+  foxglove-bridge:
+    build: ./foxglove-bridge
+    image: arduino-arm/foxglove-bridge:jazzy
+    container_name: arm-foxglove-bridge
+    command: >
+      ros2 launch foxglove_bridge foxglove_bridge_launch.xml
+      port:=8765 address:=0.0.0.0
+    ports:
+      - "8765:8765"
+    environment:
+      - ROS_DOMAIN_ID=0
+    volumes:
+      # Calibration tooling runs inside this container (rclpy is available
+      # here). See ../host/calibration/README.md.
+      - ./calibration:/calibration:ro
+    depends_on:
+      - micro-ros-agent
+    restart: unless-stopped

@@ -1,0 +1,50 @@
+# Build and deploy the documentation site to GitHub Pages on every push to main.
+#
+# Tooling: ProperDocs (maintained MkDocs successor) + MaterialX theme
+# (maintained mkdocs-material successor). `properdocs gh-deploy` builds the
+# site from properdocs.yml and force-pushes the result to the gh-pages branch.
+#
+# NOTE: GitHub Pages must be enabled once in the repository settings:
+#   Settings -> Pages -> Source: "Deploy from a branch" -> Branch: gh-pages / (root)
+# The gh-pages branch is created automatically by the first successful run.
+
+name: docs
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write # gh-deploy pushes the built site to the gh-pages branch
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Configure git credentials for gh-deploy
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Cache pip and theme assets
+        uses: actions/cache@v4
+        with:
+          key: properdocs-${{ github.run_id }}
+          path: ~/.cache
+          restore-keys: |
+            properdocs-
+
+      - name: Install documentation tooling
+        run: pip install properdocs mkdocs-materialx
+
+      - name: Deploy to GitHub Pages
+        run: properdocs gh-deploy --force
