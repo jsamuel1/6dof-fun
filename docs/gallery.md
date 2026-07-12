@@ -12,8 +12,8 @@ land (first choreographed pose sequence, PLA fit checks, PETG finals).
 </figure>
 
 <figure markdown>
-  ![Elegoo controller, PCA9685 driver, and USB cables](img/electronics-components.jpg){ width="600" }
-  <figcaption>The electronics before wiring: Elegoo Mega controller, PCA9685 16-channel PWM/servo driver, and USB cables.</figcaption>
+  ![Candidate controller boards and the PCA9685 driver](img/electronics-components.jpg){ width="600" }
+  <figcaption>Choosing a controller: the Elegoo Mega (rear) versus the smaller black ESP32 with header pins in front of it — the ESP32 won for its WiFi and processing headroom. Alongside: the PCA9685 16-channel servo driver and USB cables.</figcaption>
 </figure>
 
 <figure markdown>
