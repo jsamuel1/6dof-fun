@@ -1,6 +1,6 @@
 # Parts List (BOM)
 
-Everything below is already owned except the 6V converter (ordered, ~$12).
+Everything below is owned — the build requires no further purchases.
 Prices are indicative street prices; the "search for" column gives generic
 terms that find the part on any major electronics retailer.
 
@@ -10,7 +10,7 @@ terms that find the part on any major electronics retailer.
 | Servo driver | PCA9685 16-channel I2C PWM board, address `0x40`, with V+ terminal block | owned | ~$6–10 | "PCA9685 16 channel PWM servo driver" |
 | Servos | 6× MG996R metal-gear (4.8–7.2V; ~1A moving, 2.5A+ stall **each**) | owned | ~$25–35 for 6 | "MG996R servo 6 pack" |
 | Servo power supply | 12V/10A power supply (repurposed car-style supply) | owned | ~$15–20 | "12V 10A power supply" |
-| DC-DC converter | 12–40V input → 6V/10A output, 60W buck-boost module | **ordered (~$12)** — the only item to buy | ~$12 | "DC buck converter 12V to 6V 10A 60W" |
+| DC-DC converter | 12–40V input → 6V/10A output, 60W buck-boost module | owned | ~$12 | "DC buck converter 12V to 6V 10A 60W" |
 | Rail capacitor | ≥1000µF across the 6V servo rail to absorb stall spikes — **already fitted: the PCA9685 board carries 1000µF onboard**, so no extra part is needed | owned (onboard) | $0 | — |
 | Host computer | macOS + Docker now; spare Raspberry Pi later | owned | — | — |
 | Webcam | Mac built-in camera or any USB webcam, for calibration observation | owned | ~$0–25 | "USB webcam 1080p" |
