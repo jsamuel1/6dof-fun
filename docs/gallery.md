@@ -26,6 +26,11 @@ land (first choreographed pose sequence, PLA fit checks, PETG finals).
   <figcaption>The whole build laid out: the assembled 6-DOF arm (left), the ESP32 dev board and PCA9685 servo driver, two USB cables, the 12V power brick, and the silver DC-DC buck converter that steps 12V down to the 6V servo rail.</figcaption>
 </figure>
 
+<figure markdown>
+  ![The bracket spacing test plate on the P2S print bed](img/test-plate-print.jpg){ width="600" }
+  <figcaption>First print of the project: the bracket-spacing test coupon fresh off the Bambu Lab P2S — 12 layers, 19 minutes, 5 g of PLA. Five labelled M3 hole pairs (16–20 mm) to find the arm bracket's true spacing before printing the real mounts.</figcaption>
+</figure>
+
 ## Adding photos
 
 Images live in `docs/img/` in the repository.
