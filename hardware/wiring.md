@@ -21,9 +21,9 @@ six MG996R servos, and the 12 V → 6 V servo power chain.
            |   3V3     GPIO21    GPIO22     GND       |
            +----+---------+---------+--------+--------+
                 |         |         |        |
-                |  I2C @ 3.3 V, address 0x40 |
-                |         |         |        |
-               VCC       SDA       SCL      GND
+              green    yellow    orange   brown     I2C @ 3.3 V, addr 0x40
+                |         |         |        |      (red=OE parked,
+               VCC       SDA       SCL      GND      blue=V+ REMOVED)
            +----+---------+---------+--------+--------+
            |              PCA9685                     |
            |    16-ch PWM driver, 1000uF cap onboard  |
@@ -47,14 +47,27 @@ six MG996R servos, and the 12 V → 6 V servo power chain.
 
 Four female-female jumper wires to the PCA9685's 6-pin I2C header
 (either short end of the board — both ends carry the same signals).
+**Header pin order**, starting from the end *away* from the silver
+electrolytic capacitor: `GND, OE, SCL, SDA, VCC, V+` — **V+ is always
+the pin beside the cap.**
 
-| ESP32 pin | PCA9685 pin | Purpose | Notes |
+Colors below are this build's 6-wire ribbon as photographed; the color
+column is the ribbon position, not an electrical requirement.
+
+| Ribbon color | PCA9685 pin | ESP32 pin | Purpose / notes |
 |---|---|---|---|
-| `3V3` | `VCC` | Logic supply | **3.3 V only.** VCC powers the PCA9685 chip, not the servos. Do not use the ESP32 5 V/VIN pin — keep I2C levels at 3.3 V. |
-| `GPIO21` | `SDA` | I2C data | Default Arduino `Wire` SDA on ESP32. |
-| `GPIO22` | `SCL` | I2C clock | Default Arduino `Wire` SCL on ESP32. |
-| `GND` | `GND` | Logic/signal ground | Also ties the ESP32 into the common ground (see below). |
-| — | `OE` | Output enable | Leave unconnected. It is pulled low (outputs enabled) on standard boards. Optionally wire to a spare GPIO for a hardware kill switch (drive HIGH to disable all PWM). |
+| brown/black (end pin, farthest from cap) | `GND` | `GND` | Logic/signal ground — also the required common-ground link. |
+| red | `OE` | **leave unplugged** | Pulled low (outputs enabled) already. Optional future kill switch: wire to a spare GPIO, drive HIGH to disable all PWM. |
+| orange | `SCL` | `GPIO22` (label `D22`) | I2C clock — Arduino `Wire` default. |
+| yellow | `SDA` | `GPIO21` (label `D21`) | I2C data — Arduino `Wire` default. |
+| green | `VCC` | `3V3` | Logic supply. **3.3 V only** — never the 5 V/VIN pin; keeps the board's SDA/SCL pull-ups at 3.3 V. |
+| blue (beside the cap) | `V+` | 🛑 **REMOVE from ribbon — never to the ESP32** | This header pin is the 6 V servo rail (same net as the green terminal block). Into 3V3 it destroys the ESP32. |
+
+**ESP32 pin locations** (30-pin Elegoo devkit, `D`-prefixed labels):
+hold the board USB-C toward you, antenna away — on the right-hand row,
+reading from the USB end: `3V3, GND, D15, D2, D4, RX2, TX2, D5, D18,
+D19, D21, RX0, TX0, D22, D23`. So green(3V3) and brown(GND) land at
+the near corner, yellow on `D21` (11th), orange on `D22` (14th).
 
 - I2C address: `0x40` (all address jumpers open — the default).
 - No external pull-up resistors needed: standard PCA9685 boards have
