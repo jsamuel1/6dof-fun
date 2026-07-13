@@ -22,7 +22,7 @@ $fn = 48;                        // facet count for cylinders / holes
 // bracket. The default 20 is a PLACEHOLDER — measure the real bracket
 // with calipers before printing anything final.
 bracket_hole_spacing_mm = 20;    // MEASURE ME: bracket hole spacing, centre-to-centre
-bracket_screw_hole_d    = 4.5;   // MEASURE ME: clearance dia for the bracket screws
+bracket_screw_hole_d    = 3.4;   // M3 clearance (bracket holes confirmed M3)
                                  // (4.5 = M4 free fit; use 3.4 for M3, 5.5 for M5)
 bracket_tab_w           = 12;    // width of each mounting ear
 bracket_tab_l           = 10;    // how far each ear extends from the tray wall
