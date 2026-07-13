@@ -31,6 +31,17 @@ board and the PCA9685 driver — so the pocket and standoffs fit:
   <figcaption>The ESP32 dev board (left) and PCA9685 servo driver (right) against a centimetre ruler — a footprint reference for sizing the mount pockets and mounting-hole positions.</figcaption>
 </figure>
 
+### 1b. Print the spacing test plate first
+
+Ruler measurements are ballpark; screw holes are not. Before printing any
+mount, print `hardware/stl/bracket_test_plate.stl` (source:
+`hardware/openscad/bracket_test_plate.scad`) — a 5-minute PLA coupon with
+labelled M3 hole pairs at 16/17/18/19/20 mm center-to-center. Hold it on the
+bracket and find the row where two M3 screws drop through plate **and**
+bracket freely, then set that spacing as `bracket_hole_spacing_mm` in
+`hardware/openscad/common_params.scad`. If screws bind even on the correct
+row, open up `bracket_screw_hole_d` instead — that's clearance, not spacing.
+
 ### 2. Set the variables and export
 
 Open the relevant `.scad` file from `hardware/openscad/` in
