@@ -21,6 +21,11 @@ land (first choreographed pose sequence, PLA fit checks, PETG finals).
   <figcaption>The Elegoo ESP32 boards (WiFi + Bluetooth, Arduino-IDE compatible) that run the micro-ROS firmware.</figcaption>
 </figure>
 
+<figure markdown>
+  ![The full parts set laid out on the bench](img/parts-flatlay.jpg){ width="600" }
+  <figcaption>The whole build laid out: the assembled 6-DOF arm (left), the ESP32 dev board and PCA9685 servo driver, two USB cables, the 12V power brick, and the silver DC-DC buck converter that steps 12V down to the 6V servo rail.</figcaption>
+</figure>
+
 ## Adding photos
 
 Images live in `docs/img/` in the repository.

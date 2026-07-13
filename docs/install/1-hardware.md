@@ -28,6 +28,16 @@ violated.
   <figcaption>The 12V/10A DC supply. Its output feeds <strong>only</strong> the buck-boost converter input — never the servos or the PCA9685 V+ directly.</figcaption>
 </figure>
 
+<figure markdown>
+  ![The DC-DC converter label](../img/buck-converter-label.jpg){ width="600" }
+  <figcaption>The DC-DC converter label: <strong>12–40V input, regulated 6V/10A output</strong>. Wiring per the label — input red = +, black = −; output yellow = +, black = −. This 6V output is the servo rail; verify it with a multimeter before connecting the PCA9685.</figcaption>
+</figure>
+
+<figure markdown>
+  ![DC barrel-jack to screw-terminal adapter](../img/dc-barrel-jack-adapter.jpg){ width="600" }
+  <figcaption>A barrel-jack-to-screw-terminal adapter breaks the 12V supply's DC plug out to bare wires for the converter input. Mind polarity — the terminal block is marked + / −.</figcaption>
+</figure>
+
 ## Connections
 
 | From | To | Notes |

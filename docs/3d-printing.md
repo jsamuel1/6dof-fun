@@ -18,6 +18,19 @@ The mounts bolt onto the arm's existing metal brackets, and hole spacing is a
 - Bracket thickness and any clearance constraints around the mounting spot
   (servo horns, wiring paths).
 
+<figure markdown>
+  ![A metal servo bracket measured against a ruler](img/bracket-measurement.jpg){ width="600" }
+  <figcaption>The arm's existing metal servo bracket alongside a ruler. A quick ruler read gets you in the ballpark; use calipers on the actual hole centers and diameters for the OpenSCAD parameters.</figcaption>
+</figure>
+
+Also measure the footprint of the boards the mount will hold — the ESP32 dev
+board and the PCA9685 driver — so the pocket and standoffs fit:
+
+<figure markdown>
+  ![ESP32 and PCA9685 boards next to a centimetre ruler](img/board-footprint-measurement.jpg){ width="600" }
+  <figcaption>The ESP32 dev board (left) and PCA9685 servo driver (right) against a centimetre ruler — a footprint reference for sizing the mount pockets and mounting-hole positions.</figcaption>
+</figure>
+
 ### 2. Set the variables and export
 
 Open the relevant `.scad` file from `hardware/openscad/` in
