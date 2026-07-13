@@ -33,8 +33,34 @@ violated.
 
 <figure markdown>
   ![The DC-DC converter label](../img/buck-converter-label.jpg){ width="600" }
-  <figcaption>The DC-DC converter label: <strong>12–40V input, regulated 6V/10A output</strong>. Wiring per the label — input red = +, black = −; output yellow = +, black = −. This 6V output is the servo rail; verify it with a multimeter before connecting the PCA9685.</figcaption>
+  <figcaption>The DC-DC converter label: <strong>12–40V input, regulated 6V/10A output</strong>. This 6V output is the servo rail.</figcaption>
 </figure>
+
+### Converter wire colors
+
+Straight from the unit's label (the Chinese instruction on it translates to
+"wire strictly according to the label"):
+
+| Wire | Role | Connects to |
+|---|---|---|
+| **Red** | Input **+** | 12V supply positive |
+| **Black** (paired with red) | Input **−** | 12V supply negative |
+| **Yellow** | Output **+** (6V) | PCA9685 **V+** terminal |
+| **Black** (paired with yellow) | Output **−** | PCA9685 **GND** terminal |
+
+Red side drinks 12V; yellow side feeds the servos. The two black wires are
+both negative but belong to their own bundles — use the one physically
+paired with red for input, the one paired with yellow for output.
+
+Before the PCA9685 sees any of it:
+
+1. Power the converter with **only the input connected** and measure
+   yellow-to-black with a multimeter: expect **~6.0V**. Only then land it on
+   the PCA9685's terminal block.
+2. Double-check polarity at the V+ block before switching on — the PCA9685
+   has **no reverse-polarity protection**.
+3. The output black must share ground with the ESP32 (automatic once both
+   sit on the PCA9685's ground rail).
 
 <figure markdown>
   ![DC barrel-jack to screw-terminal adapter](../img/dc-barrel-jack-adapter.jpg){ width="600" }
