@@ -425,9 +425,23 @@ void loop() {
     case WAITING_AGENT:
       if ((uint32_t)(now - last_ping_ms) >= PING_PERIOD_MS) {
         last_ping_ms = now;
-        if (rmw_uros_ping_agent(PING_TIMEOUT_MS, 1) == RMW_RET_OK) {
+        rmw_ret_t ping_rc = rmw_uros_ping_agent(PING_TIMEOUT_MS, 1);
+        if (ping_rc == RMW_RET_OK) {
           Serial.println("[arm] agent available, creating entities");
           agent_state = AGENT_AVAILABLE;
+        } else {
+          // Every ~5s: why the probe keeps failing (rc 1 = local/transport
+          // error, rc 6 = probe sent but unanswered) + WiFi health.
+          static uint8_t ping_fail_count = 0;
+          if (++ping_fail_count >= 10) {
+            ping_fail_count = 0;
+            Serial.print("[arm] agent ping failed rc=");
+            Serial.print((int)ping_rc);
+            Serial.print(" wifi_status=");
+            Serial.print((int)WiFi.status());
+            Serial.print(" rssi=");
+            Serial.println(WiFi.RSSI());
+          }
         }
       }
       break;

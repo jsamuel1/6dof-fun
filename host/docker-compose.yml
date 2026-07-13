@@ -46,8 +46,14 @@ services:
     # udp4 transport on :8888; -v4 = mid verbosity (use -v6 to debug the
     # ESP32 session handshake, -v0 for quiet).
     command: udp4 --port 8888 -v4
+    # Both services share this network namespace (see foxglove-bridge), so
+    # DDS between the agent and the bridge flows over localhost — DDS data
+    # delivery across separate Docker bridge-network containers is unreliable
+    # (discovery works, data doesn't). The bridge's 8765 port is therefore
+    # published here, on the namespace owner.
     ports:
       - "8888:8888/udp"
+      - "8765:8765"
     environment:
       - ROS_DOMAIN_ID=0
     restart: unless-stopped
@@ -59,8 +65,8 @@ services:
     command: >
       ros2 launch foxglove_bridge foxglove_bridge_launch.xml
       port:=8765 address:=0.0.0.0
-    ports:
-      - "8765:8765"
+    # Share the agent's network namespace so DDS runs over localhost.
+    network_mode: "service:micro-ros-agent"
     environment:
       - ROS_DOMAIN_ID=0
     volumes:

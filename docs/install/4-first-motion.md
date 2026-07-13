@@ -102,5 +102,18 @@ Only after all six joints are calibrated:
       it again and confirm the node reconnects and re-registers.
 - [ ] Move through slow poses across all six joints via Foxglove.
 
+## Troubleshooting: firmware reports `agent ping failed rc=1`
+
+`rc=1` is a *local* send error — the probe never left the board — as opposed
+to `rc=6` (probe sent, no answer). The most common cause: **the ESP32 and the
+Docker host are not on the same network segment**. The ESP32 ARPs for the
+agent IP and gets no reply (client isolation between WiFi bands/SSIDs, a
+guest network, or a host on a different subnet), so the transport errors out
+before anything reaches the wire. Fix: put both devices on the same
+SSID/segment, confirm with `ping <esp32-ip>` from the host, and re-check the
+host's LAN IP (`ipconfig getifaddr en0`) — update `AGENT_IP` in `config.h`
+if it changed (DHCP renumbers hosts that switch networks; consider a DHCP
+reservation for the Docker host).
+
 Done — the arm is live. Take photos for the [gallery](../gallery.md), and see
 [3D Printing](../3d-printing.md) for mounting the boards on the arm.
