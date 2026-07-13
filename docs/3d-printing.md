@@ -42,6 +42,11 @@ bracket freely, then set that spacing as `bracket_hole_spacing_mm` in
 `hardware/openscad/common_params.scad`. If screws bind even on the correct
 row, open up `bracket_screw_hole_d` instead — that's clearance, not spacing.
 
+<figure markdown>
+  ![Printed spacing test plate held against the metal servo bracket](img/test-plate-fit-check.jpg){ width="600" }
+  <figcaption>The PLA test plate held up to the black aluminium multi-purpose servo bracket. Each labelled hole pair marks a candidate center-to-center spacing (16–20 mm); sight down each pair against the bracket's own mounting holes to find the row that lines up, then use that number as <code>bracket_hole_spacing_mm</code>.</figcaption>
+</figure>
+
 ### 2. Set the variables and export
 
 Open the relevant `.scad` file from `hardware/openscad/` in
