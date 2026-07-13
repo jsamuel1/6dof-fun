@@ -21,7 +21,10 @@ violated.
 4. **Common ground:** the ESP32 ground and the 6V servo rail ground must be
    connected — I2C does not work without a shared reference.
 5. **USB-only power is for single-servo bench testing only.** Never move more
-   than one servo without the converter connected.
+   than one servo without the converter connected. (An adjustable bench
+   adapter — e.g. a SHNITPWR 3.5–36V unit — set to 6V can substitute for USB
+   power in single-servo tests, but its 3A ceiling makes it equally
+   unsuitable for multi-servo work.)
 
 <figure markdown>
   ![The 12V 10A DC power supply](../img/power-supply-12v.jpg){ width="600" }
