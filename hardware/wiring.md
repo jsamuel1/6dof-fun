@@ -89,8 +89,12 @@ firmware, so the table above stays true.
 
 | Segment | Connection | Wire | Notes |
 |---|---|---|---|
-| PSU → converter | 12 V out (+/−) → converter IN (+/−) | 16 AWG | Converter input range 12–40 V covers the 12 V supply. |
-| Converter → PCA9685 | 6 V OUT (+) → `V+` screw terminal; OUT (−) → `GND` screw terminal | 14–16 AWG, **as short as practical** | Six MG996Rs draw ~1 A each moving and 2.5 A+ each at stall; keep this run short and thick to limit voltage sag. |
+| PSU → converter | 12 V out (+/−) → converter IN (**red** = +, paired **black** = −) | 16 AWG | Converter input range 12–40 V covers the 12 V supply. |
+| Converter → PCA9685 | 6 V OUT (**yellow** = +) → `V+` screw terminal; OUT (paired **black** = −) → `GND` screw terminal | 14–16 AWG, **as short as practical** | Six MG996Rs draw ~1 A each moving and 2.5 A+ each at stall; keep this run short and thick to limit voltage sag. |
+
+Wire colors are straight from the unit's label (input: red +, black −;
+output: yellow +, black −). The two black wires are per-bundle negatives —
+use each with its own side.
 | Stall-spike capacitor | — | — | The PCA9685 already carries a 1000 µF electrolytic across V+/GND — that satisfies the ≥1000 µF rail-cap requirement. No extra cap needed unless you lengthen the power run. |
 | ESP32 logic power | USB-C from host/charger | — | The ESP32 is **not** powered from the servo rail. |
 
