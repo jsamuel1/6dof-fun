@@ -69,18 +69,59 @@ Before the PCA9685 sees any of it:
 
 ## Connections
 
+### PCA9685 I2C header — identify direction by the capacitor
+
+The 6-pin header order, starting from the end **away** from the silver
+electrolytic capacitor, is `GND, OE, SCL, SDA, VCC, V+` — **V+ is always the
+pin beside the cap.**
+
+<figure markdown>
+  ![PCA9685 I2C header pinout with ribbon wire colors](../img/pca9685-header-diagram.svg){ width="640" }
+  <figcaption>This build's 6-wire ribbon on the PCA9685 header. Two wires never reach the ESP32: red (OE) stays parked, and blue (V+) is <strong>removed</strong> — that pin is the 6&nbsp;V servo rail and would destroy the ESP32.</figcaption>
+</figure>
+
+### ESP32 connections
+
+| Ribbon color | PCA9685 pin | ESP32 pin | Notes |
+|---|---|---|---|
+| brown/black (end pin) | GND | `GND` | required common-ground link — I2C is dead/flaky without it |
+| red | OE | **leave unplugged** | already pulled low (enabled); future kill-switch option |
+| orange | SCL | `D22` (GPIO22) | Arduino `Wire` default clock |
+| yellow | SDA | `D21` (GPIO21) | Arduino `Wire` default data |
+| green | VCC | `3V3` | logic supply for the PCA9685 chip only — **3.3V, never 5V/VIN** |
+| blue (beside cap) | V+ | 🛑 **remove from ribbon** | 6V servo rail — never to the ESP32 |
+
+Pin locations on the 30-pin devkit — hold it **USB-C toward you, antenna
+away**; the right-hand row reads `3V3, GND, D15, D2, D4, RX2, TX2, D5, D18,
+D19, D21, RX0, TX0, D22, D23` from the USB end:
+
+<figure markdown>
+  ![ESP32 30-pin devkit pinout with the four I2C connections highlighted](../img/esp32-pinout-diagram.svg){ width="420" }
+  <figcaption>Green (3V3) and brown (GND) land at the near corner; yellow on D21, orange on D22. D-numbers are GPIO numbers.</figcaption>
+</figure>
+
+<figure markdown>
+  ![The actual ESP32 board silk labels](../img/esp32-pinout.jpg){ width="420" }
+  <figcaption>The real board for silk-label matching.</figcaption>
+</figure>
+
+### Power and servo connections
+
 | From | To | Notes |
 |---|---|---|
-| ESP32 SDA | PCA9685 SDA | 3.3V logic; check your exact Elegoo module's pinout (it varies slightly between revisions) against `hardware/wiring.md` |
-| ESP32 SCL | PCA9685 SCL | as above |
-| ESP32 3V3 | PCA9685 VCC | logic supply for the PCA9685 chip only — **not** V+ |
-| ESP32 GND | PCA9685 GND | common ground with the servo rail |
-| Converter 6V + | PCA9685 V+ terminal block | short, thick wires |
-| Converter 6V − | PCA9685 GND terminal block | short, thick wires |
-| 12V supply | Converter input | converter accepts 12–40V in |
+| Converter 6V + (yellow) | PCA9685 V+ terminal block | short, thick wires |
+| Converter 6V − (black) | PCA9685 GND terminal block | short, thick wires |
+| 12V supply | Converter input (red +, black −) | converter accepts 12–40V in |
 | Servos 1–6 | PCA9685 channels 0–5 | joint1 → channel 0 … joint6 → channel 5; mind the signal/V+/GND pin order |
 
 The PCA9685 uses I2C address `0x40` (all address jumpers open — the default).
+
+!!! tip "Printable bench sheet"
+    All of this — plus safety rules and a bring-up checklist — is on the
+    3-page A4 [wiring bench sheet](https://github.com/jsamuel1/6dof-fun/blob/main/hardware/wiring-bench-sheet.pdf)
+    (a living artifact: regenerate it with
+    `uv run --with reportlab python hardware/make_bench_sheet.py`, which also
+    rebuilds the pinout diagrams on this page).
 
 ## Before powering anything
 
