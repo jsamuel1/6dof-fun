@@ -43,6 +43,7 @@
 #include <rosidl_runtime_c/primitives_sequence_functions.h>
 
 #include <WiFi.h>
+#include <Wire.h>
 
 #include <math.h>
 #include <stdio.h>
@@ -343,6 +344,137 @@ static void servo_update(uint32_t steps) {
 }
 
 // ---------------------------------------------------------------------------
+// Serial diagnostic console — bench tool, no ROS stack required.
+// Type a single letter in any serial monitor (115200 baud):
+//   h  help
+//   i  I2C bus scan + PCA9685 register dump (proves the logic chain)
+//   s  state dump (agent link, WiFi, per-joint armed/target/position)
+//   w  wiggle ALL 16 channels with raw pulses (proves the muscle chain;
+//      blocks ~6 s, so the agent link may drop and auto-reconnect after)
+//   x  disable all channels and disarm all joints (bench e-stop)
+// ---------------------------------------------------------------------------
+static const char* agent_state_name() {
+  switch (agent_state) {
+    case WAITING_AGENT: return "WAITING_AGENT";
+    case AGENT_AVAILABLE: return "AGENT_AVAILABLE";
+    case AGENT_CONNECTED: return "AGENT_CONNECTED";
+    case AGENT_DISCONNECTED: return "AGENT_DISCONNECTED";
+  }
+  return "?";
+}
+
+static void diag_i2c() {
+  Serial.println("[diag] scanning I2C bus...");
+  int found = 0;
+  for (uint8_t addr = 1; addr < 127; ++addr) {
+    Wire.beginTransmission(addr);
+    if (Wire.endTransmission() == 0) {
+      Serial.print("[diag]   device ACK at 0x");
+      Serial.println(addr, HEX);
+      ++found;
+    }
+  }
+  Serial.print("[diag] devices found: ");
+  Serial.println(found);
+
+  const struct { uint8_t reg; const char* name; } regs[] = {
+      {0x00, "MODE1"}, {0x01, "MODE2"}, {0xFE, "PRESCALE"}};
+  for (auto& r : regs) {
+    Wire.beginTransmission(PCA9685_I2C_ADDRESS);
+    Wire.write(r.reg);
+    if (Wire.endTransmission(false) != 0) {
+      Serial.print("[diag]   PCA9685 read failed: ");
+      Serial.println(r.name);
+      continue;
+    }
+    Wire.requestFrom((uint8_t)PCA9685_I2C_ADDRESS, (uint8_t)1);
+    if (Wire.available()) {
+      Serial.print("[diag]   PCA9685 ");
+      Serial.print(r.name);
+      Serial.print(" = 0x");
+      Serial.println(Wire.read(), HEX);
+    }
+  }
+  Serial.println("[diag] expect MODE1=0x20|0xA0, MODE2=0x4, PRESCALE=0x83 (50 Hz)");
+}
+
+static void diag_state() {
+  Serial.print("[diag] agent=");
+  Serial.print(agent_state_name());
+  Serial.print(" wifi_status=");
+  Serial.print((int)WiFi.status());
+  Serial.print(" rssi=");
+  Serial.print(WiFi.RSSI());
+  Serial.print(" ip=");
+  Serial.print(WiFi.localIP());
+  Serial.print(" pca9685_ok=");
+  Serial.println(pca9685_ok ? "true" : "false");
+  for (int i = 0; i < NUM_JOINTS; ++i) {
+    Serial.print("[diag]   joint");
+    Serial.print(i + 1);
+    Serial.print(" ch=");
+    Serial.print(JOINT_CONFIG[i].channel);
+    Serial.print(" armed=");
+    Serial.print(joint_armed[i] ? "yes" : "no ");
+    Serial.print(" pos=");
+    Serial.print(traj[i].position(), 3);
+    Serial.print(" target=");
+    Serial.println(traj[i].target(), 3);
+  }
+}
+
+static void diag_wiggle() {
+  if (!pca9685_ok) {
+    Serial.println("[diag] PCA9685 not initialized — cannot wiggle");
+    return;
+  }
+  Serial.println("[diag] raw-pulse wiggle on ALL 16 channels:");
+  Serial.println("[diag]   center(1500us) -> 1900us -> 1100us -> center");
+  static const uint16_t seq[] = {1500, 1900, 1100, 1500};
+  for (uint16_t us : seq) {
+    Serial.print("[diag]   all channels -> ");
+    Serial.print(us);
+    Serial.println("us");
+    for (uint8_t ch = 0; ch < 16; ++ch) {
+      servo.writeMicroseconds(ch, us);
+    }
+    delay(1500);
+  }
+  // Restore: unarmed joints back to no-pulse; armed joints will be
+  // rewritten by the 50 Hz servo loop on the next tick. Channels 6-15
+  // (spares) always go back off.
+  for (uint8_t ch = 0; ch < 16; ++ch) {
+    bool armed = false;
+    for (int i = 0; i < NUM_JOINTS; ++i) {
+      if (JOINT_CONFIG[i].channel == ch && joint_armed[i]) armed = true;
+    }
+    if (!armed) servo.disableChannel(ch);
+  }
+  Serial.println("[diag] wiggle done (agent link may reconnect now)");
+}
+
+static void diag_estop() {
+  for (int i = 0; i < NUM_JOINTS; ++i) joint_armed[i] = false;
+  servo.disableAll();
+  Serial.println("[diag] all channels disabled, all joints disarmed");
+}
+
+static void handle_serial_diag() {
+  if (!Serial.available()) return;
+  char c = (char)Serial.read();
+  switch (c) {
+    case 'h':
+      Serial.println("[diag] h=help i=i2c-scan s=state w=wiggle-all x=estop");
+      break;
+    case 'i': diag_i2c(); break;
+    case 's': diag_state(); break;
+    case 'w': diag_wiggle(); break;
+    case 'x': diag_estop(); break;
+    default: break;  // ignore newlines/noise
+  }
+}
+
+// ---------------------------------------------------------------------------
 // setup / loop
 // ---------------------------------------------------------------------------
 void setup() {
@@ -398,6 +530,9 @@ void setup() {
 
 void loop() {
   uint32_t now = millis();
+
+  // -- Serial diagnostic console (bench tool) ------------------------------
+  handle_serial_diag();
 
   // -- 50 Hz servo loop, decoupled from all ROS activity ------------------
   // Runs one fixed-dt trajectory step per elapsed SERVO_PERIOD_MS. When a
