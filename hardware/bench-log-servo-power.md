@@ -1,6 +1,6 @@
 # Bench Log — "servo doesn't move" investigation
 
-Status: **open** · Started 2026-07-14 · Symptom: full digital chain healthy,
+Status: **root cause identified** — failed reverse-polarity-protection device · Started 2026-07-14 · Symptom: full digital chain healthy,
 zero physical motion on any channel.
 
 ## Observations so far
@@ -40,3 +40,43 @@ rail** explains every observation, including why all digital tests stay green.
 - Firmware serial diag console (115200): `h` help · `i` I2C scan · `s` state ·
   `w` wiggle all channels · `x` disable all
 - All 16 middle pins share one V+ rail — any channel is representative.
+
+## Worksheet results (2026-07-14 evening)
+
+| Step | Result | Meaning |
+|---|---|---|
+| A | rows = Black/Red/Yellow = GND/V+/PWM | standard order; probing was correct |
+| B | solid beep | GND path healthy |
+| C | **fading beep** | no copper path terminal→rail *through the meter* (see root cause — a protection FET doesn't conduct at meter test voltage) |
+| D | **~0.7 V** on rail with 6 V at block | rail effectively dead under power |
+| H | 0 V + solid beep | logic/servo grounds solidly common |
+
+## Root cause
+
+Underside silk revealed this clone is **"reverse polarity protected"
+at the terminal block** — a series protection device (P-FET) sits between
+the terminal block V+ and the servo rail. With 6 V correctly applied it
+should conduct; the rail instead shows ~0.7 V leakage → **the protection
+device has failed open**. This explains every observation, including the
+fading continuity beep (capacitor charging through the dead FET's path)
+and why every digital test stayed green (logic VCC is a separate net).
+
+The silk also notes the **"side breakout pins are not"** protected — the
+V+ header pins/holes connect *directly* to the servo rail, bypassing the
+dead device.
+
+## Fix options
+
+1. **Validate first (no solder):** temporarily feed 6 V to the populated
+   header's V+ pin (where the removed blue jumper sat) via a female jumper
+   from the converter yellow — single unloaded servo sweep only (a jumper
+   wire is not rated for multi-servo current). Servo moves → diagnosis
+   proven.
+2. **Permanent, this board:** solder the converter's yellow 6 V wire into
+   the empty V+ through-hole on the unpopulated header end (direct rail
+   feed, mechanically strong). Black stays in the GND terminal. Trade-off:
+   no reverse protection remains — acceptable given the color-documented
+   wiring, but note it in wiring.md.
+3. **Alternative:** locate and bridge the failed FET's pads (needs a
+   top-side photo near the terminal block to identify the part).
+4. **Replace the board** (~$6) if keeping protection is preferred.
