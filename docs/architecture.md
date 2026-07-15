@@ -47,6 +47,7 @@ radians.
 |---|---|---|---|---|
 | `/joint_states` | `sensor_msgs/JointState` | pub | 20Hz | Commanded angle per joint (radians). The MG996R has no feedback, so these are commanded, not measured, positions. |
 | `/arm/joint_commands` | `sensor_msgs/JointState` | sub | — | Target angles; optional per-joint velocity. |
+| `/arm/cal` | `std_msgs/String` | sub | — | calibration console: same single-char commands as the serial diag console (`0`-`5` select, `+`/`-` ±10µs, `>`/`<` ±50µs, `c` center, `x` e-stop); feedback via `cal_ch`/`cal_us` in `/arm/status` |
 | `/arm/status` | `std_msgs/String` (JSON) | pub | 1Hz | Uptime, WiFi RSSI, agent link state, e-stop flag. |
 
 ## Firmware modules

@@ -88,11 +88,13 @@ static rcl_node_t node;
 static rcl_publisher_t pub_joint_states;
 static rcl_publisher_t pub_status;
 static rcl_subscription_t sub_commands;
+static rcl_subscription_t sub_cal;
 static rclc_executor_t executor;
 
 static sensor_msgs__msg__JointState joint_state_msg;  // outgoing
 static sensor_msgs__msg__JointState cmd_msg;          // incoming buffer
 static std_msgs__msg__String status_msg;              // outgoing
+static std_msgs__msg__String cal_msg;                 // incoming buffer
 
 static const char* const kJointNames[NUM_JOINTS] = {
     "joint1", "joint2", "joint3", "joint4", "joint5", "joint6"};
@@ -106,6 +108,9 @@ static arm::TrapezoidalProfile traj[NUM_JOINTS];
 static bool joint_armed[NUM_JOINTS] = {false};
 static bool pca9685_ok = false;
 static bool estop = false;  // reserved: no e-stop input in phase-1 hardware
+// Calibration mode state (driven from serial or /arm/cal — see diag section).
+static int cal_channel = -1;
+static uint16_t cal_us = 1500;
 
 // ---------------------------------------------------------------------------
 // Timers / bookkeeping
@@ -194,6 +199,23 @@ static void init_messages() {
   status_msg.data.data = status_buf;
   status_msg.data.size = 0;
   status_msg.data.capacity = sizeof(status_buf);
+
+  // Incoming /arm/cal command string: pre-allocate for deserialization.
+  std_msgs__msg__String__init(&cal_msg);
+  reserve_string(&cal_msg.data, 24);
+}
+
+// Defined in the diag section below; shared by serial console and /arm/cal.
+static void apply_diag_char(char c);
+
+// /arm/cal callback: each character of the string is one console command,
+// so `ros2 topic pub ... "{data: '0'}"` selects channel 0 and
+// `"{data: '>>'}"` nudges +100us.
+static void cal_callback(const void* msgin) {
+  const std_msgs__msg__String* m = (const std_msgs__msg__String*)msgin;
+  for (size_t i = 0; i < m->data.size && i < 24; ++i) {
+    apply_diag_char(m->data.data[i]);
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -267,10 +289,16 @@ static bool create_entities() {
       ROSIDL_GET_MSG_TYPE_SUPPORT(sensor_msgs, msg, JointState),
       "/arm/joint_commands"));
 
+  RCFAIL_RETURN_FALSE(rclc_subscription_init_default(
+      &sub_cal, &node, ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, String),
+      "/arm/cal"));
+
   RCFAIL_RETURN_FALSE(
-      rclc_executor_init(&executor, &support.context, 1, &allocator));
+      rclc_executor_init(&executor, &support.context, 2, &allocator));
   RCFAIL_RETURN_FALSE(rclc_executor_add_subscription(
       &executor, &sub_commands, &cmd_msg, &cmd_callback, ON_NEW_DATA));
+  RCFAIL_RETURN_FALSE(rclc_executor_add_subscription(
+      &executor, &sub_cal, &cal_msg, &cal_callback, ON_NEW_DATA));
 
   // Best effort; timestamps fall back to millis() if this fails.
   (void)rmw_uros_sync_session(1000);
@@ -282,6 +310,7 @@ static void destroy_entities() {
   (void)rmw_uros_set_context_entity_destroy_session_timeout(rmw_context, 0);
 
   (void)rclc_executor_fini(&executor);
+  (void)rcl_subscription_fini(&sub_cal, &node);
   (void)rcl_subscription_fini(&sub_commands, &node);
   (void)rcl_publisher_fini(&pub_joint_states, &node);
   (void)rcl_publisher_fini(&pub_status, &node);
@@ -307,9 +336,11 @@ static void publish_status() {
   const bool connected = (agent_state == AGENT_CONNECTED);
   int written = snprintf(
       status_buf, sizeof(status_buf),
-      "{\"uptime_s\":%lu,\"rssi\":%d,\"agent_connected\":%s,\"estop\":%s}",
+      "{\"uptime_s\":%lu,\"rssi\":%d,\"agent_connected\":%s,\"estop\":%s,"
+      "\"cal_ch\":%d,\"cal_us\":%u}",
       (unsigned long)(millis() / 1000UL), (int)WiFi.RSSI(),
-      connected ? "true" : "false", estop ? "true" : "false");
+      connected ? "true" : "false", estop ? "true" : "false", cal_channel,
+      (unsigned)cal_us);
   if (written < 0) {
     return;
   }
@@ -459,17 +490,81 @@ static void diag_estop() {
   Serial.println("[diag] all channels disabled, all joints disarmed");
 }
 
+// --- Calibration mode: raw microsecond stepping on one channel -------------
+// Select a channel with '0'..'5', then nudge: '-'/'+' = ±10 us,
+// '<'/'>' = ±50 us, 'c' = jump to 1500 us. Hard-clamped to 500-2500 us.
+// Selecting a channel disarms its joint so the 50 Hz trajectory loop can't
+// fight the raw pulses; 'x' releases everything. Same commands work over
+// USB serial and the /arm/cal topic (std_msgs/String); over WiFi, watch
+// cal_ch/cal_us in /arm/status for feedback. State lives near the top of
+// the file so publish_status can report it.
+
+static void cal_select(int ch) {
+  cal_channel = ch;
+  cal_us = 1500;
+  for (int i = 0; i < NUM_JOINTS; ++i) {
+    if (JOINT_CONFIG[i].channel == (uint8_t)ch) joint_armed[i] = false;
+  }
+  servo.writeMicroseconds((uint8_t)ch, cal_us);
+  Serial.print("[cal] channel ");
+  Serial.print(ch);
+  Serial.print(" selected, ");
+  Serial.print(cal_us);
+  Serial.println("us (joint disarmed; STOP at buzz = internal stop!)");
+}
+
+static void cal_nudge(int delta) {
+  if (cal_channel < 0) {
+    Serial.println("[cal] no channel selected — press 0-5 first");
+    return;
+  }
+  int next = (int)cal_us + delta;
+  if (next < 500) next = 500;
+  if (next > 2500) next = 2500;
+  cal_us = (uint16_t)next;
+  servo.writeMicroseconds((uint8_t)cal_channel, cal_us);
+  Serial.print("[cal] ch ");
+  Serial.print(cal_channel);
+  Serial.print(" -> ");
+  Serial.print(cal_us);
+  Serial.println("us");
+}
+
 static void handle_serial_diag() {
   if (!Serial.available()) return;
-  char c = (char)Serial.read();
+  apply_diag_char((char)Serial.read());
+}
+
+static void apply_diag_char(char c) {
   switch (c) {
     case 'h':
-      Serial.println("[diag] h=help i=i2c-scan s=state w=wiggle-all x=estop");
+      Serial.println(
+          "[diag] h=help i=i2c-scan s=state w=wiggle-all x=estop | "
+          "cal: 0-5=select ch, -/+ = -/+10us, </> = -/+50us, c=center");
       break;
     case 'i': diag_i2c(); break;
     case 's': diag_state(); break;
     case 'w': diag_wiggle(); break;
-    case 'x': diag_estop(); break;
+    case 'x':
+      cal_channel = -1;
+      diag_estop();
+      break;
+    case '0': case '1': case '2': case '3': case '4': case '5':
+      cal_select(c - '0');
+      break;
+    case '+': case '=': cal_nudge(+10); break;
+    case '-': case '_': cal_nudge(-10); break;
+    case '>': case '.': cal_nudge(+50); break;
+    case '<': case ',': cal_nudge(-50); break;
+    case 'c':
+      if (cal_channel >= 0) {
+        cal_us = 1500;
+        servo.writeMicroseconds((uint8_t)cal_channel, cal_us);
+        Serial.print("[cal] ch ");
+        Serial.print(cal_channel);
+        Serial.println(" -> 1500us (center)");
+      }
+      break;
     default: break;  // ignore newlines/noise
   }
 }
