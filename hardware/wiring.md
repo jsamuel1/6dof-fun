@@ -111,6 +111,16 @@ Wire colors are straight from the unit's label (input: red +, black −;
 output: yellow +, black −). The two black wires are per-bundle negatives —
 use each with its own side.
 
+> **⚠️ This board's V+ terminal is dead — bypass in effect (2026-07-14).**
+> The clone's reverse-polarity-protection FET between the terminal block
+> and the servo rail failed open (see `bench-log-servo-power.md`), so the
+> converter's yellow 6 V feeds the rail through the **unprotected V+
+> breakout** instead. Currently a temporary jumper to the header V+ pin:
+> **single-servo use only** (a jumper melts at multi-servo current).
+> Before full-arm operation, solder the yellow wire into the empty V+
+> through-hole on the unpopulated header end. GND stays in the terminal
+> block (that side is healthy).
+
 Set the converter's output to **6.0 V** with a multimeter *before*
 connecting the PCA9685 (MG996R range is 4.8–7.2 V; 6 V is the sweet
 spot of torque vs. heat).
