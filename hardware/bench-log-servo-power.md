@@ -1,6 +1,6 @@
 # Bench Log — "servo doesn't move" investigation
 
-Status: **root cause identified** — failed reverse-polarity-protection device · Started 2026-07-14 · Symptom: full digital chain healthy,
+Status: **RESOLVED 2026-07-14** — dead protection FET bypassed via unprotected V+ breakout; first motion achieved (raw wiggle; arm promptly fell over — see lessons) · Started 2026-07-14 · Symptom: full digital chain healthy,
 zero physical motion on any channel.
 
 ## Observations so far
@@ -80,3 +80,24 @@ dead device.
 3. **Alternative:** locate and bridge the failed FET's pads (needs a
    top-side photo near the terminal block to identify the part).
 4. **Replace the board** (~$6) if keeping protection is preferred.
+
+## Resolution (2026-07-14, late)
+
+Rail fed via the unprotected V+ breakout, bypassing the dead protection
+FET → raw-pulse wiggle produced **first physical motion**. The unsecured
+arm promptly fell over; channels disabled afterwards (board reboot forces
+all channels off).
+
+## Lessons / follow-ups
+
+- The diag `w` wiggle drives ALL channels simultaneously at uncontrolled
+  speed — fine for one bench servo, violent for an assembled arm.
+  Follow-up: add per-channel wiggle (`0`–`5`) to the diag console; use slow
+  ROS2 trajectories for anything assembled. **Secure the base before any
+  multi-joint motion.**
+- If the bypass is still the temporary jumper wire: single-servo testing
+  ONLY until the converter's yellow wire is soldered into the V+
+  through-hole — a jumper cannot carry multi-servo current (fire risk).
+- ESP32 reset-loops on serial attach (recurring quirk): classic clone
+  devkit auto-reset bounce; standard fix is a 10 µF capacitor from EN to
+  GND. Parked until it bites during normal operation.
