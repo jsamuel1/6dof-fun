@@ -1,0 +1,66 @@
+# ---------------------------------------------------------------------------
+# Raspberry Pi 4B host stack — the arm's permanent ROS2 brain.
+#
+# Runs the same three roles as the Mac stack (host/docker-compose.yml), plus
+# a camera publisher. Unlike Docker Desktop on macOS, Linux supports real
+# host networking, so every service uses network_mode: host and DDS works
+# across the LAN with no namespace tricks — nodes on other Linux machines
+# can see these topics directly.
+#
+#   micro-ros-agent  — UDP :8888. Point the ESP32's config.h AGENT_IP at
+#                      this Pi's IP (give the Pi a DHCP reservation!).
+#   foxglove-bridge  — WebSocket :8765. Foxglove on any machine connects to
+#                      ws://<pi-ip>:8765.
+#   camera           — publishes /image_raw + /image_raw/compressed from a
+#                      USB webcam via usb_cam (default). For a ribbon-cable
+#                      Pi Camera Module, see the libcamera note in
+#                      camera/Dockerfile.
+#
+# Bring-up on the Pi:
+#   sudo apt install -y docker.io docker-compose-v2   (or get.docker.com)
+#   git clone https://github.com/jsamuel1/6dof-fun && cd 6dof-fun/host/pi
+#   docker compose up -d --build
+# ---------------------------------------------------------------------------
+
+services:
+  micro-ros-agent:
+    image: microros/micro-ros-agent:jazzy
+    container_name: arm-micro-ros-agent
+    command: udp4 --port 8888 -v4
+    network_mode: host
+    environment:
+      - ROS_DOMAIN_ID=0
+    restart: unless-stopped
+
+  foxglove-bridge:
+    build: ../foxglove-bridge
+    image: arduino-arm/foxglove-bridge:jazzy
+    container_name: arm-foxglove-bridge
+    command: >
+      ros2 launch foxglove_bridge foxglove_bridge_launch.xml
+      port:=8765 address:=0.0.0.0
+    network_mode: host
+    environment:
+      - ROS_DOMAIN_ID=0
+    volumes:
+      - ../calibration:/calibration:ro
+    depends_on:
+      - micro-ros-agent
+    restart: unless-stopped
+
+  camera:
+    build: ./camera
+    image: arduino-arm/camera:jazzy
+    container_name: arm-camera
+    # 640x480 @ 15fps MJPEG keeps WiFi/CPU load low; raise once proven.
+    command: >
+      ros2 run usb_cam usb_cam_node_exe --ros-args
+      -p video_device:=/dev/video0
+      -p image_width:=640 -p image_height:=480
+      -p framerate:=15.0 -p pixel_format:=mjpeg2rgb
+    network_mode: host
+    environment:
+      - ROS_DOMAIN_ID=0
+    devices:
+      - /dev/video0:/dev/video0
+    restart: unless-stopped

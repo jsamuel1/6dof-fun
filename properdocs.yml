@@ -56,6 +56,7 @@ nav:
       - 2. Firmware: install/2-firmware.md
       - 3. Host Software: install/3-host.md
       - 4. First Motion: install/4-first-motion.md
+      - 5. Raspberry Pi Host: install/5-raspberry-pi.md
   - Design Decisions: design-decisions.md
   - 3D Printing: 3d-printing.md
   - Gallery: gallery.md
