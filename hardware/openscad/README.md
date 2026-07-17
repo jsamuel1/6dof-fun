@@ -60,6 +60,14 @@ openscad -o ../stl/pca9685_mount.stl \
 at `/Applications/OpenSCAD.app/Contents/MacOS/OpenSCAD` if it isn't on
 your `PATH`.)
 
+## pi4_mount.scad
+
+Open-frame tray for the Raspberry Pi 4B host (phase 2). Standoffs on the
+official 58 x 49 mm M2.5 hole pattern; USB/Ethernet end fully open; low
+rails with reliefs for USB-C/HDMI and GPIO ribbons; ventilated floor.
+Set `with_bracket_ears = true` to hang it on the arm bracket pattern
+instead of desk-standing. Pre-rendered: `../stl/pi4_mount.stl`.
+
 ## Print settings
 
 Print both parts **flat as modeled** (floor on the bed). No supports
