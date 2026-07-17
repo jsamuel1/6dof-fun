@@ -80,6 +80,22 @@ module spine_body() {
         // antenna end: generous opening (WiFi + USB-brick heat)
         translate([box_l - wall_t - 0.1, bay_y + 4, floor_t + 4])
             cube([wall_t + 0.2, inner_w - 8, box_h]);
+
+        // CENTRE-LINE mounting: M3 holes through the floor matched to the
+        // arm's *<-18->*<-32->*<-18->* row, so the spine sits ON the arm
+        // instead of cantilevering off an edge ear. Screw heads sit inside
+        // on the floor (2 mm tall) — clear of the PCA9685 standoffs (4 mm)
+        // and the ESP32's edge pin rows. Entry-end pair round (datum);
+        // up-arm pair slotted ±2 mm for the seam.
+        for (dx = [-ear_pair_pitch / 2 - 9, -ear_pair_pitch / 2 + 9])
+            translate([ear_group_center + dx, box_w / 2, -0.1])
+                cylinder(h = floor_t + 0.2, d = m3_free_d);
+        for (dx = [ear_pair_pitch / 2 - 9, ear_pair_pitch / 2 + 9])
+            translate([ear_group_center + dx, box_w / 2, -0.1])
+                hull()
+                    for (ox = [-2, 2])
+                        translate([ox, 0, 0])
+                            cylinder(h = floor_t + 0.2, d = m3_free_d);
     }
     // divider wall between bays, with an I2C ribbon notch on top
     difference() {
@@ -101,16 +117,8 @@ module spine_body() {
     for (y = [bay_y + 3, bay_y + inner_w - 3 - rail_w_spine])
         translate([esp_x, y, floor_t])
             cube([esp32_pcb_l - 4, rail_w_spine, esp32_pin_h]);
-    // bracket ears: matched to the arm's real hole row (measured
-    // 2026-07-17): four holes in a line, *<-18->*<-32->*<-18->*, i.e.
-    // two 18 mm pairs with centres 50 mm apart, straddling the arm's
-    // centre seam. Ear group is centred on the spine's length.
-    // entry-end pair = fixed datum (round holes); up-arm pair slotted
-    // ±2 mm along the spine so the seam-spanning 50 mm pitch can breathe
-    translate([ear_group_center - ear_pair_pitch / 2, box_w - 0.1, 0])
-        bracket_ears();
-    translate([ear_group_center + ear_pair_pitch / 2, box_w - 0.1, 0])
-        bracket_ears(slot_len = 4);
+    // (mounting is through the floor centre-line — see the M3 hole cuts
+    // in the difference() above; no edge ears on this enclosure)
 }
 
 punch_pitch_spine = 5;
