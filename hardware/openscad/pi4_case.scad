@@ -132,11 +132,13 @@ module base() {
 // merged squares so each motif island is one solid piece; islands fuse
 // to the surrounding lid at their vertical walls during the print.
 // =====================================================================
-module art_body() {
+module art_body(sym = "*") {
+    // sym "A" = arm group, "B" = berry, "*" = both (through-cut shape)
     art_w = art_cols * art_pitch;
     art_h = art_rows * art_pitch;
     for (iy = [0 : art_rows - 1], ix = [0 : art_cols - 1])
-        if (art[iy][ix] == "#")
+        if (art[iy][ix] != "." &&
+            (sym == "*" || art[iy][ix] == sym))
             translate([(case_l - art_w) / 2 + ix * art_pitch - 0.005,
                        (case_w - art_h) / 2 + (art_rows - 1 - iy) * art_pitch - 0.005,
                        0])
@@ -190,7 +192,7 @@ module lid() {
         for (iy = [0 : art_rows - 1], ix = [0 : art_cols - 1]) {
             px = (case_l - art_w) / 2 + (ix + 0.5) * art_pitch;
             py = (case_w - art_h) / 2 + (art_rows - 1 - iy + 0.5) * art_pitch;
-            if (art[iy][ix] != "#")
+            if (art[iy][ix] == ".")
                 translate([px, py, -0.1])
                     cylinder(h = lid_t + 0.2, d = art_hole_d);
         }
@@ -231,17 +233,20 @@ plate_dy = 0;
 translate([plate_dx, plate_dy, 0]) {
     if (part == "base") base();
     if (part == "lid") lid();
-    if (part == "art") art_body();
+    if (part == "art_arm") art_body("A");
+    if (part == "art_berry") art_body("B");
     if (part == "feet") feet();
     // plate-layout variants: pre-positioned for the Bambu project file AND
     // flipped into print orientation — lid top face on the plate, skirt
     // pointing up. Both colour bodies then share the same z=0..lid_t plane,
     // flat on the plate: no floating geometry, exact inlay registration.
     if (part == "lid_plate") to_print_orientation() lid();
-    if (part == "art_plate") to_print_orientation() art_body();
+    if (part == "art_arm_plate") to_print_orientation() art_body("A");
+    if (part == "art_berry_plate") to_print_orientation() art_body("B");
     if (part == "both") {
         base();
         translate([0, case_w + 12, skirt_h]) lid();
-        translate([0, case_w + 12, skirt_h]) color("red") art_body();
+        translate([0, case_w + 12, skirt_h]) color("white") art_body("A");
+        translate([0, case_w + 12, skirt_h]) color("red") art_body("B");
     }
 }

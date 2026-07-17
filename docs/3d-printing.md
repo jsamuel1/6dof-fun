@@ -115,8 +115,9 @@ Add photos of your fit checks and final mounts to the [gallery](gallery.md).
 Ready-made Bambu Studio project: **`hardware/arm_electronics.3mf`** — one
 plate carrying the Pi case (base + two-colour lid) and the electronics
 spine (body + two-colour lid). Both lids print face-down with the shared
-robot-arm-and-raspberry motif inlaid in filament 2. Configured for the
-P2S: 0.4 nozzle, 0.20mm Standard, textured PEI plate, 2x PETG Basic —
-map the two slots to your colours, slice, print. The TPU 95A feet
+robot-arm-and-raspberry motif inlaid in two colours (arm + leaf =
+filament 2, raspberry = filament 3). Configured for the P2S: 0.4 nozzle,
+0.20mm Standard, textured PEI plate, 3x PETG Basic — intended palette
+black lid / white arm / red raspberry; map the slots, slice, print. The TPU 95A feet
 (`hardware/stl/pi4_case_feet.stl`) print as a separate job — TPU doesn't
 co-plate with PETG.

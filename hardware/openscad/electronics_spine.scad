@@ -135,11 +135,13 @@ art_y0  = (box_w - art_h_s) / 2;
 // lands on a solid '#' motif cell
 function motif_solid(ix, iy) =
     ix >= 0 && ix < art_motif_cols && iy >= 0 && iy < art_motif_rows &&
-    art_motif[art_motif_rows - 1 - iy][ix] == "#";
+    art_motif[art_motif_rows - 1 - iy][ix] != ".";
 
-module spine_art_body() {
+module spine_art_body(sym = "*") {
     for (iy = [0 : art_motif_rows - 1], ix = [0 : art_motif_cols - 1])
-        if (motif_solid(ix, iy))
+        if (motif_solid(ix, iy) &&
+            (sym == "*" ||
+             art_motif[art_motif_rows - 1 - iy][ix] == sym))
             translate([art_x0 + ix * art_pitch_s - 0.005,
                        art_y0 + iy * art_pitch_s - 0.005, 0])
                 cube([art_pitch_s + 0.01, art_pitch_s + 0.01, lid_t_spine]);
@@ -197,14 +199,17 @@ plate_dy = 0;
 translate([plate_dx, plate_dy, 0]) {
     if (part == "body") spine_body();
     if (part == "lid") spine_lid();
-    if (part == "art") spine_art_body();
+    if (part == "art_arm") spine_art_body("A");
+    if (part == "art_berry") spine_art_body("B");
     // print-orientation plate variants (lid face-down, skirt up, art
     // coplanar) positioned beside the body for the Bambu project
     if (part == "lid_plate") spine_to_print() spine_lid();
-    if (part == "art_plate") spine_to_print() spine_art_body();
+    if (part == "art_arm_plate") spine_to_print() spine_art_body("A");
+    if (part == "art_berry_plate") spine_to_print() spine_art_body("B");
     if (part == "both") {
         spine_body();
         translate([0, box_w + 12, 5]) spine_lid();
-        translate([0, box_w + 12, 5]) color("red") spine_art_body();
+        translate([0, box_w + 12, 5]) color("white") spine_art_body("A");
+    translate([0, box_w + 12, 5]) color("red") spine_art_body("B");
     }
 }

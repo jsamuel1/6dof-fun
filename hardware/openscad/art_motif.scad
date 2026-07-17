@@ -1,30 +1,34 @@
 // =====================================================================
 // art_motif.scad — the project's pixel-art motif: a robot arm rising
-// from its base to grip a raspberry (leaf on top). 24 x 16 cells,
-// '#' = solid material, '.' = punch hole.
+// from its base to grip a raspberry. 24 x 16 cells.
 //
-// Shared by pi4_case.scad and electronics_spine.scad lids: the '#'
-// cells become a separate full-thickness body (second filament color)
-// filling a matching through-cut in a perforated lid field.
+//   '.' = punch hole (lid colour shows through the field)
+//   'A' = arm group  (robot arm, pedestal, gripper, leaf) — filament 2
+//   'B' = berry      (the raspberry)                      — filament 3
+//
+// Both groups become separate full-thickness bodies filling a shared
+// through-cut in the perforated lid. Intended palette: black lid,
+// white arm, red raspberry. Shared by pi4_case.scad and
+// electronics_spine.scad.
 // =====================================================================
 
 art_motif = [
-    "................###.....",
-    "...............##.......",
-    "..............#####.....",
-    ".............#######....",
-    ".............#######....",
-    "............#.#####.....",
-    "...........###.....#....",
-    "..........####..........",
-    ".........###............",
-    "........###.............",
-    "......####..............",
-    ".....###................",
-    "....###.................",
-    "...#######..............",
-    "..#########.............",
-    "..#########.............",
+    "................AAA.....",
+    "...............AA.......",
+    "..............BBBBB.....",
+    ".............BBBBBBB....",
+    ".............BBBBBBB....",
+    "............A.BBBBB.....",
+    "...........AAA.....A....",
+    "..........AAAA..........",
+    ".........AAA............",
+    "........AAA.............",
+    "......AAAA..............",
+    ".....AAA................",
+    "....AAA.................",
+    "...AAAAAAA..............",
+    "..AAAAAAAAA.............",
+    "..AAAAAAAAA.............",
 ];
 art_motif_rows = len(art_motif);
 art_motif_cols = len(art_motif[0]);
