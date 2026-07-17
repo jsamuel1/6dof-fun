@@ -110,10 +110,13 @@ better than PLA for a part living on a moving arm.
 Add photos of your fit checks and final mounts to the [gallery](gallery.md).
 
 
-## Raspberry Pi case (phase 2)
+## Enclosure print job (phase 2)
 
-Ready-made Bambu Studio project: **`hardware/pi4_case.3mf`** — base +
-two-colour lid (lid body = filament 1, robot-arm-and-raspberry art body =
-filament 2, pre-aligned). Open, map the two filament slots to your PETG
-colours, slice, print. The TPU 95A feet (`hardware/stl/pi4_case_feet.stl`)
-print as a separate job — TPU doesn't co-plate with PETG.
+Ready-made Bambu Studio project: **`hardware/arm_electronics.3mf`** — one
+plate carrying the Pi case (base + two-colour lid) and the electronics
+spine (body + two-colour lid). Both lids print face-down with the shared
+robot-arm-and-raspberry motif inlaid in filament 2. Configured for the
+P2S: 0.4 nozzle, 0.20mm Standard, textured PEI plate, 2x PETG Basic —
+map the two slots to your colours, slice, print. The TPU 95A feet
+(`hardware/stl/pi4_case_feet.stl`) print as a separate job — TPU doesn't
+co-plate with PETG.
