@@ -42,7 +42,10 @@ inner_w     = max(esp32_pcb_w, pca_pcb_w) + 2 * fit_clearance;  // 29.4
 box_inner_l = entry_wall + pca_pcb_l + bay_gap + esp32_pcb_l + 4;
 box_l = box_inner_l + wall_t;
 box_w = inner_w + usb_chan_w + 3 * wall_t;
-box_h = floor_t + esp32_pin_h + 1.7 + 14;   // pins + pcb + wiring headroom
+// Height is governed by the PCA9685's servo plugs standing on their
+// vertical headers: board top 7.6 + pin/plug stack ~14 = ~21.6, plus
+// wire-bend room. 22 inner is the honest minimum with straight plugs.
+box_h = floor_t + 22;
 
 pca_x   = entry_wall;                        // PCA9685 bay start
 esp_x   = entry_wall + pca_pcb_l + bay_gap;  // ESP32 bay start
@@ -80,6 +83,14 @@ module spine_body() {
         // antenna end: generous opening (WiFi + USB-brick heat)
         translate([box_l - wall_t - 0.1, bay_y + 4, floor_t + 4])
             cube([wall_t + 0.2, inner_w - 8, box_h]);
+
+        // inner raceway wall: punched through for weight and cross-flow
+        // (air path: outer wall punches -> bay -> raceway -> outer wall)
+        for (zr = [0, 1], xi = [0 : 10])
+            translate([10 + xi * 5.2 + zr * 2.6,
+                       wall_t + usb_chan_w - 0.1, 8 + zr * 5])
+                rotate([-90, 0, 0])
+                    cylinder(h = wall_t + 0.2, d = 2.2);
 
         // raceway mouth: open the channel wall across the USB plug bay so
         // the cable turns 90 deg from the plug into the raceway
