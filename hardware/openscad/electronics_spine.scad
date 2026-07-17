@@ -119,7 +119,37 @@ rail_w_spine = 4;
 ear_pair_pitch   = 50;
 ear_group_center = box_l / 2;   // ear group centred on the spine
 
+// The shared motif at a finer pitch to suit the narrow lid; the '#'
+// cells become the second-colour body (part="art"), the field around
+// them is uniform fine punch holes on the same grid.
+include <art_motif.scad>
+art_pitch_s  = 2.2;
+art_hole_s   = 1.5;
+lid_margin_s = 5;
+art_w_s = art_motif_cols * art_pitch_s;   // 52.8 along the spine
+art_h_s = art_motif_rows * art_pitch_s;   // 35.2 across it
+art_x0  = (box_l - art_w_s) / 2;
+art_y0  = (box_w - art_h_s) / 2;
+
+// true where grid cell (ix, iy) — indexed from the art block origin —
+// lands on a solid '#' motif cell
+function motif_solid(ix, iy) =
+    ix >= 0 && ix < art_motif_cols && iy >= 0 && iy < art_motif_rows &&
+    art_motif[art_motif_rows - 1 - iy][ix] == "#";
+
+module spine_art_body() {
+    for (iy = [0 : art_motif_rows - 1], ix = [0 : art_motif_cols - 1])
+        if (motif_solid(ix, iy))
+            translate([art_x0 + ix * art_pitch_s - 0.005,
+                       art_y0 + iy * art_pitch_s - 0.005, 0])
+                cube([art_pitch_s + 0.01, art_pitch_s + 0.01, lid_t_spine]);
+}
+
 module spine_lid() {
+    ix_lo = -ceil((art_x0 - lid_margin_s) / art_pitch_s);
+    ix_hi = art_motif_cols - 1 + ceil((box_l - art_x0 - art_w_s - lid_margin_s) / art_pitch_s);
+    iy_lo = -ceil((art_y0 - lid_margin_s) / art_pitch_s);
+    iy_hi = art_motif_rows - 1 + ceil((box_w - art_y0 - art_h_s - lid_margin_s) / art_pitch_s);
     difference() {
         union() {
             rounded_plate(box_l, box_w, lid_t_spine);
@@ -136,10 +166,18 @@ module spine_lid() {
                                   5.2, corner_r - 1);
             }
         }
-        // punch-hole field
-        for (iy = [0 : floor((box_w - 12) / 4)], ix = [0 : floor((box_l - 12) / 4)])
-            translate([6 + ix * 4 + (iy % 2) * 2, 6 + iy * 4, -0.1])
-                cylinder(h = lid_t_spine + 0.2, d = 2.2);
+        // through-cut for the second-colour art body
+        translate([0, 0, -0.1]) scale([1, 1, 1.2]) spine_art_body();
+        // fine punch-hole field on the motif grid, skipping solid cells
+        for (iy = [iy_lo : iy_hi], ix = [ix_lo : ix_hi]) {
+            px = art_x0 + (ix + 0.5) * art_pitch_s;
+            py = art_y0 + (iy + 0.5) * art_pitch_s;
+            if (!motif_solid(ix, iy) &&
+                px > lid_margin_s && px < box_l - lid_margin_s &&
+                py > lid_margin_s && py < box_w - lid_margin_s)
+                translate([px, py, -0.1])
+                    cylinder(h = lid_t_spine + 0.2, d = art_hole_s);
+        }
     }
 }
 
@@ -147,7 +185,19 @@ lid_t_spine = 2.0;
 
 if (part == "body") spine_body();
 if (part == "lid") spine_lid();
+if (part == "art") spine_art_body();
+// print-orientation plate variants (lid face-down, skirt up, art
+// coplanar) positioned beside the body for the Bambu project
+module spine_to_print() {
+    translate([0, 2 * box_w + 15, lid_t_spine])
+        rotate([180, 0, 0])
+            translate([0, -box_w, 0])
+                children();
+}
+if (part == "lid_plate") spine_to_print() spine_lid();
+if (part == "art_plate") spine_to_print() spine_art_body();
 if (part == "both") {
     spine_body();
     translate([0, box_w + 12, 5]) spine_lid();
+    translate([0, box_w + 12, 5]) color("red") spine_art_body();
 }

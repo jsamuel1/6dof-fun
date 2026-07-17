@@ -51,28 +51,11 @@ lid_margin   = 4.5;     // solid border before the hole field starts
 art_pitch    = 3.2;     // artwork/vent grid pitch on the lid
 art_hole_d   = 2.0;
 
-// Pixel art, 24 x 16 ('#' = SOLID material = no hole punched).
-// A robot arm rising from its base to grip a raspberry (leaf on top).
-art = [
-    "................###.....",
-    "...............##.......",
-    "..............#####.....",
-    ".............#######....",
-    ".............#######....",
-    "............#.#####.....",
-    "...........###.....#....",
-    "..........####..........",
-    ".........###............",
-    "........###.............",
-    "......####..............",
-    ".....###................",
-    "....###.................",
-    "...#######..............",
-    "..#########.............",
-    "..#########.............",
-];
-art_rows = len(art);
-art_cols = len(art[0]);
+// Pixel art motif shared with the electronics spine lid.
+include <art_motif.scad>
+art = art_motif;
+art_rows = art_motif_rows;
+art_cols = art_motif_cols;
 
 // =====================================================================
 // Base
