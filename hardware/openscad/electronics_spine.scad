@@ -183,21 +183,28 @@ module spine_lid() {
 
 lid_t_spine = 2.0;
 
-if (part == "body") spine_body();
-if (part == "lid") spine_lid();
-if (part == "art") spine_art_body();
-// print-orientation plate variants (lid face-down, skirt up, art
-// coplanar) positioned beside the body for the Bambu project
+// plate_dx/plate_dy: shift the emitted part on the print plate
+// (used by the combined-project export; override with -D)
 module spine_to_print() {
     translate([0, 2 * box_w + 15, lid_t_spine])
         rotate([180, 0, 0])
             translate([0, -box_w, 0])
                 children();
 }
-if (part == "lid_plate") spine_to_print() spine_lid();
-if (part == "art_plate") spine_to_print() spine_art_body();
-if (part == "both") {
-    spine_body();
-    translate([0, box_w + 12, 5]) spine_lid();
-    translate([0, box_w + 12, 5]) color("red") spine_art_body();
+
+plate_dx = 0;
+plate_dy = 0;
+translate([plate_dx, plate_dy, 0]) {
+    if (part == "body") spine_body();
+    if (part == "lid") spine_lid();
+    if (part == "art") spine_art_body();
+    // print-orientation plate variants (lid face-down, skirt up, art
+    // coplanar) positioned beside the body for the Bambu project
+    if (part == "lid_plate") spine_to_print() spine_lid();
+    if (part == "art_plate") spine_to_print() spine_art_body();
+    if (part == "both") {
+        spine_body();
+        translate([0, box_w + 12, 5]) spine_lid();
+        translate([0, box_w + 12, 5]) color("red") spine_art_body();
+    }
 }

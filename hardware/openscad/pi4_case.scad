@@ -217,24 +217,31 @@ module lid() {
 }
 
 // =====================================================================
-if (part == "base") base();
-if (part == "lid") lid();
-if (part == "art") art_body();
-if (part == "feet") feet();
-// plate-layout variants: pre-positioned for the Bambu project file AND
-// flipped into print orientation — lid top face on the plate, skirt
-// pointing up. Both colour bodies then share the same z=0..lid_t plane,
-// flat on the plate: no floating geometry, exact inlay registration.
+// plate_dx/plate_dy: shift the emitted part on the print plate
+// (used by the combined-project export; override with -D)
 module to_print_orientation() {
     translate([0, 2 * case_w + 15, lid_t])
         rotate([180, 0, 0])
             translate([0, -case_w, 0])
                 children();
 }
-if (part == "lid_plate") to_print_orientation() lid();
-if (part == "art_plate") to_print_orientation() art_body();
-if (part == "both") {
-    base();
-    translate([0, case_w + 12, skirt_h]) lid();
-    translate([0, case_w + 12, skirt_h]) color("red") art_body();
+
+plate_dx = 0;
+plate_dy = 0;
+translate([plate_dx, plate_dy, 0]) {
+    if (part == "base") base();
+    if (part == "lid") lid();
+    if (part == "art") art_body();
+    if (part == "feet") feet();
+    // plate-layout variants: pre-positioned for the Bambu project file AND
+    // flipped into print orientation — lid top face on the plate, skirt
+    // pointing up. Both colour bodies then share the same z=0..lid_t plane,
+    // flat on the plate: no floating geometry, exact inlay registration.
+    if (part == "lid_plate") to_print_orientation() lid();
+    if (part == "art_plate") to_print_orientation() art_body();
+    if (part == "both") {
+        base();
+        translate([0, case_w + 12, skirt_h]) lid();
+        translate([0, case_w + 12, skirt_h]) color("red") art_body();
+    }
 }
