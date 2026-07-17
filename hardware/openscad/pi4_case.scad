@@ -238,10 +238,18 @@ if (part == "base") base();
 if (part == "lid") lid();
 if (part == "art") art_body();
 if (part == "feet") feet();
-// plate-layout variants: pre-positioned for the Bambu project file, so
-// the lid and art bodies stay coincident while sitting beside the base
-if (part == "lid_plate") translate([0, case_w + 15, skirt_h]) lid();
-if (part == "art_plate") translate([0, case_w + 15, skirt_h]) art_body();
+// plate-layout variants: pre-positioned for the Bambu project file AND
+// flipped into print orientation — lid top face on the plate, skirt
+// pointing up. Both colour bodies then share the same z=0..lid_t plane,
+// flat on the plate: no floating geometry, exact inlay registration.
+module to_print_orientation() {
+    translate([0, 2 * case_w + 15, lid_t])
+        rotate([180, 0, 0])
+            translate([0, -case_w, 0])
+                children();
+}
+if (part == "lid_plate") to_print_orientation() lid();
+if (part == "art_plate") to_print_orientation() art_body();
 if (part == "both") {
     base();
     translate([0, case_w + 12, skirt_h]) lid();
