@@ -105,10 +105,12 @@ module spine_body() {
     // 2026-07-17): four holes in a line, *<-18->*<-32->*<-18->*, i.e.
     // two 18 mm pairs with centres 50 mm apart, straddling the arm's
     // centre seam. Ear group is centred on the spine's length.
-    for (cx = [ear_group_center - ear_pair_pitch / 2,
-               ear_group_center + ear_pair_pitch / 2])
-        translate([cx, box_w - 0.1, 0])
-            bracket_ears();
+    // entry-end pair = fixed datum (round holes); up-arm pair slotted
+    // ±2 mm along the spine so the seam-spanning 50 mm pitch can breathe
+    translate([ear_group_center - ear_pair_pitch / 2, box_w - 0.1, 0])
+        bracket_ears();
+    translate([ear_group_center + ear_pair_pitch / 2, box_w - 0.1, 0])
+        bracket_ears(slot_len = 4);
 }
 
 punch_pitch_spine = 5;

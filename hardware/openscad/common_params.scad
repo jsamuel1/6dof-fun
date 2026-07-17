@@ -97,7 +97,11 @@ module standoff(h, pilot_d, od = undef) {
 // Local frame: ears grow in +Y from y = 0 (place y = 0 just inside the
 // tray's outer wall so the roots fuse to it), holes are spaced
 // `spacing` apart along X and centred on x = 0, ears sit on z = 0.
-module bracket_ears(spacing = bracket_hole_spacing_mm) {
+// slot_len > 0 elongates each screw hole into a stadium slot along X
+// (total extra travel; e.g. 4 = ±2 mm). Use on ONE pair of a two-pair
+// mount: the round-hole pair is the fixed datum, the slotted pair
+// floats to absorb frame seam movement / measurement slack.
+module bracket_ears(spacing = bracket_hole_spacing_mm, slot_len = 0) {
     for (sx = [-1, 1])
         translate([sx * spacing / 2, 0, 0])
             difference() {
@@ -109,8 +113,12 @@ module bracket_ears(spacing = bracket_hole_spacing_mm) {
                     translate([0, bracket_tab_l - bracket_tab_w / 2, 0])
                         cylinder(h = bracket_tab_t, d = bracket_tab_w);
                 }
-                // bracket screw hole
+                // bracket screw hole (round, or slotted along X)
                 translate([0, bracket_tab_l - bracket_hole_end_inset, -0.1])
-                    cylinder(h = bracket_tab_t + 0.2, d = bracket_screw_hole_d);
+                    hull()
+                        for (ox = [-slot_len / 2, slot_len / 2])
+                            translate([ox, 0, 0])
+                                cylinder(h = bracket_tab_t + 0.2,
+                                         d = bracket_screw_hole_d);
             }
 }
