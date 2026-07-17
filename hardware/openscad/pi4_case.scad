@@ -15,7 +15,13 @@
 
 include <common_params.scad>
 
-part = "base";   // "base" | "lid" | "both" (preview)
+part = "base";   // "base" | "lid" | "art" | "feet" | "both" (preview)
+//
+// Two-colour printing: export "lid" and "art" separately; in Bambu
+// Studio import both STLs as parts of ONE object and assign a PETG
+// colour to each. The art body fills a through-cut in the lid, so the
+// motif shows on both faces. "feet" prints 4 press-fit bumpers in
+// TPU 95A for the base's corner floor holes.
 
 // --- Raspberry Pi 4B PCB -------------------------------------------------
 pi_pcb_l      = 85;
@@ -111,6 +117,12 @@ module base() {
                        case_w * 0.30 + row * vent_row_pitch, 0])
                 vent_slot(vent_slot_pitch, vent_slot_w, floor_t);
 
+        // corner holes for the TPU 95A press-fit feet
+        for (px = [0, 1], py = [0, 1])
+            translate([foot_inset + px * (case_l - 2 * foot_inset),
+                       foot_inset + py * (case_w - 2 * foot_inset), -0.1])
+                cylinder(h = floor_t + 0.2, d = foot_hole_d);
+
         // USB / Ethernet end: open from just under PCB top to the rim
         translate([case_l - wall_t - 0.1, wall_t + 2, pcb_top_z - 3])
             cube([wall_t + 0.2, case_w - 2 * wall_t - 4, wall_h]);
@@ -129,6 +141,42 @@ module base() {
 
         wall_punches();
     }
+}
+
+// =====================================================================
+// Artwork body — the '#' cells extruded to full lid thickness. Printed
+// in the second colour; the lid gets a matching through-cut. Cells are
+// merged squares so each motif island is one solid piece; islands fuse
+// to the surrounding lid at their vertical walls during the print.
+// =====================================================================
+module art_body() {
+    art_w = art_cols * art_pitch;
+    art_h = art_rows * art_pitch;
+    for (iy = [0 : art_rows - 1], ix = [0 : art_cols - 1])
+        if (art[iy][ix] == "#")
+            translate([(case_l - art_w) / 2 + ix * art_pitch - 0.005,
+                       (case_w - art_h) / 2 + (art_rows - 1 - iy) * art_pitch - 0.005,
+                       0])
+                cube([art_pitch + 0.01, art_pitch + 0.01, lid_t]);
+}
+
+// =====================================================================
+// TPU 95A feet — press-fit bumpers for the base's corner floor holes.
+// Stem is 0.2 over the hole; TPU squishes in and stays put.
+// =====================================================================
+foot_hole_d = 3.2;   // matching holes added in the base floor corners
+foot_inset  = 6.5;   // hole centre inset from the case corner
+
+module foot() {
+    cylinder(h = 3, d1 = 9, d2 = 7);              // dome pad
+    translate([0, 0, 3]) cylinder(h = floor_t + 1.2, d = foot_hole_d + 0.2);
+    translate([0, 0, 3 + floor_t + 1.2])
+        cylinder(h = 1, d1 = foot_hole_d + 1.4, d2 = foot_hole_d - 0.6);  // snap barb
+}
+
+module feet() {
+    for (px = [0, 1], py = [0, 1])
+        translate([px * 14, py * 14, 0]) foot();
 }
 
 // =====================================================================
@@ -153,6 +201,8 @@ module lid() {
                                   skirt_h + 0.2, corner_r - 1);
             }
         }
+        // through-cut for the two-colour artwork body
+        translate([0, 0, -0.1]) scale([1, 1, 1.2]) art_body();
         // hole field with the artwork left solid; art block centred
         for (iy = [0 : art_rows - 1], ix = [0 : art_cols - 1]) {
             px = (case_l - art_w) / 2 + (ix + 0.5) * art_pitch;
@@ -186,7 +236,10 @@ module lid() {
 // =====================================================================
 if (part == "base") base();
 if (part == "lid") lid();
+if (part == "art") art_body();
+if (part == "feet") feet();
 if (part == "both") {
     base();
     translate([0, case_w + 12, skirt_h]) lid();
+    translate([0, case_w + 12, skirt_h]) color("red") art_body();
 }
