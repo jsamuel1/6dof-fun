@@ -1,6 +1,6 @@
 # Parts List (BOM)
 
-Everything below is owned except a microSD card for the Raspberry Pi host (phase 2).
+Everything below is owned — the build requires no further purchases.
 Prices are indicative street prices; the "search for" column gives generic
 terms that find the part on any major electronics retailer.
 
@@ -18,7 +18,7 @@ terms that find the part on any major electronics retailer.
 | Filament | PLA (prototypes) + PETG (final mounts) | owned | ~$20–25/kg | "PETG filament 1kg" |
 | Raspberry Pi 4B | arm64 host for phase 2 (agent + Foxglove bridge + camera) | owned | — | — |
 | USB webcam | camera node on the Pi (`/dev/video0`) | owned | — | — |
-| microSD card | Pi boot disk — 32GB+, A1/A2 application class | **to buy (~$12)** | ~$12 | "SanDisk 64GB microSD A2" or "Samsung Endurance 64GB" |
+| microSD card | Pi boot disk — 32GB A1 | owned | — | — |
 | Wiring & misc | Short, thick wire for converter → PCA9685 V+ run; jumper wires for I2C; USB-C cable | owned | ~$5–10 | "silicone wire 16 AWG", "dupont jumper wires" |
 
 !!! warning "Power budget"
