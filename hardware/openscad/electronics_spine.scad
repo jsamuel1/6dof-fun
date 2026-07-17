@@ -35,7 +35,7 @@ pca_pcb_l   = 62.5;   pca_pcb_w   = 25.4;
 pca_hole_dl = 56.0;   pca_hole_dw = 19.0;   pca_hole_off_l = (pca_pcb_l - 56.0) / 2;
 
 // --- layout ----------------------------------------------------------
-bay_gap     = 8;      // divider wall + I2C ribbon pass-over
+bay_gap     = 14;     // divider + USB-C plug bay (plug body ~12 mm)
 entry_wall  = 6;      // thick bottom wall carrying the two cable ports
 usb_chan_w  = 9;      // floor channel beside the PCA9685 bay for USB run
 inner_w     = max(esp32_pcb_w, pca_pcb_w) + 2 * fit_clearance;  // 29.4
@@ -81,6 +81,11 @@ module spine_body() {
         translate([box_l - wall_t - 0.1, bay_y + 4, floor_t + 4])
             cube([wall_t + 0.2, inner_w - 8, box_h]);
 
+        // raceway mouth: open the channel wall across the USB plug bay so
+        // the cable turns 90 deg from the plug into the raceway
+        translate([esp_x - bay_gap + wall_t + 3, wall_t + usb_chan_w - 0.1, floor_t])
+            cube([bay_gap - wall_t - 5, 2 * wall_t + 0.2 - 2.2, 14]);
+
         // CENTRE-LINE mounting: M3 holes through the floor matched to the
         // arm's *<-18->*<-32->*<-18->* row, so the spine sits ON the arm
         // instead of cantilevering off an edge ear. Screw heads sit inside
@@ -97,15 +102,13 @@ module spine_body() {
                         translate([ox, 0, 0])
                             cylinder(h = floor_t + 0.2, d = m3_free_d);
     }
-    // divider wall between bays, with an I2C ribbon notch on top
+    // divider wall on the PCA side of the gap — the gap itself is the
+    // USB-C plug bay (plug seats into the ESP32 across it)
     difference() {
-        translate([esp_x - wall_t - 2, bay_y, floor_t])
+        translate([pca_x + pca_pcb_l + 1, bay_y, floor_t])
             cube([wall_t + 2, inner_w, box_h - floor_t - 6]);
-        translate([esp_x - wall_t - 2.1, bay_y + inner_w / 2 - 8, box_h - 14])
+        translate([pca_x + pca_pcb_l + 0.9, bay_y + inner_w / 2 - 8, box_h - 14])
             cube([wall_t + 2.2, 16, 20]);
-        // USB-C mouth through the divider into the channel side
-        translate([esp_x - wall_t - 2.1, bay_y - 0.1, floor_t + 2])
-            cube([wall_t + 2.2, 2, 10]);
     }
     // PCA9685 corner standoffs (M2.5)
     for (px = [0, 1], py = [0, 1])
