@@ -101,14 +101,21 @@ module spine_body() {
     for (y = [bay_y + 3, bay_y + inner_w - 3 - rail_w_spine])
         translate([esp_x, y, floor_t])
             cube([esp32_pcb_l - 4, rail_w_spine, esp32_pin_h]);
-    // bracket ears: one pair behind each bay (back wall = y max)
-    for (cx = [pca_x + pca_pcb_l / 2, esp_x + esp32_pcb_l / 2])
+    // bracket ears: matched to the arm's real hole row (measured
+    // 2026-07-17): four holes in a line, *<-18->*<-32->*<-18->*, i.e.
+    // two 18 mm pairs with centres 50 mm apart, straddling the arm's
+    // centre seam. Ear group is centred on the spine's length.
+    for (cx = [ear_group_center - ear_pair_pitch / 2,
+               ear_group_center + ear_pair_pitch / 2])
         translate([cx, box_w - 0.1, 0])
             bracket_ears();
 }
 
 punch_pitch_spine = 5;
 rail_w_spine = 4;
+// Arm hole row (verified): pair-to-pair centre distance = 18/2 + 32 + 18/2.
+ear_pair_pitch   = 50;
+ear_group_center = box_l / 2;   // ear group centred on the spine
 
 module spine_lid() {
     difference() {
