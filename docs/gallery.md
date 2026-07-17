@@ -31,6 +31,11 @@ land (first choreographed pose sequence, PLA fit checks, PETG finals).
   <figcaption>First print of the project: the bracket-spacing test coupon fresh off the Bambu Lab P2S — 12 layers, 19 minutes, 5 g of PLA. Five labelled M3 hole pairs (16–20 mm) to find the arm bracket's true spacing before printing the real mounts.</figcaption>
 </figure>
 
+<figure markdown>
+  ![The disassembled arm laid out on the cutting mat for electronics fitting](img/arm-opened-for-electronics.jpg){ width="600" }
+  <figcaption>The arm opened up on the bench for electronics fitting — servos, brackets, and the loomed wiring spread out on the cutting mat while the printed electronics-spine mount is dry-fitted against the base plates.</figcaption>
+</figure>
+
 ## Adding photos
 
 Images live in `docs/img/` in the repository.

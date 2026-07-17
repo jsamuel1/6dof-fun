@@ -6,6 +6,27 @@ you export STLs into `hardware/stl/` yourself after setting the measured
 parameters (the bracket hole spacing is a measured input, so no
 one-size-fits-all STL is committed).
 
+## Mounting anatomy
+
+The printed "electronics spine" (`hardware/openscad/electronics_spine.scad`)
+bolts to the arm's black metal base plates — the folded U-channel bracket at the
+arm's foot. Seen face-on, each plate face carries a repeating,
+left-right-symmetric hole pattern: paired small holes flanking larger bores,
+with a circular bolt-circle around a central bore where a servo boss sits. The
+evenly spaced small-hole pairs are the features the mounts' M3 "ear" pairs
+(nominally 18 mm center-to-center) bolt through, so the printed part hangs off
+the existing plate without new drilling.
+
+<figure markdown>
+  ![Face-on view of the arm's black metal base plate showing its hole pattern](img/bracket-hole-pattern-face-on.jpg){ width="600" }
+  <figcaption>Face-on view of the arm's black metal U-channel base plate. The hole pattern is what the printed mount's 18&nbsp;mm M3 ear pairs bolt into: note the horizontally paired small holes at the corners and the central bolt-circle around a servo bore. Confirm the actual pair spacing with the <a href="#1b-print-the-spacing-test-plate-first">test plate</a> before committing a mount — these photos show layout, not measurements.</figcaption>
+</figure>
+
+<figure markdown>
+  ![Closer face-on view of the base plate hole clusters](img/bracket-hole-pattern-detail.jpg){ width="600" }
+  <figcaption>A second face-on angle of the same plate. The corner clusters each pair two small M3-size holes around a larger bore, and the pattern mirrors left-to-right and repeats on the folded lower face — the symmetry the mount's ear pairs register against.</figcaption>
+</figure>
+
 ## Workflow
 
 ### 1. Measure the bracket holes
