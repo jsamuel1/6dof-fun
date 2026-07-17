@@ -238,6 +238,10 @@ if (part == "base") base();
 if (part == "lid") lid();
 if (part == "art") art_body();
 if (part == "feet") feet();
+// plate-layout variants: pre-positioned for the Bambu project file, so
+// the lid and art bodies stay coincident while sitting beside the base
+if (part == "lid_plate") translate([0, case_w + 15, skirt_h]) lid();
+if (part == "art_plate") translate([0, case_w + 15, skirt_h]) art_body();
 if (part == "both") {
     base();
     translate([0, case_w + 12, skirt_h]) lid();
