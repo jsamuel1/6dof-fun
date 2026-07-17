@@ -19,10 +19,9 @@ $fn = 48;                        // facet count for cylinders / holes
 // Arm bracket interface                                  *** MEASURE ME ***
 // ---------------------------------------------------------------------
 // Centre-to-centre spacing of the two screw holes on the arm's metal
-// bracket. Measured 18 mm by ruler (2026-07-13) — verify with
-// bracket_test_plate.scad before printing final mounts, and update here
-// if a neighbouring spacing fits better.
-bracket_hole_spacing_mm = 18;    // ruler-measured; confirm via test plate
+// bracket. VERIFIED 2026-07-17 with bracket_test_plate.scad — the 18 mm
+// row fits the bracket holes cleanly.
+bracket_hole_spacing_mm = 18;    // test-plate verified
 bracket_screw_hole_d    = 3.4;   // M3 clearance (bracket holes confirmed M3)
                                  // (4.5 = M4 free fit; use 3.4 for M3, 5.5 for M5)
 bracket_tab_w           = 12;    // width of each mounting ear
