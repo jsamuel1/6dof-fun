@@ -35,7 +35,7 @@ pca_pcb_l   = 62.5;   pca_pcb_w   = 25.4;
 pca_hole_dl = 56.0;   pca_hole_dw = 19.0;   pca_hole_off_l = (pca_pcb_l - 56.0) / 2;
 
 // --- layout ----------------------------------------------------------
-bay_gap     = 14;     // divider + USB-C plug bay (plug body ~12 mm)
+bay_gap     = 18;     // divider + USB-C plug bay (plug ~12 mm + finger room)
 entry_wall  = 6;      // thick bottom wall carrying the two cable ports
 usb_chan_w  = 9;      // floor channel beside the PCA9685 bay for USB run
 inner_w     = max(esp32_pcb_w, pca_pcb_w) + 2 * fit_clearance;  // 29.4
@@ -95,7 +95,13 @@ module spine_body() {
         // raceway mouth: open the channel wall across the USB plug bay so
         // the cable turns 90 deg from the plug into the raceway
         translate([esp_x - bay_gap + wall_t + 3, wall_t + usb_chan_w - 0.1, floor_t])
-            cube([bay_gap - wall_t - 5, 2 * wall_t + 0.2 - 2.2, 14]);
+            cube([bay_gap - wall_t - 5, 2 * wall_t + 0.2 - 2.2, 16]);
+
+        // USB access opening: front wall, directly in line with the plug
+        // bay and raceway mouth — a straight finger/cable tunnel from
+        // outside to the USB-C port (like the servo slots, but taller)
+        translate([esp_x - bay_gap + wall_t + 3, -0.1, floor_t + 2])
+            cube([bay_gap - wall_t - 5, wall_t + 0.2, 16]);
 
         // CENTRE-LINE mounting: M3 holes through the floor matched to the
         // arm's *<-18->*<-32->*<-18->* row, so the spine sits ON the arm
