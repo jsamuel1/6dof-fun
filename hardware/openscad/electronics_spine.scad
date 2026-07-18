@@ -243,7 +243,7 @@ module spine_body() {
             rotate([0, 45, 0])
                 cube([14, inner_w + 0.2, 14]);
         translate([box_l - 8.7, esp_bay_y - 0.2, 0])
-            cube([8.8, inner_w + 0.4, box_h]);
+            cube([8.6, inner_w + 0.4, box_h]);
     }
     // interior relief pads at BOTH pair centres: give the head recess
     // its depth whichever end faces the screw heads. 2.4 above the

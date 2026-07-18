@@ -89,9 +89,13 @@ module wall_punches() {
                  abs(x - snap_xs_far[0]) < 7 || abs(x - snap_xs_far[1]) < 7);
             if (x < case_l - 8 && !near_snap) {
                 for (y = [-0.1, case_w - wall_t - 0.1])
-                    translate([x, y, z])
-                        rotate([-90, 0, 0])
-                            cylinder(h = wall_t + 0.2, d = punch_d);
+                    // port-side wall (y=0): the big opening ends at
+                    // x=62.65 — punches near that edge carve floating
+                    // slivers off the wall stub, so start clear of it
+                    if (y > 0 || x >= 66)
+                        translate([x, y, z])
+                            rotate([-90, 0, 0])
+                                cylinder(h = wall_t + 0.2, d = punch_d);
             }
         }
 }
