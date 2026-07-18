@@ -79,26 +79,26 @@ pwr_z       = 16.5;   // connector centre height — RAISED so the body
                       // entry-end right-angle pins (~z 8.6-11.4)
 
 // --- arm-face hardware relief (underside) ---------------------------
-// The arm's own assembly screws stand proud of its mounting face, right
-// at the centre of each 18 mm hole pair (the servo bolt-circle): screw
-// heads at one end, a screw tip + nut at the other. BOTH pair centres
-// get the full relief — a circular head recess (in a locally thickened
-// floor pad) with an elongated nut through-slot in its middle — so the
-// spine mounts either way round and either end absorbs either
-// protrusion. The slot's extra length matches the +-2 mm seam-movement
-// mount slots. Confirm on the PLA fit check; adjust if needed.
+// The arm's proud assembly screws sit a further 18 mm OUTBOARD of each
+// outer mount hole (measured on the arm; the row reads
+//   screw <18> hole <18> hole <seam> hole <18> hole <18> screw
+// so the hardware lands 52 from the row centre). Screw heads at one
+// end, a screw tip + nut at the other; BOTH spots get the full relief
+// — a circular head recess in a locally thickened floor pad with an
+// elongated nut through-slot in its middle — so the spine mounts
+// either way round. The slot's extra length matches the +-2 mm
+// seam-movement mount slots.
 // Keep the seam screw's tip trimmed near-flush with its nut: a <=4 mm
-// stack clears the PCA9685 header tails / ESP32 underside at any end.
-head_recess_d     = 18;    // covers centre screw + washer + bolt-circle heads
+// stack clears the PCA9685 header tails / the ESP32's RF can above.
+hw_dx             = 52;    // ear_pair_pitch/2 + 9 + 18: outer mount
+                           // hole at 34 from the row centre, screw a
+                           // further 18 outboard
+head_recess_d     = 18;    // covers screw head + washer
                            // (VERIFIED 2026-07-18: widest hardware <16)
 head_recess_depth = 3.0;   // proudest head ~2.5 -> 0.5 air
 head_pad_d        = 24;    // interior pad giving the recess its depth
 nut_slot_w        = 9;     // M3 nut confirmed: 6.9 a/c + clearance
-nut_slot_l        = 13;    // width + 4 mm travel (mount-slot match);
-                           // tips just kiss the mount slots — harmless,
-                           // the washered mount screws bridge the notch
-// NOTE: use washers under all four M3 mount heads inside — the recess
-// lobes clip the hole edges, so the washer spreads load onto the pad.
+nut_slot_l        = 13;    // width + 4 mm travel (mount-slot match)
 
 module spine_body() {
   difference() {
@@ -247,17 +247,13 @@ module spine_body() {
     // floor — under the PCA9685 that leaves ~1.5 to the board's header
     // tails (PETG pad, harmless if they kiss); at the ESP32 end it
     // merges with the board seat pads.
-    // datum end (under the PCA9685)
-    translate([ear_group_center - ear_pair_pitch / 2, box_w / 2, 0])
-        cylinder(h = head_recess_depth + 1.4, d = head_pad_d);
-    // floating end — clipped to the ESP32 bay: the pad's shoulder would
-    // otherwise stand in the USB plug bay floor under the plug body
-    intersection() {
-        translate([ear_group_center + ear_pair_pitch / 2, box_w / 2, 0])
+    // interior relief pads at both hardware positions (18 outboard of
+    // the outer mount holes): entry-end one merges with a PCA9685
+    // standoff, nose-end one merges with the RF-can seat pad — both
+    // harmless unions, the boards still seat at their design heights
+    for (sx = [-1, 1])
+        translate([ear_group_center + sx * hw_dx, box_w / 2, 0])
             cylinder(h = head_recess_depth + 1.4, d = head_pad_d);
-        translate([esp_x + 0.05, esp_bay_y, 0])
-            cube([head_pad_d + 10, inner_w, head_recess_depth + 2]);
-    }
     // PCA9685 corner standoffs (M2.5) — board datum sits pca_pin_clear
     // off the entry wall (right-angle pin room), 0.5 off the divider;
     // hole pattern centred across the bay width
@@ -311,13 +307,14 @@ module spine_body() {
             rotate([-90, 0, 0])
                 cylinder(h = box_w + 0.4, r = 11.4, $fn = 96);
     }
-    // symmetric relief at BOTH pair centres: circular head recess with
-    // an elongated nut through-slot in its middle — either end deals
-    // with either the screw heads or the screw tip + nut
+    // symmetric relief at BOTH hardware positions (52 from the row
+    // centre): circular head recess with an elongated nut through-slot
+    // in its middle — either end deals with either the screw heads or
+    // the screw tip + nut
     for (sx = [-1, 1]) {
-        translate([ear_group_center + sx * ear_pair_pitch / 2, box_w / 2, -0.1])
+        translate([ear_group_center + sx * hw_dx, box_w / 2, -0.1])
             cylinder(h = head_recess_depth + 0.1, d = head_recess_d);
-        translate([ear_group_center + sx * ear_pair_pitch / 2, box_w / 2, -0.1])
+        translate([ear_group_center + sx * hw_dx, box_w / 2, -0.1])
             hull()
                 for (ox = [-(nut_slot_l - nut_slot_w) / 2,
                             (nut_slot_l - nut_slot_w) / 2])

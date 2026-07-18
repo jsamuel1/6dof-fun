@@ -169,13 +169,14 @@ Lessons from the first printed set, designed back into the sources:
   the I2C Dupont housings plug straight on at the divider end —
   crossing just above the USB-C plug (plug USB first, I2C second).
 - **Spine underside clears the arm's own hardware — either way round**:
-  both hole-pair centres carry the same relief, a circular recess for
-  proud screw heads with an elongated through-slot in its middle for a
-  screw-tip-and-nut stack (elongated to match the ±2mm seam-movement
-  slots). Mount the spine in whichever orientation; either end absorbs
-  either protrusion. Keep the seam screw's tip trimmed near-flush with
-  its nut (≤4mm stack) and put washers under all four M3 mount heads
-  inside.
+  the arm's proud screws sit a further 18mm *outboard* of each outer
+  mount hole (row: screw, 18, hole, 18, hole, seam — mirrored), and
+  both spots carry the same relief: a circular recess for screw heads
+  with an elongated through-slot in its middle for a screw-tip-and-nut
+  stack (elongated to match the ±2mm seam-movement slots). Mount the
+  spine in whichever orientation; either end absorbs either
+  protrusion. Keep the seam screw's tip trimmed near-flush with its
+  nut (≤4mm stack).
 - **Low inner walls**: the raceway wall is an 8mm curb and the bay
   divider a plain 10mm wall — with every opening top-loaded and the lid
   closing the roof, wires simply cross over them (the I2C run crosses the notched
