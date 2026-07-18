@@ -154,3 +154,27 @@ Lessons from the first printed set, designed back into the sources:
   through-slot at the floating pair where the screw tip + nut stand
   taller (elongated to match the ±2mm seam-movement slots). Put washers
   under the two datum M3 heads inside the spine.
+- **Servo slots cut through the inner raceway wall** so the leads run
+  straight from outside to the PCA9685 headers, crossing above the
+  USB cable in the channel (v1 dead-ended them against the wall).
+
+### Component placement
+
+`hardware/openscad/spine_assembly.scad` is a non-printed documentation
+model — the spine body with mock boards, the XT60 panel inlet, the
+inline XT60 service disconnect (lengthwise along the board's back
+edge), the 6V feed and the USB-C run placed in situ:
+
+<figure markdown>
+  ![Spine assembly, isometric](img/spine-assembly-iso.png){ width="700" }
+  <figcaption>PCA9685 (green) and ESP32 (blue) in their bays; XT60 inlet
+  in the entry wall, inline XT60 pair beside the old terminal block,
+  USB-C cable in the raceway turning into the plug bay.</figcaption>
+</figure>
+
+<figure markdown>
+  ![Spine assembly, top](img/spine-assembly-top.png){ width="700" }
+  <figcaption>Top view: servo leads enter through the front slots
+  straight onto the header strip; the I2C ribbon crosses the divider
+  notch to the ESP32.</figcaption>
+</figure>

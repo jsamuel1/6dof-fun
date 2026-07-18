@@ -116,10 +116,13 @@ module spine_body() {
             cube([entry_wall + 0.2, 9, box_h]);
         // servo lead slots: FRONT wall (away from the bracket/arm side),
         // 3 slots of 2 channels each along the PCA9685 bay. Open to the
-        // rim — wires drop in from above, the lid closes the top.
+        // rim — wires drop in from above, the lid closes the top. The
+        // slots cut through the inner raceway wall too: the leads cross
+        // the USB channel (the cable lies below the slot sills) straight
+        // to the PCA9685 headers.
         for (i = [0 : 2])
             translate([pca_x + 6 + i * 18, -0.1, floor_t + 3])
-                cube([13, wall_t + 0.2, box_h]);
+                cube([13, bay_y + 0.2, box_h]);
         // punch-hole ventilation, both long walls + ESP32 bay far side
         for (zr = [0 : 2], xi = [0 : floor((box_l - 16) / punch_pitch_spine)]) {
             x = 8 + xi * punch_pitch_spine + (zr % 2) * punch_pitch_spine / 2;
