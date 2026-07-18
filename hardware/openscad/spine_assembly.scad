@@ -33,7 +33,7 @@ color("dimgray")                   // 1000uF electrolytic
 
 // ---- ESP32 devkit (on the tapered rails) ----------------------------
 esp_y0 = bay_y + (inner_w - esp32_pcb_w) / 2;
-esp_z0 = floor_t + esp32_pin_h;    // rail tops
+esp_z0 = floor_t + rail_h_spine;   // rail tops
 color("#233a5e")
     translate([esp_x, esp_y0, esp_z0])
         cube([esp32_pcb_l, esp32_pcb_w, 1.6]);
@@ -46,8 +46,14 @@ color("silver") {                  // RF can, antenna end up-arm
 }
 color("#222222")                   // pin rows hanging outside the rails
     for (y = [esp_y0 + 0.6, esp_y0 + esp32_pcb_w - 3.1])
-        translate([esp_x + 1, y, floor_t + 2])
-            cube([esp32_pcb_l - 2, 2.5, esp32_pin_h - 2]);
+        translate([esp_x + 1, y, esp_z0 - 6])
+            cube([esp32_pcb_l - 2, 2.5, 6]);
+// I2C hookup: a 4-way Dupont housing block on the down-facing pins
+// (GND / 3V3 / D21 SDA / D22 SCL, back row, divider end) — hangs in
+// the gap beside the rail and just clears the floor
+color("#333366")
+    translate([esp_x + 3, esp_y0 + esp32_pcb_w - 3.2, esp_z0 - 14])
+        cube([10.2, 2.9, 14]);
 
 // ---- XT60 power inlet (panel mount, entry wall) ---------------------
 pwr_y = bay_y + inner_w / 2;
@@ -97,7 +103,32 @@ color("#555555") {
           [esp_x - 6.5, esp_y0 + esp32_pcb_w / 2, esp_z0 + 3]], 4);
 }
 
-// ---- I2C ribbon: divider notch, far breakout row --------------------
-color("#8844cc") wire([[esp_x + 4, esp_y0 + esp32_pcb_w - 2, esp_z0 + 6],
-                       [pca_x + pca_pcb_l + 2, bay_y + inner_w / 2 + 4, box_h - 8],
+// ---- I2C ribbon: out of the Dupont block, over the divider notch ----
+color("#8844cc") wire([[esp_x + 8, esp_y0 + esp32_pcb_w - 2, esp_z0 - 13],
+                       [esp_x + 2, esp_y0 + esp32_pcb_w + 1, box_h - 10],
+                       [pca_x + pca_pcb_l + 2, bay_y + inner_w / 2 + 4, box_h - 10],
                        [pcb_x0 + pca_pcb_l - 3, pcb_y0 + 14, pcb_z0 + 6]], 3);
+
+// ---- servo leads: 3-wire trios onto channels 0-5 --------------------
+// Each MG996R lead (brown GND / red V+ / orange signal) presses onto a
+// vertical 3-pin column: GND row nearest the board edge, V+ middle,
+// signal inboard. Plugs stand upright side by side at 2.54 pitch from
+// channel 0; the trios bend forward and leave 2-2-2 through the three
+// front slots, crossing above the USB cable in the raceway.
+hdr_x0 = pcb_x0 + (pca_pcb_l - 41) / 2;   // channel 0 pin column
+module servo_lead(fx, tx) {
+    cols = ["#553311", "#cc2222", "#cc6600"];   // brown / red / orange
+    for (i = [0 : 2])
+        color(cols[i])
+            wire([[fx, pcb_y0 + 2 + 2.3 * i, pcb_z0 + 14.5],
+                  [(fx + tx) / 2, 12, 13 - i],
+                  [tx - 4 + 1.3 * i, 6, 8.5],
+                  [tx - 4 + 1.3 * i, -6, 7.5]], 1.6);
+}
+for (c = [0 : 5]) {
+    color("#111111")                          // plug housing on the pins
+        translate([hdr_x0 + c * 2.54 + 0.1, pcb_y0 + 0.7, pcb_z0 + 3.5])
+            cube([2.35, 8, 12]);
+    servo_lead(hdr_x0 + c * 2.54 + 1.27,
+               [18.5, 18.5, 36.5, 36.5, 54.5, 54.5][c] + (c % 2 == 0 ? -2 : 2));
+}

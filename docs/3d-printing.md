@@ -144,7 +144,11 @@ Lessons from the first printed set, designed back into the sources:
   ports — no separate slot on the GPIO side.
 - **ESP32 drops in freely**: the support rails moved inboard (4.5mm
   inset) and gained tapered tops — v1's rails caught the pin-header
-  bases and needed a shove.
+  bases and needed a shove. The rails are now 14mm tall and the spine
+  2mm taller (26mm) so the I2C hookup rides the ESP32's down-facing
+  pins: a Dupont housing hanging from the board's underside clears the
+  floor in the gap beside the rail — no soldering on the ESP32, and the
+  board stays replaceable.
 - **Proper 6V power inlet**: the bare-wire pass-through in the entry
   wall is now a panel-mount connector opening on the PCA9685 bay's
   entry edge, sized for an XT60E-M flag mount (parametric — adjust

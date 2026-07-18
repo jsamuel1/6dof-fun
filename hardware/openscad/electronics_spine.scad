@@ -42,10 +42,14 @@ inner_w     = max(esp32_pcb_w, pca_pcb_w) + 2 * fit_clearance;  // 29.4
 box_inner_l = entry_wall + pca_pcb_l + bay_gap + esp32_pcb_l + 4;
 box_l = box_inner_l + wall_t;
 box_w = inner_w + usb_chan_w + 3 * wall_t;
-// Height is governed by the PCA9685's servo plugs standing on their
-// vertical headers: board top 7.6 + pin/plug stack ~14 = ~21.6, plus
-// wire-bend room. 22 inner is the honest minimum with straight plugs.
-box_h = floor_t + 22;
+// Height is governed by two stacks:
+//   * PCA9685 servo plugs on their vertical headers: board top 7.6 +
+//     pin/plug stack ~14 = ~21.6, plus wire-bend room.
+//   * ESP32 on rails tall enough that Dupont housings (14 mm) on its
+//     down-facing pins clear the floor: board bottom at 16, USB-C plug
+//     body tops out ~22.5.
+// 24 inner covers both with margin.
+box_h = floor_t + 24;
 
 pca_x   = entry_wall;                        // PCA9685 bay start
 esp_x   = entry_wall + pca_pcb_l + bay_gap;  // ESP32 bay start
@@ -174,15 +178,17 @@ module spine_body() {
                    bay_y + inner_w / 2 + py * pca_hole_dw / 2,
                    floor_t])
             standoff(4, m25_pilot_d);
-    // ESP32 support rails (pins hang between them, breadboard-style).
-    // Inset 4.5 from the bay walls so the pin-header bases clear the
-    // plastic, and tapered to a 2 mm top so the board drops on without
-    // a fight (v1 at 3 mm inset needed a shove).
+    // ESP32 support rails. Inset 4.5 from the bay walls so the
+    // pin-header bases clear the plastic, and tapered to a 2 mm top so
+    // the board drops on without a fight (v1 at 3 mm inset needed a
+    // shove). 14 mm tall: the I2C connections ride the down-facing
+    // pins, and a Dupont housing (14 mm) hanging from the board's
+    // underside then clears the floor in the gap beside the rail.
     for (y = [bay_y + 4.5, bay_y + inner_w - 4.5 - rail_w_spine])
         translate([esp_x, y, floor_t])
             hull() {
                 cube([esp32_pcb_l - 4, rail_w_spine, 0.1]);
-                translate([0, rail_w_spine / 2 - 1, esp32_pin_h - 0.1])
+                translate([0, rail_w_spine / 2 - 1, rail_h_spine - 0.1])
                     cube([esp32_pcb_l - 4, 2, 0.1]);
             }
     }   // end union
@@ -218,6 +224,7 @@ module spine_body() {
 
 punch_pitch_spine = 5;
 rail_w_spine = 4;
+rail_h_spine = 14;   // board bottom: floor + 14 = Dupont housing length
 // Arm hole row (verified): pair-to-pair centre distance = 18/2 + 32 + 18/2.
 ear_pair_pitch   = 50;
 ear_group_center = box_l / 2;   // ear group centred on the spine
