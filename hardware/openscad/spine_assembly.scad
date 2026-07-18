@@ -31,28 +31,28 @@ color("dimgray")                   // 1000uF electrolytic
     translate([pcb_x0 + 45, pcb_y0 + pca_pcb_w - 5.5, pcb_z0 + 1.6])
         cylinder(h = 11.5, d = 8.5);
 
-// ---- ESP32 devkit (on the tapered rails) ----------------------------
+// ---- ESP32 devkit — UPSIDE DOWN (pins up) on the end pads -----------
 esp_y0 = bay_y + (inner_w - esp32_pcb_w) / 2;
-esp_z0 = floor_t + rail_h_spine;   // rail tops
+esp_z0 = floor_t + esp_pad_h + 3.2;   // board underside: pads + can height
 color("#233a5e")
     translate([esp_x, esp_y0, esp_z0])
         cube([esp32_pcb_l, esp32_pcb_w, 1.6]);
-color("silver") {                  // RF can, antenna end up-arm
+color("silver") {                  // RF can BELOW the board, on its pad
     translate([esp_x + esp32_pcb_l - 18, esp_y0 + (esp32_pcb_w - 16) / 2,
-               esp_z0 + 1.6])
-        cube([16, 16, 3.1]);
-    translate([esp_x - 1.5, esp_y0 + esp32_pcb_w / 2 - 4.5, esp_z0 + 1.6])
+               esp_z0 - 3.2])
+        cube([16, 16, 3.2]);
+    translate([esp_x - 1.5, esp_y0 + esp32_pcb_w / 2 - 4.5, esp_z0 - 3.2])
         cube([7, 9, 3.2]);         // USB-C receptacle, faces the plug bay
 }
-color("#222222")                   // pin rows hanging outside the rails
+color("#222222")                   // pin rows standing UP off the board
     for (y = [esp_y0 + 0.6, esp_y0 + esp32_pcb_w - 3.1])
-        translate([esp_x + 1, y, esp_z0 - 6])
+        translate([esp_x + 1, y, esp_z0 + 1.6])
             cube([esp32_pcb_l - 2, 2.5, 6]);
-// I2C hookup: a 4-way Dupont housing block on the down-facing pins
-// (GND / 3V3 / D21 SDA / D22 SCL, back row, divider end) — hangs in
-// the gap beside the rail and just clears the floor
+// I2C hookup: 4-way Dupont block pressed onto the up-facing pins
+// (GND / 3V3 / D21 SDA / D22 SCL, back row, divider end) — reachable
+// from above even with the board installed
 color("#333366")
-    translate([esp_x + 3, esp_y0 + esp32_pcb_w - 3.2, esp_z0 - 14])
+    translate([esp_x + 3, esp_y0 + esp32_pcb_w - 3.2, esp_z0 + 1.6])
         cube([10.2, 2.9, 14]);
 
 // ---- XT60 power inlet (panel mount, entry wall) ---------------------
@@ -95,18 +95,17 @@ color("#111111") wire([[entry_wall, pwr_y + 3, pwr_z],
 color("#555555") {
     translate([-6, wall_t + usb_chan_w / 2, floor_t + 2.2])
         rotate([0, 90, 0]) cylinder(h = esp_x - bay_gap + wall_t + 9, d = 4);
-    translate([esp_x - 11.5, esp_y0 + esp32_pcb_w / 2 - 5, esp_z0 + 0.6])
+    translate([esp_x - 11.5, esp_y0 + esp32_pcb_w / 2 - 5, esp_z0 - 4.3])
         cube([10.5, 10, 5.4]);     // USB-C plug body in the bay
     // cable turning from the raceway through the mouth to the plug
     wire([[esp_x - bay_gap + wall_t + 7, wall_t + usb_chan_w / 2, floor_t + 2.2],
-          [esp_x - 8, bay_y + 6, floor_t + 4],
-          [esp_x - 6.5, esp_y0 + esp32_pcb_w / 2, esp_z0 + 3]], 4);
+          [esp_x - 8, bay_y + 6, floor_t + 3],
+          [esp_x - 6.5, esp_y0 + esp32_pcb_w / 2, esp_z0 - 1.6]], 4);
 }
 
 // ---- I2C ribbon: out of the Dupont block, over the divider notch ----
-color("#8844cc") wire([[esp_x + 8, esp_y0 + esp32_pcb_w - 2, esp_z0 - 13],
-                       [esp_x + 2, esp_y0 + esp32_pcb_w + 1, box_h - 10],
-                       [pca_x + pca_pcb_l + 2, bay_y + inner_w / 2 + 4, box_h - 10],
+color("#8844cc") wire([[esp_x + 8, esp_y0 + esp32_pcb_w - 2, esp_z0 + 15],
+                       [pca_x + pca_pcb_l + 2, bay_y + inner_w / 2 + 4, box_h - 9],
                        [pcb_x0 + pca_pcb_l - 3, pcb_y0 + 14, pcb_z0 + 6]], 3);
 
 // ---- servo leads: 3-wire trios onto channels 0-5 --------------------
