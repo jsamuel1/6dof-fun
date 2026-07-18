@@ -197,17 +197,8 @@ module spine_body() {
             translate([3, 11.2, box_h - 3])
                 rotate([-90, 0, 0]) cylinder(h = 34.6, r = 3);
         }
-        // nose top: exterior is a CURVED quarter-round (R11.4) — the
-        // top surface sweeps down and the end face continues the curve
-        // tangentially below it (no facet crease). The interior roof
-        // stays a straight 45° ceiling underneath for printability.
-        difference() {
-            translate([box_l - 11.5, -0.1, box_h - 11.4])
-                cube([12, box_w + 0.2, 11.6]);
-            translate([box_l - 11.4, -0.2, box_h - 11.4])
-                rotate([-90, 0, 0])
-                    cylinder(h = box_w + 0.4, r = 11.4, $fn = 96);
-        }
+        // (the nose's curved crown is cut in the OUTER difference — it
+        // has to shave the separately-unioned roof piece too)
 
         // inner raceway wall: a LOW straight curb (8 mm) — it only has
         // to keep the USB cable in its channel. Wires arrive from above
@@ -300,6 +291,18 @@ module spine_body() {
                 for (ox = [-2, 2])
                     translate([ox, 0, 0])
                         cylinder(h = box_h + 0.2, d = m3_free_d);
+    // nose top: exterior is a CURVED quarter-round (R11.4) — the top
+    // surface sweeps down and the end face continues the curve
+    // tangentially below it (no facet crease). Cut HERE so it shaves
+    // walls AND the unioned interior roof; the roof's 45° ceiling
+    // stays underneath for printability.
+    difference() {
+        translate([box_l - 11.5, -0.1, box_h - 11.4])
+            cube([12, box_w + 0.2, 11.6]);
+        translate([box_l - 11.4, -0.2, box_h - 11.4])
+            rotate([-90, 0, 0])
+                cylinder(h = box_w + 0.4, r = 11.4, $fn = 96);
+    }
     // symmetric relief at BOTH pair centres: circular head recess with
     // an elongated nut through-slot in its middle — either end deals
     // with either the screw heads or the screw tip + nut
