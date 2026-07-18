@@ -182,8 +182,10 @@ Lessons from the first printed set, designed back into the sources:
   divider; the USB cable stays behind the curb). v1's full-height
   inner walls boxed in the USB plug bay.
 - **Streamlined outside**: the box is only full-height where the
-  interior needs it. The whole front tier (the cable trough)
-  drops to 13mm, and the **ESP32 nose section is centred on the arm's
+  interior needs it. The whole wiring tier — cable trough, USB entry and the three
+  servo-lead slots — drops to 13mm and sits on the BACK face (the
+  board's servo-header side), so every wire enters and leaves on one
+  side and the front is a single clean tall wall, and the **ESP32 nose section is centred on the arm's
   mount line**, both long faces sweeping in to it with rounded plan
   blends. The long top edges, nose and entry edges carry proper
   round-overs (convex, upward-facing — they print clean, unlike a

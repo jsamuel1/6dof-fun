@@ -11,7 +11,7 @@ include <electronics_spine.scad>   // emits the body (default part)
 
 // ---- PCA9685 (pin-clearance off the entry wall) ---------------------
 pcb_x0 = pca_bx0 + 0.5;
-pcb_y0 = bay_y + (inner_w - pca_pcb_w) / 2;
+pcb_y0 = bay_yw + (inner_w - pca_pcb_w) / 2;   // mirrored-shell world y
 pcb_z0 = floor_t + 4;              // standoff tops
 color("forestgreen")
     translate([pcb_x0, pcb_y0, pcb_z0])
@@ -81,7 +81,7 @@ color("#333366")
             cube([2.54, 2.6, 14]);
 
 // ---- XT60 power inlet (panel mount, entry wall) ---------------------
-pwr_y = bay_y + inner_w / 2;
+pwr_y = box_w - bay_y - inner_w / 2;   // mirrored-shell world y
 color("gold") {
     translate([0.3, pwr_y - pwr_pock_w / 2 + 0.5, pwr_z - pwr_pock_h / 2 + 0.5])
         cube([pwr_panel_t + 1.4, pwr_pock_w - 1, pwr_pock_h - 1]);  // flange
@@ -117,25 +117,25 @@ color("#111111") wire([[-12, pwr_y + 2, pwr_z], [-24, pwr_y + 2, pwr_z - 2],
 // internal run drops from the raised inlet, passing ABOVE the board's
 // entry-end pins, then along the FRONT band via the inline pair
 color("red") wire([[12, pwr_y - 3, pwr_z],
-                   [pca_bx0 + 2, pwr_y - 6, 13.5],
+                   [pca_bx0 + 2, pwr_y - 5, 13.5],
                    [pcb_x0 + 2, pcb_y0 + 6, pcb_z0 + 6.5],
                    [pcb_x0 + 21, pcb_y0 + 6, pcb_z0 + 6.5],
                    [pcb_x0 + 30, pcb_y0 + 4, pcb_z0 + 3]]);
 color("#111111") wire([[12, pwr_y + 3, pwr_z],
-                       [pca_bx0 + 2, pwr_y - 4, 14.5],
+                       [pca_bx0 + 2, pwr_y - 3, 14.5],
                        [pcb_x0 + 2, pcb_y0 + 8, pcb_z0 + 8.5],
                        [pcb_x0 + 21, pcb_y0 + 8, pcb_z0 + 8.5],
                        [pcb_x0 + 36, pcb_y0 + 4, pcb_z0 + 3]]);
 
 // ---- USB-C run: entry port -> raceway -> plug bay -> ESP32 ----------
 color("#555555") {
-    translate([-6, wall_t + usb_chan_w / 2, floor_t + 2.2])
+    translate([-6, box_w - wall_t - usb_chan_w / 2, floor_t + 2.2])
         rotate([0, 90, 0]) cylinder(h = esp_x - bay_gap + wall_t + 9, d = 4);
     translate([esp_x - 11.5, esp_y0 + esp32_pcb_w / 2 - 5, esp_z0 - 4.3])
         cube([10.5, 10, 5.4]);     // USB-C plug body in the bay
     // cable turning from the raceway through the mouth to the plug
-    wire([[esp_x - bay_gap + wall_t + 7, wall_t + usb_chan_w / 2, floor_t + 2.2],
-          [esp_x - 8, bay_y + 6, floor_t + 3],
+    wire([[esp_x - bay_gap + wall_t + 7, box_w - wall_t - usb_chan_w / 2, floor_t + 2.2],
+          [esp_x - 8, 31, floor_t + 3],
           [esp_x - 6.5, esp_y0 + esp32_pcb_w / 2, esp_z0 - 1.6]], 4);
 }
 
@@ -197,7 +197,7 @@ for (i = [0 : 3])
 tag("V+",  [pcb_x0 + 28.5, pcb_y0 + 8.7, 24], 2.2, "#cc2222");
 tag("GND", [pcb_x0 + 34.5, pcb_y0 + 8.7, 24], 2.2, "#222222");
 tag("6V IN (XT60)", [-30, pwr_y + 7, 18], 2.4);
-tag("USB-C", [esp_x - 13, esp_y0 - 3.5, 20], 2.2);
+tag("USB-C", [esp_x - 13, esp_y0 + esp32_pcb_w + 2, 20], 2.2);
 
 // ---- servo leads: 3-wire trios onto channels 0-5 --------------------
 // Each MG996R lead (brown GND / red V+ / orange signal) presses onto a

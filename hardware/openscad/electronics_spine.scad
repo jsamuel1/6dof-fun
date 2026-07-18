@@ -133,14 +133,15 @@ module spine_body() {
         // USB-C cable port (into the channel)
         translate([-0.1, wall_t + usb_chan_w / 2 - 4.5, floor_t])
             cube([entry_wall + 0.2, 9, box_h]);
-        // servo lead slots: BACK wall. With the board's I2C end
-        // connector facing the ESP32, the 16-channel header row lands
-        // on the BACK edge (board chirality) — so the leads exit
-        // straight out the back. 3 slots of 2 channels each, open to
-        // the rim (wires drop in from above, the lid closes the top).
+        // servo lead slots in the LOW tier wall, 3 slots of 2 channels
+        // each, open to the rim — leads drop in from above and cross
+        // the curb to the headers. NOTE: the shell is EMITTED MIRRORED
+        // (see sp_mirror at the bottom), so in the real part this low
+        // wiring tier — trough, USB entry and these slots — is the
+        // BACK face, matching the board's servo-header edge; the front
+        // is one clean tall wall.
         for (i = [0 : 2])
-            translate([pca_bx0 + 5.5 + i * 18, box_w - wall_t - 0.1,
-                       floor_t + 3])
+            translate([pca_bx0 + 5.5 + i * 18, -0.1, floor_t + 3])
                 cube([13, wall_t + 0.2, box_h]);
         // punch-hole ventilation on the tall back wall (the low front
         // tier is all slots and open trough — no punches needed there)
@@ -433,22 +434,32 @@ module spine_to_print() {
                 children();
 }
 
+// The shell is modelled with the wiring tier at y = 0 but EMITTED
+// MIRRORED about the box centreline: in the real part all wire exits
+// (trough, USB entry, servo-lead slots) face the BACK — the same side
+// as the PCA9685's servo-header edge — and the front is a clean tall
+// wall. World-y of the (mirrored) PCA bay, for the assembly model:
+bay_yw = box_w - bay_y - inner_w;
+module sp_mirror() {
+    translate([0, box_w, 0]) mirror([0, 1, 0]) children();
+}
+
 plate_dx = 0;
 plate_dy = 0;
 translate([plate_dx, plate_dy, 0]) {
-    if (part == "body") spine_body();
-    if (part == "lid") spine_lid();
-    if (part == "art_arm") spine_art_body("A");
-    if (part == "art_berry") spine_art_body("B");
+    if (part == "body") sp_mirror() spine_body();
+    if (part == "lid") sp_mirror() spine_lid();
+    if (part == "art_arm") sp_mirror() spine_art_body("A");
+    if (part == "art_berry") sp_mirror() spine_art_body("B");
     // print-orientation plate variants (lid face-down, skirt up, art
     // coplanar) positioned beside the body for the Bambu project
-    if (part == "lid_plate") spine_to_print() spine_lid();
-    if (part == "art_arm_plate") spine_to_print() spine_art_body("A");
-    if (part == "art_berry_plate") spine_to_print() spine_art_body("B");
+    if (part == "lid_plate") spine_to_print() sp_mirror() spine_lid();
+    if (part == "art_arm_plate") spine_to_print() sp_mirror() spine_art_body("A");
+    if (part == "art_berry_plate") spine_to_print() sp_mirror() spine_art_body("B");
     if (part == "both") {
-        spine_body();
-        translate([0, box_w + 12, 5]) spine_lid();
-        translate([0, box_w + 12, 5]) color("white") spine_art_body("A");
-    translate([0, box_w + 12, 5]) color("red") spine_art_body("B");
+        sp_mirror() spine_body();
+        translate([0, box_w + 12, 5]) sp_mirror() spine_lid();
+        translate([0, box_w + 12, 5]) color("white") sp_mirror() spine_art_body("A");
+        translate([0, box_w + 12, 5]) color("red") sp_mirror() spine_art_body("B");
     }
 }
