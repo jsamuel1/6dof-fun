@@ -148,15 +148,16 @@ Lessons from the first printed set, designed back into the sources:
 - **Pi case is one punch-row lower** (24mm inner) and the GPIO jumpers
   now exit through the same open-topped side opening as the power/HDMI
   ports — no separate slot on the GPIO side.
-- **ESP32 rides upside down (pins up)**: v1's rails caught the
-  pin-header bases and left no room for connectors on the down-facing
-  pins. Flipped, the board rests on two flat pads under its RF can and
-  USB-C receptacle, the bay walls guide its sides, and the I2C Dupont
-  block presses onto the pins from above — reachable with the board
-  installed, no soldering, board stays replaceable, and the spine keeps
-  its 24mm profile. Trade-off: the antenna faces the arm bracket
-  through the floor — watch `rssi` in `/arm/status` on the first
-  wireless soak and revisit if it suffers.
+- **ESP32 rides components-up on tall rails**: the board sits pins-down
+  on 14.5mm tapered rails (4.5mm inset clears the pin-header bases),
+  with the four I2C Dupont shells hanging pre-fitted from the hookup
+  pins in the rail-to-wall gap — they clear the floor by half a
+  millimetre, and the whole stack fits under the 24mm lid plane. Fit
+  the shells before dropping the board on. The antenna faces UP,
+  directly under the lid's hexagon vent (no RF penalty), the USB-C
+  plug rides high above the PCA9685's horizontal I2C housings, and
+  nothing above the board tops ~21mm. No soldering on the ESP32; the
+  board stays replaceable.
 - **Proper 6V power inlet**: the bare-wire pass-through in the entry
   wall is now a panel-mount connector opening on the PCA9685 bay's
   entry edge, sized for an XT60E-M flag mount (parametric — adjust

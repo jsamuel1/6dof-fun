@@ -50,34 +50,36 @@ color("dimgray")                   // 1000uF electrolytic
     translate([pcb_x0 + 45, pcb_y0 + 5.5, pcb_z0 + 1.6])
         cylinder(h = 11.5, d = 8.5);
 
-// ---- ESP32 devkit — UPSIDE DOWN (pins up) on the end pads -----------
+// ---- ESP32 devkit — pins DOWN on the tapered rails (components up:
+// antenna under the lid's hex vent) --------------------------------
 esp_y0 = esp_bay_y + (inner_w - esp32_pcb_w) / 2;
-esp_z0 = floor_t + esp_pad_h + 3.2;   // board underside: pads + can height
+esp_z0 = floor_t + esp_rail_h;     // board underside on the rail tops
 color("#233a5e")
     translate([esp_x, esp_y0, esp_z0])
         cube([esp32_pcb_l, esp32_pcb_w, 1.6]);
-color("silver") {                  // RF can BELOW the board, on its pad
+color("silver") {                  // RF can on TOP, antenna end up-arm
     translate([esp_x + esp32_pcb_l - 18, esp_y0 + (esp32_pcb_w - 16) / 2,
-               esp_z0 - 3.2])
+               esp_z0 + 1.6])
         cube([16, 16, 3.2]);
-    translate([esp_x - 1.5, esp_y0 + esp32_pcb_w / 2 - 4.5, esp_z0 - 3.2])
+    translate([esp_x - 1.5, esp_y0 + esp32_pcb_w / 2 - 4.5, esp_z0 + 1.6])
         cube([7, 9, 3.2]);         // USB-C receptacle, faces the plug bay
 }
-color("#222222")                   // 15-pin rows standing UP off the board
+color("#222222")                   // 15-pin rows hanging DOWN off the board
     for (y = [esp_y0 + 0.6, esp_y0 + esp32_pcb_w - 3.1])
-        translate([esp_x + 7, y, esp_z0 + 1.6])
+        translate([esp_x + 7, y, esp_z0 - 6])
             cube([38, 2.5, 6]);
 // I2C hookup on the REAL 30-pin layout: all four connections live on
-// the one row (the back row once the board is flipped), but scattered —
-// indexed from the antenna end: D23(1) D22(2) TX0 RX0 D21(5) ... GND(14)
-// 3V3(15). Individual Dupont shells drop onto each pin from above.
+// the one row (the back row), but scattered — indexed from the antenna
+// end: D23(1) D22(2) TX0 RX0 D21(5) ... GND(14) 3V3(15). Individual
+// Dupont shells hang below the board, pre-fitted before it drops onto
+// the rails; they clear the floor by 0.5.
 esp_row_y = esp_y0 + esp32_pcb_w - 1.85;      // back pin row centre
 function esp_pin_x(i) = esp_x + esp32_pcb_l - 8.2 - i * 2.54;
 i2c_esp_idx = [13, 1, 4, 14];   // GND, D22 SCL, D21 SDA, 3V3 (0-based)
 color("#333366")
     for (k = [0 : 3])
         translate([esp_pin_x(i2c_esp_idx[k]) - 1.27, esp_row_y - 1.3,
-                   esp_z0 + 1.6])
+                   esp_z0 - 14])
             cube([2.54, 2.6, 14]);
 
 // ---- XT60 power inlet (panel mount, entry wall) ---------------------
@@ -133,12 +135,12 @@ color("#111111") wire([[pcb_x0 + 27.5, pcb_y0 + 7, pcb_z0 + 5.7],
 color("#555555") {
     translate([-6, box_w - wall_t - usb_chan_w / 2, floor_t + 2.2])
         rotate([0, 90, 0]) cylinder(h = esp_x - bay_gap + wall_t + 9, d = 4);
-    translate([esp_x - 11.5, esp_y0 + esp32_pcb_w / 2 - 5, esp_z0 - 4.3])
+    translate([esp_x - 11.5, esp_y0 + esp32_pcb_w / 2 - 5, esp_z0 + 0.5])
         cube([10.5, 10, 5.4]);     // USB-C plug body in the bay
     // cable turning from the raceway through the mouth to the plug
     wire([[esp_x - bay_gap + wall_t + 7, box_w - wall_t - usb_chan_w / 2, floor_t + 2.2],
-          [esp_x - 8, 31, floor_t + 3],
-          [esp_x - 6.5, esp_y0 + esp32_pcb_w / 2, esp_z0 - 1.6]], 4);
+          [esp_x - 8, 31, floor_t + 6],
+          [esp_x - 6.5, esp_y0 + esp32_pcb_w / 2, esp_z0 + 3.2]], 4);
 }
 
 // ---- I2C harness: ESP32 pins (up) -> PCA9685 far breakout row -------
@@ -161,10 +163,10 @@ for (i = [0 : 3])
         // (>= 1.6 spacing, wire dia 1.5) to its own pin's shell.
         wire([[pcb_x0 + pca_pcb_l + 14.6,
                pcb_y0 + pca_pcb_w - 6.8 - i2c_pin[i] * 2.54, 10.1],
-              [esp_x - 2, 27 + 2.2 * (i - 1.5), 15],
-              [esp_x + 4, 31.4 + 0.9 * i, 19 + 0.6 * i],
-              [esp_pin_x(i2c_esp_idx[i]) - 3, 31.4 + 0.9 * i, 20 + 0.6 * i],
-              [esp_pin_x(i2c_esp_idx[i]), esp_row_y, esp_z0 + 15.8]], 1.5);
+              [esp_x - 2, 27 + 2.2 * (i - 1.5), 9.5],
+              [esp_x + 4, 31.6 + 0.9 * i, 4.5 + 0.6 * i],
+              [esp_pin_x(i2c_esp_idx[i]) - 3, 31.6 + 0.9 * i, 3.6 + 0.6 * i],
+              [esp_pin_x(i2c_esp_idx[i]), esp_row_y - 0.6, esp_z0 - 13.2]], 1.5);
 
 // ---- destination labels (floating, read from above) -----------------
 module tag(t, pos, s = 2.4, c = "#222222", rot = 0)

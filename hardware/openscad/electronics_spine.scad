@@ -51,9 +51,10 @@ box_w = inner_w + usb_chan_w + 3 * wall_t;
 // Height is governed by two stacks, both ~21.5:
 //   * PCA9685 servo plugs on their vertical headers: board top 7.6 +
 //     pin/plug stack ~14, plus wire-bend room.
-//   * ESP32 riding PINS-UP on end pads: pad 2.6 + RF can 3.2 +
-//     PCB 1.6 + Dupont housings on the pins 14 = 21.4.
-// 22 inner covers both.
+//   * ESP32 pins-DOWN on 14.5 rails (Dupont housings below the
+//     board): board top 18.1, USB-C plug tops out ~23 under the
+//     24-high lid plane.
+// 22 inner (lid underside at 24) covers both.
 box_h = floor_t + 22;
 
 pca_x   = entry_wall;                        // PCA9685 bay start (void)
@@ -236,11 +237,11 @@ module spine_body() {
     // end. 45° prints support-free; every tall component (the D21/D22
     // Dupont shells, ~23.4) ends before the slope starts.
     intersection() {
-        translate([box_l - 13.4, esp_bay_y - 0.1, box_h])
+        translate([box_l - 8.6, esp_bay_y - 0.1, box_h])
             rotate([0, 45, 0])
-                cube([19, inner_w + 0.2, 19]);
-        translate([box_l - 13.5, esp_bay_y - 0.2, 0])
-            cube([13.6, inner_w + 0.4, box_h]);
+                cube([14, inner_w + 0.2, 14]);
+        translate([box_l - 8.7, esp_bay_y - 0.2, 0])
+            cube([8.8, inner_w + 0.4, box_h]);
     }
     // interior relief pads at BOTH pair centres: give the head recess
     // its depth whichever end faces the screw heads. 2.4 above the
@@ -262,22 +263,23 @@ module spine_body() {
                    bay_y + inner_w / 2 + py * pca_hole_dw / 2,
                    floor_t])
             standoff(4, m25_pilot_d);
-    // ESP32 seat — the board rides UPSIDE DOWN (pins up): the I2C
-    // Dupont block pushes onto the pins from above, reachable even
-    // with the board installed, and nothing hangs below the board to
-    // fight the floor. It rests on two flat pads under its two hard
-    // metal components (RF can and USB-C receptacle, both 3.2 tall);
-    // the bay walls guide the board sides (0.25 play), end posts stop
-    // it drifting up-arm. Trade-off: antenna faces the arm bracket —
-    // watch RSSI in /arm/status on the first wireless soak.
-    translate([esp_x + 0.2, esp_bay_y + inner_w / 2 - 6, floor_t])
-        cube([9, 12, esp_pad_h]);                       // USB-C end pad
-    translate([esp_x + esp32_pcb_l - 19, esp_bay_y + inner_w / 2 - 9, floor_t])
-        cube([18, 18, esp_pad_h]);                      // RF-can pad
+    // ESP32 seat — the board rides pins-DOWN (components up, antenna
+    // under the lid's hex vent). Tapered rails, 14.5 tall: the four
+    // I2C Dupont housings hang pre-fitted from the hookup pins in the
+    // gap between rail and bay wall, clearing the floor by 0.5; the
+    // pin-header bases clear the 4.5 rail inset; the USB-C plug rides
+    // high, above the PCA9685's horizontal I2C housings.
+    for (y = [esp_bay_y + 4.5, esp_bay_y + inner_w - 8.5])
+        translate([esp_x, y, floor_t])
+            hull() {
+                cube([esp32_pcb_l - 4, 4, 0.1]);
+                translate([0, 1, esp_rail_h - 0.1])
+                    cube([esp32_pcb_l - 4, 2, 0.1]);
+            }
     for (sy = [0, 1])                                   // up-arm end stops
         translate([esp_x + esp32_pcb_l + 0.35,
                    esp_bay_y + 0.5 + sy * (inner_w - 5.5), floor_t])
-            cube([2.5, 5, 10]);
+            cube([2.5, 5, esp_rail_h + 2]);
     }   // end union
 
     // ---- cuts through EVERYTHING (floor + pad + rails) ----------------
@@ -301,11 +303,11 @@ module spine_body() {
     // walls AND the unioned interior roof; the roof's 45° ceiling
     // stays underneath for printability.
     difference() {
-        translate([box_l - 11.5, -0.1, box_h - 11.4])
-            cube([12, box_w + 0.2, 11.6]);
-        translate([box_l - 11.4, -0.2, box_h - 11.4])
+        translate([box_l - 6.7, -0.1, box_h - 6.6])
+            cube([7.2, box_w + 0.2, 6.8]);
+        translate([box_l - 6.6, -0.2, box_h - 6.6])
             rotate([-90, 0, 0])
-                cylinder(h = box_w + 0.4, r = 11.4, $fn = 96);
+                cylinder(h = box_w + 0.4, r = 6.6, $fn = 96);
     }
     // symmetric relief at BOTH hardware positions (52 from the row
     // centre): circular head recess with an elongated nut through-slot
@@ -325,7 +327,8 @@ module spine_body() {
 }
 
 punch_pitch_spine = 5;
-esp_pad_h = 2.6;   // ESP32 end-pad height; USB-C plug then clears the floor
+esp_rail_h = 14.5;   // ESP32 rail height: board bottom at 16.5 —
+                     // a 14mm Dupont housing below clears the floor
 // Arm hole row (verified): pair-to-pair centre distance = 18/2 + 32 + 18/2.
 ear_pair_pitch   = 50;
 // Mount row CENTRED on the spine: the arm's seam sits mid-row, so a
@@ -339,12 +342,12 @@ ear_group_center = box_l / 2;
 // wall band, feet onto the low curb between the servo-lead windows;
 // back edge at the round-over crest) jogging in to a narrower, centred
 // rectangle over the ESP32 nose.
-lid_x0 = 0;      lid_x1 = box_l - 13.4;        // ends at the nose roof
+lid_x0 = 0;      lid_x1 = box_l - 8.6;         // ends at the nose roof
 lid_y0 = 11.9;   lid_y1 = 43.4;                // PCA section edges
 lid_ey0 = esp_bay_y - wall_t + 0.5;            // 6.2 — ESP section edges
 lid_ey1 = esp_bay_y + inner_w + wall_t - 2.2;  // 37.7
 lid_jx  = esp_x;                               // outline jog position
-hex_cx = esp_x + 33;  hex_cy = box_w / 2;  // WiFi vent, over the RF can
+hex_cx = esp_x + 37;  hex_cy = box_w / 2;  // WiFi vent, over the RF can
 hex_d  = 16;                               // across corners
 
 // The shared motif at a finer pitch to suit the narrow lid; the '#'
