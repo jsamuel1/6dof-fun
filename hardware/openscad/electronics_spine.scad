@@ -78,9 +78,10 @@ pwr_z       = 10;     // connector centre height
 // Keep the seam screw's tip trimmed near-flush with its nut: a <=4 mm
 // stack clears the PCA9685 header tails / ESP32 underside at any end.
 head_recess_d     = 18;    // covers centre screw + washer + bolt-circle heads
+                           // (VERIFIED 2026-07-18: widest hardware <16)
 head_recess_depth = 3.0;   // proudest head ~2.5 -> 0.5 air
 head_pad_d        = 24;    // interior pad giving the recess its depth
-nut_slot_w        = 9;     // M3 nut (6.9 a/c) + clearance
+nut_slot_w        = 9;     // M3 nut confirmed: 6.9 a/c + clearance
 nut_slot_l        = 13;    // width + 4 mm travel (mount-slot match);
                            // tips just kiss the mount slots — harmless,
                            // the washered mount screws bridge the notch
