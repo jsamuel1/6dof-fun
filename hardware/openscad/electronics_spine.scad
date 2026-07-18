@@ -31,7 +31,8 @@ part = "body";
 
 // --- boards (from esp32_mount.scad / pca9685_mount.scad) -------------
 esp32_pcb_l = 52.0;   esp32_pcb_w = 28.9;   esp32_pin_h = 9.0;
-esp_hole_dl = 46.5;   esp_hole_dw = 23.3;   // corner screw holes  *** MEASURE ME ***
+esp_hole_dl = 46.5;   esp_hole_dw = 23.3;   // corner screw holes
+                      // (ruler-verified 2026-07-18; fit check confirms)
 pca_pcb_l   = 62.5;   pca_pcb_w   = 25.4;
 pca_hole_dl = 56.0;   pca_hole_dw = 19.0;   pca_hole_off_l = (pca_pcb_l - 56.0) / 2;
 
