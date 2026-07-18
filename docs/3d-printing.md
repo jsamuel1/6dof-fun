@@ -121,3 +121,29 @@ filament 2, raspberry = filament 3). Configured for the P2S: 0.4 nozzle,
 black lid / white arm / red raspberry; map the slots, slice, print. The TPU 95A feet
 (`hardware/stl/pi4_case_feet.stl`) print as a separate job — TPU doesn't
 co-plate with PETG.
+
+The project is a generated artifact: rebuild it after any `.scad` change
+with `./hardware/make_print_project.sh` (needs OpenSCAD and
+BambuStudio's CLI; the script bakes plate positions, filament mapping,
+bed type, and colours).
+
+### v2 fit-check revisions
+
+Lessons from the first printed set, designed back into the sources:
+
+- **No supports, no bridges**: every wall opening on both enclosures is
+  now open-topped — the *lid* closes the top of each port/slot instead
+  of the base bridging over it.
+- **Pi lid snaps on** (v1's friction skirt wouldn't stay down): ramped
+  bumps on the skirt click into small windows through the walls; press a
+  fingernail into a window to release. The skirt is also relieved over
+  the USB/Ethernet stack and the port-side opening — the "indent" that
+  had to be hand-cut into the v1 lid.
+- **Pi case is one punch-row lower** (24mm inner) and the GPIO jumpers
+  now exit through the same open-topped side opening as the power/HDMI
+  ports — no separate slot on the GPIO side.
+- **Spine underside clears the arm's own hardware**: a circular recess
+  over the proud screw heads at the datum hole pair, and an elongated
+  through-slot at the floating pair where the screw tip + nut stand
+  taller (elongated to match the ±2mm seam-movement slots). Put washers
+  under the two datum M3 heads inside the spine.

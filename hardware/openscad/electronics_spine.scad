@@ -51,7 +51,30 @@ pca_x   = entry_wall;                        // PCA9685 bay start
 esp_x   = entry_wall + pca_pcb_l + bay_gap;  // ESP32 bay start
 bay_y   = 2 * wall_t + usb_chan_w;           // bays sit past the USB channel
 
+// --- arm-face hardware relief (underside) ---------------------------
+// The arm's own assembly screws stand proud of its mounting face, right
+// at the centre of each 18 mm hole pair (the servo bolt-circle).
+//   datum end (entry pair):   screw heads / washer -> shallow circular
+//     recess in a locally thickened floor pad; the spine still bears on
+//     the arm face around it.
+//   floating end (slotted pair): screw tip + nut -> elongated
+//     through-slot, so the taller stack passes into the bay and can
+//     travel with the frame-seam movement (matches the +-2 mm mount
+//     slots). Nut clears under the ESP32, which rides 9 mm up on rails.
+// Confirm on the PLA fit check; adjust these if a protrusion differs.
+head_recess_d     = 18;    // covers centre screw + washer + bolt-circle heads
+head_recess_depth = 3.0;   // proudest head ~2.5 -> 0.5 air
+head_pad_d        = 24;    // interior pad giving the recess its depth
+nut_slot_w        = 9;     // M3 nut (6.9 a/c) + clearance
+nut_slot_l        = 13;    // width + 4 mm travel (mount-slot match);
+                           // tips just kiss the mount slots — harmless,
+                           // the washered mount screws bridge the notch
+// NOTE: use washers under the two datum M3 heads inside — the recess
+// lobe clips the hole edge, so the washer spreads load onto the pad.
+
 module spine_body() {
+  difference() {
+    union() {
     difference() {
         rounded_plate(box_l, box_w, box_h);
         // hollow: main cavity (both bays + divider gap)
@@ -60,18 +83,20 @@ module spine_body() {
         // hollow: USB cable channel from entry to the ESP32 bay mouth
         translate([pca_x, wall_t, floor_t])
             cube([esp_x - entry_wall + 6, usb_chan_w, box_h]);
-        // divider stays: re-add below. Entry-wall cable ports:
+        // divider stays: re-add below. Entry-wall cable ports —
+        // OPEN-TOPPED notches (lid closes them: no bridges, no supports)
         // 6V pair port (into PCA9685 bay, floor level)
         translate([-0.1, bay_y + inner_w / 2 - 5, floor_t])
-            cube([entry_wall + 0.2, 10, 8]);
+            cube([entry_wall + 0.2, 10, box_h]);
         // USB-C cable port (into the channel)
         translate([-0.1, wall_t + usb_chan_w / 2 - 4.5, floor_t])
-            cube([entry_wall + 0.2, 9, 12]);
+            cube([entry_wall + 0.2, 9, box_h]);
         // servo lead slots: FRONT wall (away from the bracket/arm side),
-        // 3 slots of 2 channels each along the PCA9685 bay
+        // 3 slots of 2 channels each along the PCA9685 bay. Open to the
+        // rim — wires drop in from above, the lid closes the top.
         for (i = [0 : 2])
             translate([pca_x + 6 + i * 18, -0.1, floor_t + 3])
-                cube([13, wall_t + 0.2, 12]);
+                cube([13, wall_t + 0.2, box_h]);
         // punch-hole ventilation, both long walls + ESP32 bay far side
         for (zr = [0 : 2], xi = [0 : floor((box_l - 16) / punch_pitch_spine)]) {
             x = 8 + xi * punch_pitch_spine + (zr % 2) * punch_pitch_spine / 2;
@@ -93,31 +118,16 @@ module spine_body() {
                     cylinder(h = wall_t + 0.2, d = 2.2);
 
         // raceway mouth: open the channel wall across the USB plug bay so
-        // the cable turns 90 deg from the plug into the raceway
+        // the cable turns 90 deg from the plug into the raceway. Open to
+        // the rim (the divider carries the structure there).
         translate([esp_x - bay_gap + wall_t + 3, wall_t + usb_chan_w - 0.1, floor_t])
-            cube([bay_gap - wall_t - 5, 2 * wall_t + 0.2 - 2.2, 16]);
+            cube([bay_gap - wall_t - 5, 2 * wall_t + 0.2 - 2.2, box_h]);
 
         // USB access opening: front wall, directly in line with the plug
         // bay and raceway mouth — a straight finger/cable tunnel from
-        // outside to the USB-C port (like the servo slots, but taller)
+        // outside to the USB-C port. Open to the rim, lid closes the top.
         translate([esp_x - bay_gap + wall_t + 3, -0.1, floor_t + 2])
-            cube([bay_gap - wall_t - 5, wall_t + 0.2, 16]);
-
-        // CENTRE-LINE mounting: M3 holes through the floor matched to the
-        // arm's *<-18->*<-32->*<-18->* row, so the spine sits ON the arm
-        // instead of cantilevering off an edge ear. Screw heads sit inside
-        // on the floor (2 mm tall) — clear of the PCA9685 standoffs (4 mm)
-        // and the ESP32's edge pin rows. Entry-end pair round (datum);
-        // up-arm pair slotted ±2 mm for the seam.
-        for (dx = [-ear_pair_pitch / 2 - 9, -ear_pair_pitch / 2 + 9])
-            translate([ear_group_center + dx, box_w / 2, -0.1])
-                cylinder(h = floor_t + 0.2, d = m3_free_d);
-        for (dx = [ear_pair_pitch / 2 - 9, ear_pair_pitch / 2 + 9])
-            translate([ear_group_center + dx, box_w / 2, -0.1])
-                hull()
-                    for (ox = [-2, 2])
-                        translate([ox, 0, 0])
-                            cylinder(h = floor_t + 0.2, d = m3_free_d);
+            cube([bay_gap - wall_t - 5, wall_t + 0.2, box_h]);
     }
     // divider wall on the PCA side of the gap — the gap itself is the
     // USB-C plug bay (plug seats into the ESP32 across it)
@@ -127,6 +137,10 @@ module spine_body() {
         translate([pca_x + pca_pcb_l + 0.9, bay_y + inner_w / 2 - 8, box_h - 14])
             cube([wall_t + 2.2, 16, 20]);
     }
+    // interior pad under the PCA9685: gives the head recess its depth.
+    // 2.4 tall — stays 1.6 under the board (standoffs are 4).
+    translate([ear_group_center - ear_pair_pitch / 2, box_w / 2, 0])
+        cylinder(h = head_recess_depth + 1.4, d = head_pad_d);
     // PCA9685 corner standoffs (M2.5)
     for (px = [0, 1], py = [0, 1])
         translate([pca_x + pca_hole_off_l + fit_clearance + px * pca_hole_dl,
@@ -137,8 +151,35 @@ module spine_body() {
     for (y = [bay_y + 3, bay_y + inner_w - 3 - rail_w_spine])
         translate([esp_x, y, floor_t])
             cube([esp32_pcb_l - 4, rail_w_spine, esp32_pin_h]);
-    // (mounting is through the floor centre-line — see the M3 hole cuts
-    // in the difference() above; no edge ears on this enclosure)
+    }   // end union
+
+    // ---- cuts through EVERYTHING (floor + pad + rails) ----------------
+    // CENTRE-LINE mounting: M3 holes through the floor matched to the
+    // arm's *<-18->*<-32->*<-18->* row, so the spine sits ON the arm
+    // instead of cantilevering off an edge ear. Entry-end pair round
+    // (datum, pierces the head-relief pad — use washers inside);
+    // up-arm pair slotted ±2 mm for the seam.
+    for (dx = [-ear_pair_pitch / 2 - 9, -ear_pair_pitch / 2 + 9])
+        translate([ear_group_center + dx, box_w / 2, -0.1])
+            cylinder(h = box_h + 0.2, d = m3_free_d);
+    for (dx = [ear_pair_pitch / 2 - 9, ear_pair_pitch / 2 + 9])
+        translate([ear_group_center + dx, box_w / 2, -0.1])
+            hull()
+                for (ox = [-2, 2])
+                    translate([ox, 0, 0])
+                        cylinder(h = floor_t + 0.2, d = m3_free_d);
+    // head recess: underside circular pocket at the datum pair centre
+    translate([ear_group_center - ear_pair_pitch / 2, box_w / 2, -0.1])
+        cylinder(h = head_recess_depth + 0.1, d = head_recess_d);
+    // nut slot: elongated through-cut at the slotted pair centre; the
+    // screw tip + nut ride up between the ESP32 rails, under the board
+    translate([ear_group_center + ear_pair_pitch / 2, box_w / 2, -0.1])
+        hull()
+            for (ox = [-(nut_slot_l - nut_slot_w) / 2,
+                        (nut_slot_l - nut_slot_w) / 2])
+                translate([ox, 0, 0])
+                    cylinder(h = floor_t + 0.2, d = nut_slot_w);
+  }
 }
 
 punch_pitch_spine = 5;

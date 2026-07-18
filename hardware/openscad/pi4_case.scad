@@ -2,9 +2,11 @@
 // pi4_case.scad — protective perforated case for the Raspberry Pi 4B.
 //
 // Two printed parts (export with -D 'part="base"' / -D 'part="lid"'):
-//   base — full-height walls, punch-hole ventilation, port cutouts,
+//   base — full-height walls, punch-hole ventilation, port cutouts
+//          (open-topped: the lid closes them, so nothing bridges),
 //          M2.5 standoffs on the Pi's 58 x 49 pattern.
-//   lid  — friction-fit skirt, fine punch-hole field across the top;
+//   lid  — snap-fit skirt (ramped bumps click into wall windows),
+//          fine punch-hole field across the top;
 //          the holes SKIP a pixel-art silhouette of a robot arm holding
 //          a raspberry, so the artwork appears as solid material in a
 //          perforated field (ventilation + decoration, no tiny bridges).
@@ -33,11 +35,26 @@ pi_standoff_h = 6;      // SD body + solder clearance under the PCB
 pcb_t         = 1.6;
 
 // --- Case body -----------------------------------------------------------
-inner_h   = 28;          // floor top -> lid underside (USB stack ~26)
+inner_h   = 24;          // floor top -> lid underside; one punch row lower
+                         // than v1 (28) — the USB stack pokes out the open
+                         // end cutout, so the lid only needs to clear its top
 case_l    = pi_pcb_l + 2 * (wall_t + fit_clearance);
 case_w    = pi_pcb_w + 2 * (wall_t + fit_clearance);
 wall_h    = floor_t + inner_h;
 pcb_top_z = floor_t + pi_standoff_h + pcb_t;
+
+// --- Snap-fit lid --------------------------------------------------------
+// v1's friction skirt wouldn't stay down. The lid now carries ramped
+// snap bumps on the skirt that click into windows through the walls:
+// two on the GPIO-side wall, one on the port-side wall past the port
+// opening, one on the SD end. Press a fingernail into a window to pop
+// the lid off.
+snap_z_c    = wall_h - 3.8;   // window/bump centre height
+snap_win_w  = 9;   snap_win_h  = 2.6;
+snap_bump_w = 8;   snap_bump_h = 2.1;   snap_bump_p = 1.0;  // proudness
+snap_xs_far = [case_l * 0.3, case_l * 0.7];   // GPIO-side wall (y = max)
+snap_x_near = 75;             // port-side wall, clear of the port opening
+snap_y_end  = case_w / 2;     // SD end wall (x = 0)
 
 // --- Punch-hole pattern --------------------------------------------------
 punch_d     = 2.2;      // "fine" holes
@@ -61,18 +78,36 @@ art_cols = art_motif_cols;
 // Base
 // =====================================================================
 module wall_punches() {
-    // punch the two long walls with horizontal holes
-    for (zr = [0 : 3])
+    // punch the two long walls with horizontal holes (3 rows for the
+    // lower case); the top row skips around the snap windows
+    for (zr = [0 : 2])
         for (xi = [0 : 17]) {
             x = 8 + xi * punch_pitch + (zr % 2 == 0 ? 0 : punch_pitch / 2);
             z = 13 + zr * punch_pitch;
-            if (x < case_l - 8) {
+            near_snap = zr == 2 &&
+                (abs(x - snap_x_near) < 7 ||
+                 abs(x - snap_xs_far[0]) < 7 || abs(x - snap_xs_far[1]) < 7);
+            if (x < case_l - 8 && !near_snap) {
                 for (y = [-0.1, case_w - wall_t - 0.1])
                     translate([x, y, z])
                         rotate([-90, 0, 0])
                             cylinder(h = wall_t + 0.2, d = punch_d);
             }
         }
+}
+
+module snap_windows() {
+    // catch windows for the lid's snap bumps, through each wall
+    for (sx = snap_xs_far)   // GPIO-side wall
+        translate([sx - snap_win_w / 2, case_w - wall_t - 0.1,
+                   snap_z_c - snap_win_h / 2])
+            cube([snap_win_w, wall_t + 0.2, snap_win_h]);
+    translate([snap_x_near - snap_win_w / 2, -0.1,   // port-side wall
+               snap_z_c - snap_win_h / 2])
+        cube([snap_win_w, wall_t + 0.2, snap_win_h]);
+    translate([-0.1, snap_y_end - snap_win_w / 2,    // SD end wall
+               snap_z_c - snap_win_h / 2])
+        cube([wall_t + 0.2, snap_win_w, snap_win_h]);
 }
 
 module base() {
@@ -110,19 +145,19 @@ module base() {
         translate([case_l - wall_t - 0.1, wall_t + 2, pcb_top_z - 3])
             cube([wall_t + 0.2, case_w - 2 * wall_t - 4, wall_h]);
 
-        // USB-C + 2x micro-HDMI + audio (long side, y = 0): low cutout
+        // USB-C + 2x micro-HDMI + audio (long side, y = 0): open-topped
+        // to the rim — no bridge to print, the lid closes the top, and
+        // the GPIO jumper wires exit over the ports through this same
+        // opening (no separate slot on the GPIO side any more)
         translate([wall_t + fit_clearance + 4, -0.1, pcb_top_z - 1.5])
-            cube([56, wall_t + 0.2, 10]);
+            cube([56, wall_t + 0.2, wall_h]);
 
         // SD end (x = 0): slot at floor level, card sits under the PCB
         translate([-0.1, case_w / 2 - 8, floor_t + 1])
             cube([wall_t + 0.2, 16, 5]);
 
-        // GPIO side (y = max): ribbon slot from the rim down
-        translate([case_l / 2 - 27, case_w - wall_t - 0.1, wall_h - 9])
-            cube([54, wall_t + 0.2, 9.1]);
-
         wall_punches();
+        snap_windows();
     }
 }
 
@@ -167,13 +202,26 @@ module feet() {
 // =====================================================================
 // Lid
 // =====================================================================
+// Ramped snap bump, built for a wall along y = 0: sits on the skirt's
+// outer face, protrudes -y, ramp below (cams over the rim as the lid
+// presses on), square catch ledge on top (resists pull-off).
+module snap_bump() {
+    hull() {
+        translate([-snap_bump_w / 2, 0, -snap_bump_h / 2])
+            cube([snap_bump_w, 0.1, snap_bump_h]);
+        translate([-snap_bump_w / 2, -snap_bump_p, snap_bump_h / 2 - 0.7])
+            cube([snap_bump_w, 0.1, 0.7]);
+    }
+}
+
 module lid() {
     art_w = art_cols * art_pitch;
     art_h = art_rows * art_pitch;
+    bump_z = snap_z_c - wall_h;   // lid plate underside sits on the rim
     difference() {
         union() {
             rounded_plate(case_l, case_w, lid_t);
-            // friction skirt, sits inside the walls
+            // locating skirt, sits inside the walls
             difference() {
                 translate([wall_t + fit_clearance, wall_t + fit_clearance, -skirt_h])
                     rounded_plate(case_l - 2 * (wall_t + fit_clearance),
@@ -185,7 +233,24 @@ module lid() {
                                   case_w - 2 * (wall_t + fit_clearance + skirt_t),
                                   skirt_h + 0.2, corner_r - 1);
             }
+            // snap bumps, mirroring the base's windows
+            translate([snap_x_near, wall_t + fit_clearance, bump_z])
+                snap_bump();                                  // port side
+            for (sx = snap_xs_far)
+                translate([sx, case_w - wall_t - fit_clearance, bump_z])
+                    rotate([0, 0, 180]) snap_bump();          // GPIO side
+            translate([wall_t + fit_clearance, snap_y_end, bump_z])
+                rotate([0, 0, -90]) snap_bump();              // SD end
         }
+        // skirt relief over the base's rim-reaching openings — designed
+        // in this time instead of hand-cut: the USB/Ethernet stack and
+        // the port-side opening (ports + GPIO wire exit) pass under the
+        // lid plate with no skirt in the way
+        translate([case_l - wall_t - fit_clearance - skirt_t - 0.1,
+                   wall_t + 2, -skirt_h - 0.1])
+            cube([skirt_t + wall_t, case_w - 2 * wall_t - 4, skirt_h + 0.1]);
+        translate([wall_t + fit_clearance + 4, -0.1, -skirt_h - 0.1])
+            cube([56, wall_t + fit_clearance + skirt_t + 0.2, skirt_h + 0.1]);
         // through-cut for the two-colour artwork body
         translate([0, 0, -0.1]) scale([1, 1, 1.2]) art_body();
         // hole field with the artwork left solid; art block centred

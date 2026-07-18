@@ -20,3 +20,4 @@ host/calibration/captures/
 
 # Photo staging area — drop originals here; web-sized copies go to docs/img/
 images/
+result.json
