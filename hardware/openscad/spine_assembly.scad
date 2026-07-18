@@ -9,8 +9,8 @@
 
 include <electronics_spine.scad>   // emits the body (default part)
 
-// ---- PCA9685 (centred in its bay) -----------------------------------
-pcb_x0 = pca_x + 0.5;
+// ---- PCA9685 (pin-clearance off the entry wall) ---------------------
+pcb_x0 = pca_bx0 + 0.5;
 pcb_y0 = bay_y + (inner_w - pca_pcb_w) / 2;
 pcb_z0 = floor_t + 4;              // standoff tops
 color("forestgreen")
@@ -21,15 +21,23 @@ color("#222222") {                 // 16-channel servo headers, front edge
         cube([41, 8, 8]);
     translate([pcb_x0 + 27, pcb_y0 + pca_pcb_w / 2 - 3, pcb_z0 + 1.6])
         cube([7, 6, 1.2]);         // PCA9685 chip
-    translate([pcb_x0 + 1, pcb_y0 + 6, pcb_z0 + 1.6])
-        cube([2.5, 15.2, 8.5]);    // free entry-end breakout row (pins up)
+    // RIGHT-ANGLE 6-pin headers at both board ends, pins horizontal
+    // out past the edges (~6 mm at ~z 10)
+    translate([pcb_x0, pcb_y0 + 5.5, pcb_z0 + 1.6]) cube([2.5, 15.2, 2.5]);
+    translate([pcb_x0 + pca_pcb_l - 2.5, pcb_y0 + 5.5, pcb_z0 + 1.6])
+        cube([2.5, 15.2, 2.5]);
 }
+color("silver") {                  // the horizontal pin combs
+    translate([pcb_x0 - 6, pcb_y0 + 5.5, 9.7]) cube([6.2, 15.2, 0.7]);
+    translate([pcb_x0 + pca_pcb_l - 0.2, pcb_y0 + 5.5, 9.7])
+        cube([6.4, 15.2, 0.7]);
+}
+color("#333366")                   // I2C Dupont housings, plugged on
+    translate([pcb_x0 + pca_pcb_l + 0.4, pcb_y0 + 5.3, 8.5])
+        cube([14, 15.4, 3.0]);     // horizontally over the notched divider
 color("#1a4d1a")                   // old (dead-FET) terminal block
     translate([pcb_x0 + 28, pcb_y0 + pca_pcb_w - 8, pcb_z0 + 1.6])
         cube([10, 7.6, 10]);
-color("#111111")                   // far breakout row + I2C plug shells
-    translate([pcb_x0 + pca_pcb_l - 3.5, pcb_y0 + 5.5, pcb_z0 + 1.6])
-        cube([2.5, 15.2, 14]);
 color("silver") {                  // 16AWG solder joints: V+ and GND
     translate([pcb_x0 + 30, pcb_y0 + pca_pcb_w - 4, pcb_z0 + 2]) sphere(d = 3.2);
     translate([pcb_x0 + 36, pcb_y0 + pca_pcb_w - 4, pcb_z0 + 2]) sphere(d = 3.2);
@@ -73,10 +81,10 @@ color("gold") {
 
 // ---- inline XT60 service disconnect ---------------------------------
 // Lengthwise in the clear band along the board's back edge, between
-// the entry breakout row and the old terminal block; the servo header
-// strip along the front edge stays unobstructed.
+// the entry breakout header and the old terminal block; the servo
+// header strip along the front edge stays unobstructed.
 color("gold")
-    translate([pca_x + 4, pcb_y0 + pca_pcb_w - 9.5, pcb_z0 + 1.7])
+    translate([pcb_x0 + 3.5, pcb_y0 + pca_pcb_w - 9.5, pcb_z0 + 1.7])
         cube([24, 8.2, 8]);
 
 // ---- 6V feed: panel tails -> inline pair -> V+/GND through-holes ----
@@ -95,15 +103,17 @@ color("red") wire([[-12, pwr_y - 2, pwr_z], [-24, pwr_y - 2, pwr_z - 2],
                    [-32, pwr_y - 1, pwr_z - 6]], 2.4);
 color("#111111") wire([[-12, pwr_y + 2, pwr_z], [-24, pwr_y + 2, pwr_z - 2],
                        [-32, pwr_y + 3, pwr_z - 6]], 2.4);
-color("red") wire([[entry_wall, pwr_y - 3, pwr_z],
-                   [pca_x + 3, pwr_y + 3, pcb_z0 + 9],
-                   [pca_x + 5, pcb_y0 + pca_pcb_w - 6, pcb_z0 + 6.5],
-                   [pca_x + 27, pcb_y0 + pca_pcb_w - 6, pcb_z0 + 6.5],
+// internal run drops from the raised inlet, passing ABOVE the board's
+// entry-end pins, then along the back band via the inline pair
+color("red") wire([[12, pwr_y - 3, pwr_z],
+                   [pca_bx0 + 2, pwr_y + 3, 13.5],
+                   [pcb_x0 + 2, pcb_y0 + pca_pcb_w - 6, pcb_z0 + 6.5],
+                   [pcb_x0 + 21, pcb_y0 + pca_pcb_w - 6, pcb_z0 + 6.5],
                    [pcb_x0 + 30, pcb_y0 + pca_pcb_w - 4, pcb_z0 + 3]]);
-color("#111111") wire([[entry_wall, pwr_y + 3, pwr_z],
-                       [pca_x + 3, pwr_y + 5, pcb_z0 + 10],
-                       [pca_x + 5, pcb_y0 + pca_pcb_w - 8, pcb_z0 + 8.5],
-                       [pca_x + 27, pcb_y0 + pca_pcb_w - 8, pcb_z0 + 8.5],
+color("#111111") wire([[12, pwr_y + 3, pwr_z],
+                       [pca_bx0 + 2, pwr_y + 5, 14.5],
+                       [pcb_x0 + 2, pcb_y0 + pca_pcb_w - 8, pcb_z0 + 8.5],
+                       [pcb_x0 + 21, pcb_y0 + pca_pcb_w - 8, pcb_z0 + 8.5],
                        [pcb_x0 + 36, pcb_y0 + pca_pcb_w - 4, pcb_z0 + 3]]);
 
 // ---- USB-C run: entry port -> raceway -> plug bay -> ESP32 ----------
@@ -131,14 +141,17 @@ i2c_cols = ["#7a4a21", "#e07000", "#e8c520", "#2e9e3e"];
 i2c_pin  = [0, 2, 3, 4];   // positions on the PCA's 6-pin row
 for (i = [0 : 3])
     color(i2c_cols[i])
-        // flat 4-wide ribbon: 1.8 lateral spacing at every waypoint
-        // (wire dia 1.5), twisting from the x-aligned ESP32 block to
-        // the y-aligned PCA row — no shared points
-        wire([[esp_x + 4.3 + i * 2.54, esp_y0 + esp32_pcb_w - 1.7, esp_z0 + 15.8],
-              [esp_x - 6 + 1.8 * (i - 1.5), 34 + 0.6 * (i - 1.5), 20],
-              [pca_x + pca_pcb_l + 3, 34 + 1.8 * (i - 1.5), 21 - 0.4 * (i - 1.5)],
-              [pcb_x0 + pca_pcb_l - 2.2,
-               pcb_y0 + 6.8 + i2c_pin[i] * 2.54, pcb_z0 + 15.8]], 1.5);
+        // flat 4-wide ribbon: >=1.8 lateral spacing at every waypoint
+        // (wire dia 1.5). Leaves the horizontal housings on the PCA's
+        // right-angle pins (z ~10, over the notched divider and above
+        // the USB plug), swings up through the plug bay onto the
+        // ESP32's up-facing pin block.
+        wire([[pcb_x0 + pca_pcb_l + 14.6,
+               pcb_y0 + 6.8 + i2c_pin[i] * 2.54, 10.1],
+              [esp_x - 3, 27 + 2.2 * (i - 1.5), 15],
+              [esp_x + 1.5 + 1.9 * (i - 1.5), 31 + 1.5 * (i - 1.5), 20.5],
+              [esp_x + 4.3 + i * 2.54, esp_y0 + esp32_pcb_w - 1.7,
+               esp_z0 + 15.8]], 1.5);
 
 // ---- destination labels (floating, read from above) -----------------
 module tag(t, pos, s = 2.4, c = "#222222", rot = 0)
@@ -158,7 +171,7 @@ for (p = [0 : 5]) {
         pca_pin_used[p] == undef ? "#777777" : i2c_cols[pca_pin_used[p]]);
     if (pca_pin_used[p] != undef)
         color(i2c_cols[pca_pin_used[p]])
-            translate([pcb_x0 + pca_pcb_l - 2.2,
+            translate([pcb_x0 + pca_pcb_l + 4,
                        pcb_y0 + 6.8 + p * 2.54, 24])
                 cylinder(h = 0.6, d = 1.8);
 }
@@ -198,5 +211,5 @@ for (c = [0 : 5]) {
         translate([hdr_x0 + c * 2.54 + 0.1, pcb_y0 + 0.7, pcb_z0 + 3.5])
             cube([2.35, 8, 12]);
     servo_lead(hdr_x0 + c * 2.54 + 1.27,
-               [18.5, 18.5, 36.5, 36.5, 54.5, 54.5][c] + (c % 2 == 0 ? -2 : 2));
+               pca_bx0 + [12, 12, 30, 30, 48, 48][c] + (c % 2 == 0 ? -2 : 2));
 }

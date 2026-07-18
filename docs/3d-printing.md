@@ -155,6 +155,13 @@ Lessons from the first printed set, designed back into the sources:
   wall is now a panel-mount connector opening on the PCA9685 bay's
   entry edge, sized for an XT60E-M flag mount (parametric — adjust
   `pwr_*` in the spine source for a different connector).
+- **Right-angle end headers accounted for**: the PCA9685's 6-pin
+  breakouts point horizontally out past both board ends. The board
+  datum sits 7.5mm off the entry wall so the unused entry-end pins
+  float free, the XT60 inlet rides higher in the entry wall so its
+  body and solder cups pass above them, and the divider is notched so
+  the I2C Dupont housings plug straight on at the divider end —
+  crossing just above the USB-C plug (plug USB first, I2C second).
 - **Spine underside clears the arm's own hardware — either way round**:
   both hole-pair centres carry the same relief, a circular recess for
   proud screw heads with an elongated through-slot in its middle for a
