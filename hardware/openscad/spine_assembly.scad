@@ -131,11 +131,48 @@ i2c_cols = ["#7a4a21", "#e07000", "#e8c520", "#2e9e3e"];
 i2c_pin  = [0, 2, 3, 4];   // positions on the PCA's 6-pin row
 for (i = [0 : 3])
     color(i2c_cols[i])
+        // flat 4-wide ribbon: 1.8 lateral spacing at every waypoint
+        // (wire dia 1.5), twisting from the x-aligned ESP32 block to
+        // the y-aligned PCA row — no shared points
         wire([[esp_x + 4.3 + i * 2.54, esp_y0 + esp32_pcb_w - 1.7, esp_z0 + 15.8],
-              [esp_x - 6, 35, 20],
-              [pca_x + pca_pcb_l + 3, 36, 21],
+              [esp_x - 6 + 1.8 * (i - 1.5), 34 + 0.6 * (i - 1.5), 20],
+              [pca_x + pca_pcb_l + 3, 34 + 1.8 * (i - 1.5), 21 - 0.4 * (i - 1.5)],
               [pcb_x0 + pca_pcb_l - 2.2,
-               pcb_y0 + 6.8 + i2c_pin[i] * 2.54, pcb_z0 + 15.8]], 1.6);
+               pcb_y0 + 6.8 + i2c_pin[i] * 2.54, pcb_z0 + 15.8]], 1.5);
+
+// ---- destination labels (floating, read from above) -----------------
+module tag(t, pos, s = 2.4, c = "#222222", rot = 0)
+    color(c) translate(pos) rotate([0, 0, rot])
+        linear_extrude(0.6) text(t, size = s, halign = "left");
+// PCA9685 servo channels: numbers above the six plugs
+for (c = [0 : 5])
+    tag(str(c), [hdr_x0 + c * 2.54 + 0.4, pcb_y0 + 10, 24], 2.2, "white");
+tag("CH", [hdr_x0 - 4.5, pcb_y0 + 10, 24], 2.2, "white");
+// PCA9685 6-pin breakout row (divider end), pin 1 nearest the servo
+// headers; dots colour-matched to the wires on the used pins
+pca_pin_names = ["1 GND", "2 OE", "3 SCL", "4 SDA", "5 VCC", "6 V+"];
+pca_pin_used  = [0, undef, 1, 2, 3, undef];   // index into i2c_cols
+for (p = [0 : 5]) {
+    tag(pca_pin_names[p],
+        [pcb_x0 + pca_pcb_l - 15.5, pcb_y0 + 5.9 + p * 2.54, 24], 2.0,
+        pca_pin_used[p] == undef ? "#777777" : i2c_cols[pca_pin_used[p]]);
+    if (pca_pin_used[p] != undef)
+        color(i2c_cols[pca_pin_used[p]])
+            translate([pcb_x0 + pca_pcb_l - 2.2,
+                       pcb_y0 + 6.8 + p * 2.54, 24])
+                cylinder(h = 0.6, d = 1.8);
+}
+// ESP32 header pins carrying the I2C block (back row, divider end)
+esp_pin_names = ["GND", "3V3", "D21 SDA", "D22 SCL"];
+for (i = [0 : 3])
+    tag(esp_pin_names[i],
+        [esp_x + 5.2 + i * 2.54, esp_y0 + esp32_pcb_w + 2, 24.4], 2.0,
+        i2c_cols[i], 90);
+// power attachments
+tag("V+",  [pcb_x0 + 28.5, pcb_y0 + pca_pcb_w - 1, 24], 2.2, "#cc2222");
+tag("GND", [pcb_x0 + 34.5, pcb_y0 + pca_pcb_w - 1, 24], 2.2, "#222222");
+tag("6V IN (XT60)", [-30, pwr_y + 7, 18], 2.4);
+tag("USB-C", [esp_x - 13, esp_y0 - 3.5, 20], 2.2);
 
 // ---- servo leads: 3-wire trios onto channels 0-5 --------------------
 // Each MG996R lead (brown GND / red V+ / orange signal) presses onto a
@@ -145,13 +182,16 @@ for (i = [0 : 3])
 // front slots, crossing above the USB cable in the raceway.
 hdr_x0 = pcb_x0 + (pca_pcb_l - 41) / 2;   // channel 0 pin column
 module servo_lead(fx, tx) {
+    // three wires modelled at their real ~1.3 dia, held 1.5 apart at
+    // every waypoint — the flat ribbon twists from the vertical pin
+    // column to lie flat through the slot, never merging
     cols = ["#553311", "#cc2222", "#cc6600"];   // brown / red / orange
     for (i = [0 : 2])
         color(cols[i])
-            wire([[fx, pcb_y0 + 2 + 2.3 * i, pcb_z0 + 14.5],
-                  [(fx + tx) / 2, 12, 13 - i],
-                  [tx - 4 + 1.3 * i, 6, 8.5],
-                  [tx - 4 + 1.3 * i, -6, 7.5]], 1.6);
+            wire([[fx, pcb_y0 + 1.8 + 2.54 * i, pcb_z0 + 14.5],
+                  [(fx + tx) / 2 + 1.5 * (i - 1), 12, 12.5 - 1.5 * (i - 1)],
+                  [tx - 4.5 + 1.5 * i, 6, 8.5],
+                  [tx - 4.5 + 1.5 * i, -6, 7.5]], 1.3);
 }
 for (c = [0 : 5]) {
     color("#111111")                          // plug housing on the pins
