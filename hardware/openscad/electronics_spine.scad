@@ -125,17 +125,38 @@ module spine_body() {
         for (i = [0 : 2])
             translate([pca_x + 6 + i * 18, -0.1, floor_t + 3])
                 cube([13, wall_t + 0.2, box_h]);
-        // punch-hole ventilation, both long walls + ESP32 bay far side
+        // punch-hole ventilation on the tall back wall (the low front
+        // tier is all slots and open trough — no punches needed there)
         for (zr = [0 : 2], xi = [0 : floor((box_l - 16) / punch_pitch_spine)]) {
             x = 8 + xi * punch_pitch_spine + (zr % 2) * punch_pitch_spine / 2;
             z = box_h - 14 + zr * 4;
-            for (y = [-0.1, box_w - wall_t - 0.1])
-                translate([x, y, z]) rotate([-90, 0, 0])
-                    cylinder(h = wall_t + 0.2, d = 2.2);
+            translate([x, box_w - wall_t - 0.1, z]) rotate([-90, 0, 0])
+                cylinder(h = wall_t + 0.2, d = 2.2);
         }
-        // antenna end: generous opening (WiFi + USB-brick heat)
-        translate([box_l - wall_t - 0.1, bay_y + 4, floor_t + 4])
-            cube([wall_t + 0.2, inner_w - 8, box_h]);
+        // ESP32 bay front-band vents — the face exposed above the low
+        // ledge once the plan taper sweeps the front tier away
+        for (zr = [0, 1], xi = [0 : 7])
+            translate([96 + xi * 5.2 + zr * 2.6,
+                       wall_t + usb_chan_w - 0.6, 15 + zr * 4])
+                rotate([-90, 0, 0]) cylinder(h = 4, d = 2.2);
+
+        // ---- streamlining ------------------------------------------
+        // low front tier: everything forward of the bay wall band drops
+        // to 13 — the front wall only ever held slot sills and the
+        // cable trough, not height. Wires still drop in from above.
+        translate([-0.1, -0.1, 13])
+            cube([box_l + 0.2, 11.5, box_h]);
+        // plan taper: the low front ledge sweeps in at the ESP32 end
+        // instead of running to the nose as a block
+        translate([0, 0, -0.5]) linear_extrude(box_h + 1)
+            polygon([[92, -0.1], [146, -0.1], [146, 11.4], [118, 11.4]]);
+        // back long edge: 45-degree chamfer off the top edge
+        translate([-0.1, 43.4, box_h]) rotate([-45, 0, 0])
+            cube([box_l + 0.2, 14, 14]);
+        // nose: solid end wall (the old wide antenna opening is gone —
+        // the lid's hexagon vent takes over), top edge chamfered
+        translate([box_l - 2.5, -0.1, box_h]) rotate([0, 45, 0])
+            cube([14, box_w + 0.2, 14]);
 
         // inner raceway wall: a LOW straight curb (8 mm) — it only has
         // to keep the USB cable in its channel. Wires arrive from above
@@ -233,17 +254,27 @@ esp_pad_h = 2.6;   // ESP32 end-pad height; USB-C plug then clears the floor
 ear_pair_pitch   = 50;
 ear_group_center = box_l / 2;   // ear group centred on the spine
 
+// Lid outline: the streamlined body only has a flat rim over the tall
+// central section — front edge on the bay wall band (over the PCA run
+// the lid drops FEET onto the low curb between the servo-lead
+// windows), back edge on the back chamfer crest, nose end at the end
+// chamfer crest.
+lid_x0 = 0;      lid_x1 = box_l - 2.5;
+lid_y0 = 11.9;   lid_y1 = 43.4;
+hex_cx = 128.5;  hex_cy = 28.5;   // WiFi/heat vent, over the RF can
+hex_d  = 16;                      // across corners
+
 // The shared motif at a finer pitch to suit the narrow lid; the '#'
 // cells become the second-colour body (part="art"), the field around
 // them is uniform fine punch holes on the same grid.
 include <art_motif.scad>
-art_pitch_s  = 2.2;
-art_hole_s   = 1.5;
-lid_margin_s = 5;
-art_w_s = art_motif_cols * art_pitch_s;   // 52.8 along the spine
-art_h_s = art_motif_rows * art_pitch_s;   // 35.2 across it
-art_x0  = (box_l - art_w_s) / 2;
-art_y0  = (box_w - art_h_s) / 2;
+art_pitch_s  = 1.6;
+art_hole_s   = 1.15;
+lid_margin_s = 4;
+art_w_s = art_motif_cols * art_pitch_s;   // 38.4 along the spine
+art_h_s = art_motif_rows * art_pitch_s;   // 25.6 across it
+art_x0  = (lid_x0 + lid_x1 - art_w_s) / 2;
+art_y0  = (lid_y0 + lid_y1 - art_h_s) / 2;
 
 // true where grid cell (ix, iy) — indexed from the art block origin —
 // lands on a solid '#' motif cell
@@ -262,35 +293,42 @@ module spine_art_body(sym = "*") {
 }
 
 module spine_lid() {
-    ix_lo = -ceil((art_x0 - lid_margin_s) / art_pitch_s);
-    ix_hi = art_motif_cols - 1 + ceil((box_l - art_x0 - art_w_s - lid_margin_s) / art_pitch_s);
-    iy_lo = -ceil((art_y0 - lid_margin_s) / art_pitch_s);
-    iy_hi = art_motif_rows - 1 + ceil((box_w - art_y0 - art_h_s - lid_margin_s) / art_pitch_s);
+    ix_lo = -ceil((art_x0 - lid_x0 - lid_margin_s) / art_pitch_s);
+    ix_hi = art_motif_cols - 1 + ceil((lid_x1 - art_x0 - art_w_s - lid_margin_s) / art_pitch_s);
+    iy_lo = -ceil((art_y0 - lid_y0 - lid_margin_s) / art_pitch_s);
+    iy_hi = art_motif_rows - 1 + ceil((lid_y1 - art_y0 - art_h_s - lid_margin_s) / art_pitch_s);
     difference() {
         union() {
-            rounded_plate(box_l, box_w, lid_t_spine);
-            // skirt walls drop just inside the box rim
-            difference() {
-                translate([wall_t + fit_clearance, wall_t + fit_clearance, -5])
-                    rounded_plate(box_l - 2 * (wall_t + fit_clearance),
-                                  box_w - 2 * (wall_t + fit_clearance), 5,
-                                  corner_r - 1);
-                translate([wall_t + fit_clearance + 1.6,
-                           wall_t + fit_clearance + 1.6, -5.1])
-                    rounded_plate(box_l - 2 * (wall_t + fit_clearance + 1.6),
-                                  box_w - 2 * (wall_t + fit_clearance + 1.6),
-                                  5.2, corner_r - 1);
-            }
+            translate([lid_x0, lid_y0, 0])
+                rounded_plate(lid_x1 - lid_x0, lid_y1 - lid_y0, lid_t_spine, 2);
+            // locating skirt strips, dropping 5 inside the tall walls
+            // (the back strip skips the ESP32's I2C Dupont block)
+            translate([6.3, 14.0, -5]) cube([133.7 - 6.3, 1.6, 5]);
+            for (xr = [[6.3, 88], [101, 133.7]])
+                translate([xr[0], 39.8, -5]) cube([xr[1] - xr[0], 1.6, 5]);
+            translate([6.3, 14.0, -5]) cube([1.6, 27.4, 5]);
+            translate([138.4, 14.0, -5]) cube([1.6, 27.4, 5]);
+            // deep feet onto the low curb, between the servo-lead
+            // windows — they carry the lid's front edge over the PCA
+            // bay, where the curb is only 8 tall
+            for (xr = [[6.3, 11], [26, 29], [44, 47], [62, 68]])
+                translate([xr[0], 11.9, -15.8])
+                    cube([xr[1] - xr[0], 1.6, 15.8]);
         }
         // through-cut for the second-colour art body
         translate([0, 0, -0.1]) scale([1, 1, 1.2]) spine_art_body();
+        // hexagon WiFi/heat vent over the RF can
+        translate([hex_cx, hex_cy, -0.1]) rotate([0, 0, 30])
+            cylinder(h = lid_t_spine + 0.2, d = hex_d, $fn = 6);
         // fine punch-hole field on the motif grid, skipping solid cells
+        // and the hexagon zone
         for (iy = [iy_lo : iy_hi], ix = [ix_lo : ix_hi]) {
             px = art_x0 + (ix + 0.5) * art_pitch_s;
             py = art_y0 + (iy + 0.5) * art_pitch_s;
             if (!motif_solid(ix, iy) &&
-                px > lid_margin_s && px < box_l - lid_margin_s &&
-                py > lid_margin_s && py < box_w - lid_margin_s)
+                px > lid_x0 + lid_margin_s && px < lid_x1 - lid_margin_s &&
+                py > lid_y0 + lid_margin_s && py < lid_y1 - lid_margin_s &&
+                norm([px - hex_cx, py - hex_cy]) > hex_d / 2 + 1.5)
                 translate([px, py, -0.1])
                     cylinder(h = lid_t_spine + 0.2, d = art_hole_s);
         }

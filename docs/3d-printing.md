@@ -169,6 +169,16 @@ Lessons from the first printed set, designed back into the sources:
   the curb to the headers; the I2C ribbon crosses the divider, whose
   notch is gone). v1's full-height inner walls dead-ended the servo
   leads and boxed in the USB plug bay.
+- **Streamlined outside**: the box is only full-height where the
+  interior needs it. The whole front tier (servo slots + cable trough)
+  drops to 13mm, that low ledge sweeps away in plan at the ESP32 end
+  instead of running to the nose as a solid block, and the back and
+  nose top edges carry 45° chamfers (straight facets, not curves — a
+  curved cove over the open trough would print as an unsupported
+  ceiling). The old wide antenna opening is replaced by a solid
+  chamfered nose plus a hexagon vent through the lid over the RF can.
+  The narrower lid rides the tall central section, dropping four feet
+  onto the curb between the servo-lead windows.
 
 ### Component placement
 
