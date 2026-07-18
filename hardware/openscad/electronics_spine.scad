@@ -68,15 +68,15 @@ pwr_z       = 10;     // connector centre height
 
 // --- arm-face hardware relief (underside) ---------------------------
 // The arm's own assembly screws stand proud of its mounting face, right
-// at the centre of each 18 mm hole pair (the servo bolt-circle).
-//   datum end (entry pair):   screw heads / washer -> shallow circular
-//     recess in a locally thickened floor pad; the spine still bears on
-//     the arm face around it.
-//   floating end (slotted pair): screw tip + nut -> elongated
-//     through-slot, so the taller stack passes into the bay and can
-//     travel with the frame-seam movement (matches the +-2 mm mount
-//     slots). Nut clears under the ESP32, which rides 9 mm up on rails.
-// Confirm on the PLA fit check; adjust these if a protrusion differs.
+// at the centre of each 18 mm hole pair (the servo bolt-circle): screw
+// heads at one end, a screw tip + nut at the other. BOTH pair centres
+// get the full relief — a circular head recess (in a locally thickened
+// floor pad) with an elongated nut through-slot in its middle — so the
+// spine mounts either way round and either end absorbs either
+// protrusion. The slot's extra length matches the +-2 mm seam-movement
+// mount slots. Confirm on the PLA fit check; adjust if needed.
+// Keep the seam screw's tip trimmed near-flush with its nut: a <=4 mm
+// stack clears the PCA9685 header tails / ESP32 underside at any end.
 head_recess_d     = 18;    // covers centre screw + washer + bolt-circle heads
 head_recess_depth = 3.0;   // proudest head ~2.5 -> 0.5 air
 head_pad_d        = 24;    // interior pad giving the recess its depth
@@ -84,8 +84,8 @@ nut_slot_w        = 9;     // M3 nut (6.9 a/c) + clearance
 nut_slot_l        = 13;    // width + 4 mm travel (mount-slot match);
                            // tips just kiss the mount slots — harmless,
                            // the washered mount screws bridge the notch
-// NOTE: use washers under the two datum M3 heads inside — the recess
-// lobe clips the hole edge, so the washer spreads load onto the pad.
+// NOTE: use washers under all four M3 mount heads inside — the recess
+// lobes clip the hole edges, so the washer spreads load onto the pad.
 
 module spine_body() {
   difference() {
@@ -162,10 +162,14 @@ module spine_body() {
     // gone) — more finger room for the USB plug too.
     translate([pca_x + pca_pcb_l + 1, bay_y, floor_t])
         cube([wall_t + 2, inner_w, 10]);
-    // interior pad under the PCA9685: gives the head recess its depth.
-    // 2.4 tall — stays 1.6 under the board (standoffs are 4).
-    translate([ear_group_center - ear_pair_pitch / 2, box_w / 2, 0])
-        cylinder(h = head_recess_depth + 1.4, d = head_pad_d);
+    // interior relief pads at BOTH pair centres: give the head recess
+    // its depth whichever end faces the screw heads. 2.4 above the
+    // floor — under the PCA9685 that leaves ~1.5 to the board's header
+    // tails (PETG pad, harmless if they kiss); at the ESP32 end it
+    // merges with the board seat pads.
+    for (sx = [-1, 1])
+        translate([ear_group_center + sx * ear_pair_pitch / 2, box_w / 2, 0])
+            cylinder(h = head_recess_depth + 1.4, d = head_pad_d);
     // PCA9685 corner standoffs (M2.5) — hole pattern centred in the bay
     // (entry wall to divider face along x, full inner width along y)
     for (px = [-1, 1], py = [-1, 1])
@@ -205,18 +209,20 @@ module spine_body() {
             hull()
                 for (ox = [-2, 2])
                     translate([ox, 0, 0])
-                        cylinder(h = floor_t + 0.2, d = m3_free_d);
-    // head recess: underside circular pocket at the datum pair centre
-    translate([ear_group_center - ear_pair_pitch / 2, box_w / 2, -0.1])
-        cylinder(h = head_recess_depth + 0.1, d = head_recess_d);
-    // nut slot: elongated through-cut at the slotted pair centre; the
-    // screw tip + nut ride up between the ESP32 rails, under the board
-    translate([ear_group_center + ear_pair_pitch / 2, box_w / 2, -0.1])
-        hull()
-            for (ox = [-(nut_slot_l - nut_slot_w) / 2,
-                        (nut_slot_l - nut_slot_w) / 2])
-                translate([ox, 0, 0])
-                    cylinder(h = floor_t + 0.2, d = nut_slot_w);
+                        cylinder(h = box_h + 0.2, d = m3_free_d);
+    // symmetric relief at BOTH pair centres: circular head recess with
+    // an elongated nut through-slot in its middle — either end deals
+    // with either the screw heads or the screw tip + nut
+    for (sx = [-1, 1]) {
+        translate([ear_group_center + sx * ear_pair_pitch / 2, box_w / 2, -0.1])
+            cylinder(h = head_recess_depth + 0.1, d = head_recess_d);
+        translate([ear_group_center + sx * ear_pair_pitch / 2, box_w / 2, -0.1])
+            hull()
+                for (ox = [-(nut_slot_l - nut_slot_w) / 2,
+                            (nut_slot_l - nut_slot_w) / 2])
+                    translate([ox, 0, 0])
+                        cylinder(h = 8.1, d = nut_slot_w);
+    }
   }
 }
 

@@ -155,11 +155,14 @@ Lessons from the first printed set, designed back into the sources:
   wall is now a panel-mount connector opening on the PCA9685 bay's
   entry edge, sized for an XT60E-M flag mount (parametric — adjust
   `pwr_*` in the spine source for a different connector).
-- **Spine underside clears the arm's own hardware**: a circular recess
-  over the proud screw heads at the datum hole pair, and an elongated
-  through-slot at the floating pair where the screw tip + nut stand
-  taller (elongated to match the ±2mm seam-movement slots). Put washers
-  under the two datum M3 heads inside the spine.
+- **Spine underside clears the arm's own hardware — either way round**:
+  both hole-pair centres carry the same relief, a circular recess for
+  proud screw heads with an elongated through-slot in its middle for a
+  screw-tip-and-nut stack (elongated to match the ±2mm seam-movement
+  slots). Mount the spine in whichever orientation; either end absorbs
+  either protrusion. Keep the seam screw's tip trimmed near-flush with
+  its nut (≤4mm stack) and put washers under all four M3 mount heads
+  inside.
 - **Low inner walls**: the raceway wall is an 8mm curb and the bay
   divider a plain 10mm wall — with every opening top-loaded and the lid
   closing the roof, wires simply cross over them (servo leads step over
