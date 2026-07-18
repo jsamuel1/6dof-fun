@@ -39,7 +39,7 @@ color("dimgray")                   // 1000uF electrolytic
         cylinder(h = 11.5, d = 8.5);
 
 // ---- ESP32 devkit — UPSIDE DOWN (pins up) on the end pads -----------
-esp_y0 = bay_y + (inner_w - esp32_pcb_w) / 2;
+esp_y0 = esp_bay_y + (inner_w - esp32_pcb_w) / 2;
 esp_z0 = floor_t + esp_pad_h + 3.2;   // board underside: pads + can height
 color("#233a5e")
     translate([esp_x, esp_y0, esp_z0])
@@ -132,8 +132,8 @@ i2c_pin  = [0, 2, 3, 4];   // positions on the PCA's 6-pin row
 for (i = [0 : 3])
     color(i2c_cols[i])
         wire([[esp_x + 4.3 + i * 2.54, esp_y0 + esp32_pcb_w - 1.7, esp_z0 + 15.8],
-              [esp_x - 6, 40, 20],
-              [pca_x + pca_pcb_l + 3, 37.5, 21],
+              [esp_x - 6, 35, 20],
+              [pca_x + pca_pcb_l + 3, 36, 21],
               [pcb_x0 + pca_pcb_l - 2.2,
                pcb_y0 + 6.8 + i2c_pin[i] * 2.54, pcb_z0 + 15.8]], 1.6);
 

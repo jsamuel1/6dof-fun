@@ -171,14 +171,16 @@ Lessons from the first printed set, designed back into the sources:
   leads and boxed in the USB plug bay.
 - **Streamlined outside**: the box is only full-height where the
   interior needs it. The whole front tier (servo slots + cable trough)
-  drops to 13mm, that low ledge sweeps away in plan at the ESP32 end
-  instead of running to the nose as a solid block, and the back and
-  nose top edges carry 45° chamfers (straight facets, not curves — a
-  curved cove over the open trough would print as an unsupported
-  ceiling). The old wide antenna opening is replaced by a solid
-  chamfered nose plus a hexagon vent through the lid over the RF can.
-  The narrower lid rides the tall central section, dropping four feet
-  onto the curb between the servo-lead windows.
+  drops to 13mm, and the **ESP32 nose section is centred on the arm's
+  mount line**, both long faces sweeping in to it with rounded plan
+  blends. The long top edges, nose and entry edges carry proper
+  round-overs (convex, upward-facing — they print clean, unlike a
+  cove over the open trough, which is why the shape uses round-overs
+  rather than scooped curves). The old wide antenna opening is a solid
+  rounded nose now, vented by a hexagon through the lid over the RF
+  can. The lid follows the body as a jogged plate: wide over the PCA
+  run (with four feet onto the curb between the servo-lead windows),
+  narrow and centred over the nose.
 
 ### Component placement
 

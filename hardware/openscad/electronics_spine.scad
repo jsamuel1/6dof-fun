@@ -53,6 +53,9 @@ box_h = floor_t + 22;
 pca_x   = entry_wall;                        // PCA9685 bay start
 esp_x   = entry_wall + pca_pcb_l + bay_gap;  // ESP32 bay start
 bay_y   = 2 * wall_t + usb_chan_w;           // bays sit past the USB channel
+esp_bay_y = box_w / 2 - inner_w / 2;         // ESP32 section CENTRED on the
+                                             // arm mount line — the nose
+                                             // tapers in from BOTH sides
 
 // --- 6V power inlet (entry wall, PCA bay) ---------------------------
 // Defaults fit an XT60E-M flag-style panel mount. For a different
@@ -93,9 +96,12 @@ module spine_body() {
     union() {
     difference() {
         rounded_plate(box_l, box_w, box_h);
-        // hollow: main cavity (both bays + divider gap)
+        // hollow: PCA9685 + plug bay cavity (raceway-side alignment)
         translate([pca_x, bay_y, floor_t])
-            cube([box_inner_l - entry_wall, inner_w, box_h]);
+            cube([esp_x - pca_x, inner_w, box_h]);
+        // hollow: ESP32 cavity, centred on the mount line
+        translate([esp_x, esp_bay_y, floor_t])
+            cube([box_inner_l - entry_wall - (esp_x - pca_x), inner_w, box_h]);
         // hollow: USB cable channel from entry to the ESP32 bay mouth
         translate([pca_x, wall_t, floor_t])
             cube([esp_x - entry_wall + 6, usb_chan_w, box_h]);
@@ -133,11 +139,10 @@ module spine_body() {
             translate([x, box_w - wall_t - 0.1, z]) rotate([-90, 0, 0])
                 cylinder(h = wall_t + 0.2, d = 2.2);
         }
-        // ESP32 bay front-band vents — the face exposed above the low
-        // ledge once the plan taper sweeps the front tier away
-        for (zr = [0, 1], xi = [0 : 7])
-            translate([96 + xi * 5.2 + zr * 2.6,
-                       wall_t + usb_chan_w - 0.6, 15 + zr * 4])
+        // ESP32 bay vents through both its (centred) side walls
+        for (yv = [esp_bay_y - wall_t - 0.6, esp_bay_y + inner_w + 0.1],
+             zr = [0, 1], xi = [0 : 7])
+            translate([96 + xi * 5.2 + zr * 2.6, yv, 15 + zr * 4])
                 rotate([-90, 0, 0]) cylinder(h = 4, d = 2.2);
 
         // ---- streamlining ------------------------------------------
@@ -145,18 +150,39 @@ module spine_body() {
         // to 13 — the front wall only ever held slot sills and the
         // cable trough, not height. Wires still drop in from above.
         translate([-0.1, -0.1, 13])
-            cube([box_l + 0.2, 11.5, box_h]);
-        // plan taper: the low front ledge sweeps in at the ESP32 end
-        // instead of running to the nose as a block
+            cube([88.3, 11.5, box_h]);
+        // plan tapers: BOTH long faces sweep in to the centred nose
+        // (rounded blends via offset)
         translate([0, 0, -0.5]) linear_extrude(box_h + 1)
-            polygon([[92, -0.1], [146, -0.1], [146, 11.4], [118, 11.4]]);
-        // back long edge: 45-degree chamfer off the top edge
-        translate([-0.1, 43.4, box_h]) rotate([-45, 0, 0])
-            cube([box_l + 0.2, 14, 14]);
-        // nose: solid end wall (the old wide antenna opening is gone —
-        // the lid's hexagon vent takes over), top edge chamfered
-        translate([box_l - 2.5, -0.1, box_h]) rotate([0, 45, 0])
-            cube([14, box_w + 0.2, 14]);
+            offset(r = 3) offset(delta = -3)
+                polygon([[88, -0.1], [118, esp_bay_y - wall_t],
+                         [146, esp_bay_y - wall_t], [146, -0.1]]);
+        translate([0, 0, -0.5]) linear_extrude(box_h + 1)
+            offset(r = 3) offset(delta = -3)
+                polygon([[90, box_w + 0.1], [116, esp_bay_y + inner_w + wall_t],
+                         [146, esp_bay_y + inner_w + wall_t], [146, box_w + 0.1]]);
+        // rounded top edges (round-over cutters: corner bar minus rod)
+        difference() {   // back long edge, R4
+            translate([-0.1, box_w - 4, box_h - 4]) cube([box_l + 0.2, 4.2, 4.1]);
+            translate([-0.2, box_w - 4, box_h - 4])
+                rotate([0, 90, 0]) cylinder(h = box_l + 0.4, r = 4);
+        }
+        difference() {   // nose end edge, R4 (solid nose: the old wide
+                         // antenna opening is gone, the lid's hexagon
+                         // vent takes over)
+            translate([box_l - 4, -0.1, box_h - 4]) cube([4.1, box_w + 0.2, 4.1]);
+            translate([box_l - 4, -0.2, box_h - 4])
+                rotate([-90, 0, 0]) cylinder(h = box_w + 0.4, r = 4);
+        }
+        difference() {   // front tier edge, R3
+            translate([-0.1, -0.1, 10]) cube([88.4, 3.2, 3.2]);
+            translate([-0.2, 3, 10]) rotate([0, 90, 0]) cylinder(h = 88.6, r = 3);
+        }
+        difference() {   // entry-end top edge, R3
+            translate([-0.1, 11.3, box_h - 3]) cube([3.2, 34.4, 3.1]);
+            translate([3, 11.2, box_h - 3])
+                rotate([-90, 0, 0]) cylinder(h = 34.6, r = 3);
+        }
 
         // inner raceway wall: a LOW straight curb (8 mm) — it only has
         // to keep the USB cable in its channel. Wires arrive from above
@@ -182,8 +208,8 @@ module spine_body() {
     // straight wall: it shields the plug bay and locates the boards,
     // and the I2C ribbon simply crosses over the top (the old notch is
     // gone) — more finger room for the USB plug too.
-    translate([pca_x + pca_pcb_l + 1, bay_y, floor_t])
-        cube([wall_t + 2, inner_w, 10]);
+    translate([pca_x + pca_pcb_l + 1, esp_bay_y, floor_t])
+        cube([wall_t + 2, bay_y + inner_w - esp_bay_y, 10]);
     // interior relief pads at BOTH pair centres: give the head recess
     // its depth whichever end faces the screw heads. 2.4 above the
     // floor — under the PCA9685 that leaves ~1.5 to the board's header
@@ -207,13 +233,13 @@ module spine_body() {
     // the bay walls guide the board sides (0.25 play), end posts stop
     // it drifting up-arm. Trade-off: antenna faces the arm bracket —
     // watch RSSI in /arm/status on the first wireless soak.
-    translate([esp_x + 0.2, bay_y + inner_w / 2 - 6, floor_t])
+    translate([esp_x + 0.2, esp_bay_y + inner_w / 2 - 6, floor_t])
         cube([9, 12, esp_pad_h]);                       // USB-C end pad
-    translate([esp_x + esp32_pcb_l - 19, bay_y + inner_w / 2 - 9, floor_t])
+    translate([esp_x + esp32_pcb_l - 19, esp_bay_y + inner_w / 2 - 9, floor_t])
         cube([18, 18, esp_pad_h]);                      // RF-can pad
     for (sy = [0, 1])                                   // up-arm end stops
         translate([esp_x + esp32_pcb_l + 0.35,
-                   bay_y + 0.5 + sy * (inner_w - 5.5), floor_t])
+                   esp_bay_y + 0.5 + sy * (inner_w - 5.5), floor_t])
             cube([2.5, 5, 10]);
     }   // end union
 
@@ -255,25 +281,28 @@ ear_pair_pitch   = 50;
 ear_group_center = box_l / 2;   // ear group centred on the spine
 
 // Lid outline: the streamlined body only has a flat rim over the tall
-// central section — front edge on the bay wall band (over the PCA run
-// the lid drops FEET onto the low curb between the servo-lead
-// windows), back edge on the back chamfer crest, nose end at the end
-// chamfer crest.
+// sections — a wide rectangle over the PCA run (front edge on the bay
+// wall band, feet onto the low curb between the servo-lead windows;
+// back edge at the round-over crest) jogging in to a narrower, centred
+// rectangle over the ESP32 nose.
 lid_x0 = 0;      lid_x1 = box_l - 2.5;
-lid_y0 = 11.9;   lid_y1 = 43.4;
-hex_cx = 128.5;  hex_cy = 28.5;   // WiFi/heat vent, over the RF can
-hex_d  = 16;                      // across corners
+lid_y0 = 11.9;   lid_y1 = 43.4;                // PCA section edges
+lid_ey0 = esp_bay_y - wall_t + 0.5;            // 6.2 — ESP section edges
+lid_ey1 = esp_bay_y + inner_w + wall_t - 2.2;  // 37.7
+hex_cx = 128.5;  hex_cy = box_w / 2;  // WiFi/heat vent, over the RF can
+hex_d  = 16;                          // across corners
 
 // The shared motif at a finer pitch to suit the narrow lid; the '#'
 // cells become the second-colour body (part="art"), the field around
-// them is uniform fine punch holes on the same grid.
+// them is uniform fine punch holes on the same grid. Centred on the
+// wide PCA section of the lid.
 include <art_motif.scad>
-art_pitch_s  = 1.6;
-art_hole_s   = 1.15;
+art_pitch_s  = 1.45;
+art_hole_s   = 1.05;
 lid_margin_s = 4;
-art_w_s = art_motif_cols * art_pitch_s;   // 38.4 along the spine
-art_h_s = art_motif_rows * art_pitch_s;   // 25.6 across it
-art_x0  = (lid_x0 + lid_x1 - art_w_s) / 2;
+art_w_s = art_motif_cols * art_pitch_s;   // 34.8 along the spine
+art_h_s = art_motif_rows * art_pitch_s;   // 23.2 across it
+art_x0  = 26;
 art_y0  = (lid_y0 + lid_y1 - art_h_s) / 2;
 
 // true where grid cell (ix, iy) — indexed from the art block origin —
@@ -295,19 +324,25 @@ module spine_art_body(sym = "*") {
 module spine_lid() {
     ix_lo = -ceil((art_x0 - lid_x0 - lid_margin_s) / art_pitch_s);
     ix_hi = art_motif_cols - 1 + ceil((lid_x1 - art_x0 - art_w_s - lid_margin_s) / art_pitch_s);
-    iy_lo = -ceil((art_y0 - lid_y0 - lid_margin_s) / art_pitch_s);
+    iy_lo = -ceil((art_y0 - lid_ey0 - lid_margin_s) / art_pitch_s);
     iy_hi = art_motif_rows - 1 + ceil((lid_y1 - art_y0 - art_h_s - lid_margin_s) / art_pitch_s);
     difference() {
         union() {
-            translate([lid_x0, lid_y0, 0])
-                rounded_plate(lid_x1 - lid_x0, lid_y1 - lid_y0, lid_t_spine, 2);
+            // jogged plate: wide over the PCA run, narrow + centred
+            // over the nose, corners rounded
+            linear_extrude(lid_t_spine) offset(r = 2) offset(delta = -2)
+                polygon([[lid_x0, lid_y0], [86.5, lid_y0], [90, lid_ey0],
+                         [lid_x1, lid_ey0], [lid_x1, lid_ey1],
+                         [90, lid_ey1], [86.5, lid_y1], [lid_x0, lid_y1]]);
             // locating skirt strips, dropping 5 inside the tall walls
-            // (the back strip skips the ESP32's I2C Dupont block)
-            translate([6.3, 14.0, -5]) cube([133.7 - 6.3, 1.6, 5]);
-            for (xr = [[6.3, 88], [101, 133.7]])
-                translate([xr[0], 39.8, -5]) cube([xr[1] - xr[0], 1.6, 5]);
+            // (the nose back strip skips the ESP32's I2C Dupont block)
+            translate([6.3, 14.0, -5]) cube([85 - 6.3, 1.6, 5]);
+            translate([6.3, 39.8, -5]) cube([85 - 6.3, 1.6, 5]);
+            translate([90, esp_bay_y + 0.5, -5]) cube([43.7, 1.6, 5]);
+            translate([101, esp_bay_y + inner_w - 2.1, -5]) cube([32.7, 1.6, 5]);
             translate([6.3, 14.0, -5]) cube([1.6, 27.4, 5]);
-            translate([138.4, 14.0, -5]) cube([1.6, 27.4, 5]);
+            translate([138.4, esp_bay_y + 0.5, -5])
+                cube([1.6, inner_w - 1, 5]);
             // deep feet onto the low curb, between the servo-lead
             // windows — they carry the lid's front edge over the PCA
             // bay, where the curb is only 8 tall
@@ -321,13 +356,15 @@ module spine_lid() {
         translate([hex_cx, hex_cy, -0.1]) rotate([0, 0, 30])
             cylinder(h = lid_t_spine + 0.2, d = hex_d, $fn = 6);
         // fine punch-hole field on the motif grid, skipping solid cells
-        // and the hexagon zone
+        // and the hexagon zone; bounds follow the jogged outline
         for (iy = [iy_lo : iy_hi], ix = [ix_lo : ix_hi]) {
             px = art_x0 + (ix + 0.5) * art_pitch_s;
             py = art_y0 + (iy + 0.5) * art_pitch_s;
+            fy = px < 90 ? lid_y0 : lid_ey0;
+            by = px < 86.5 ? lid_y1 : lid_ey1;
             if (!motif_solid(ix, iy) &&
                 px > lid_x0 + lid_margin_s && px < lid_x1 - lid_margin_s &&
-                py > lid_y0 + lid_margin_s && py < lid_y1 - lid_margin_s &&
+                py > fy + lid_margin_s && py < by - lid_margin_s &&
                 norm([px - hex_cx, py - hex_cy]) > hex_d / 2 + 1.5)
                 translate([px, py, -0.1])
                     cylinder(h = lid_t_spine + 0.2, d = art_hole_s);
