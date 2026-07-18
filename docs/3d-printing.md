@@ -77,16 +77,22 @@ values. Preview (++f5++), render (++f6++), then export the STL (++f7++ or
 **File → Export → Export as STL…**). Keep exported STLs in `hardware/stl/` so
 the printed geometry stays reproducible.
 
-### 3. Print: PLA first, then PETG
+### 3. The first print is the fit check
 
-Print every new or re-parameterized design **in PLA first** as a fit check —
-it's cheap and fast, and bracket measurements are usually off by a little on
-the first try. Bolt the PLA prototype to the actual bracket, seat the board in
-it, and check screw alignment, wire clearance, and USB-C access. Iterate the
+Treat print #1 of any new or re-parameterized design as a prototype: bolt it
+to the actual bracket, seat the boards, and check screw alignment, wire
+clearance, connector seating and USB-C access before trusting it. Iterate the
 `.scad` variables until it fits.
 
-Only then print the final part in **PETG** — it tolerates heat and load far
-better than PLA for a part living on a moving arm.
+**Print that fit check in PETG** (the final material) once your PETG process
+is dialled — which it is on this P2S. Fit clearances and snap/flex behaviour
+differ between materials, so a fit validated in PLA doesn't fully transfer;
+the material cost difference is pennies. PLA-first still makes sense for
+brand-new, wholly unmeasured geometry (like the spacing test plate) or
+rapid-fire iteration sessions. Either way the keeper part is **PETG** — it
+tolerates heat and load far better than PLA for a part living on a moving
+arm. To de-risk a big revision cheaply, print the highest-risk part alone
+(usually the spine body) before committing the full multi-colour plate.
 
 ## Print settings (Bambu Lab P2S)
 
