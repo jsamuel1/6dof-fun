@@ -141,10 +141,11 @@ module spine_body() {
     // 2.4 tall — stays 1.6 under the board (standoffs are 4).
     translate([ear_group_center - ear_pair_pitch / 2, box_w / 2, 0])
         cylinder(h = head_recess_depth + 1.4, d = head_pad_d);
-    // PCA9685 corner standoffs (M2.5)
-    for (px = [0, 1], py = [0, 1])
-        translate([pca_x + pca_hole_off_l + fit_clearance + px * pca_hole_dl,
-                   bay_y + (pca_pcb_w - pca_hole_dw) / 2 + py * pca_hole_dw,
+    // PCA9685 corner standoffs (M2.5) — hole pattern centred in the bay
+    // (entry wall to divider face along x, full inner width along y)
+    for (px = [-1, 1], py = [-1, 1])
+        translate([pca_x + (pca_pcb_l + 1) / 2 + px * pca_hole_dl / 2,
+                   bay_y + inner_w / 2 + py * pca_hole_dw / 2,
                    floor_t])
             standoff(4, m25_pilot_d);
     // ESP32 support rails (pins hang between them, breadboard-style)
