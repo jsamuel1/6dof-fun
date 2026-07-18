@@ -142,6 +142,13 @@ Lessons from the first printed set, designed back into the sources:
 - **Pi case is one punch-row lower** (24mm inner) and the GPIO jumpers
   now exit through the same open-topped side opening as the power/HDMI
   ports — no separate slot on the GPIO side.
+- **ESP32 drops in freely**: the support rails moved inboard (4.5mm
+  inset) and gained tapered tops — v1's rails caught the pin-header
+  bases and needed a shove.
+- **Proper 6V power inlet**: the bare-wire pass-through in the entry
+  wall is now a panel-mount connector opening on the PCA9685 bay's
+  entry edge, sized for an XT60E-M flag mount (parametric — adjust
+  `pwr_*` in the spine source for a different connector).
 - **Spine underside clears the arm's own hardware**: a circular recess
   over the proud screw heads at the datum hole pair, and an elongated
   through-slot at the floating pair where the screw tip + nut stand

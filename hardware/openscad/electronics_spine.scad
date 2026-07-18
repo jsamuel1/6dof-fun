@@ -10,8 +10,8 @@
 //   |  ##   |                                    |  the divider;   |
 //   |  ##   |                                    |  antenna up-arm)|
 //   +--------------------------------------------------------------+
-//        ^ two cable ports: 6V pair -> PCA9685, USB-C -> ESP32
-//          (USB cable runs in a floor channel beside the PCA9685 bay)
+//        ^ entry wall: XT60 panel-mount 6V inlet -> PCA9685 terminal,
+//          USB-C cable port -> floor channel beside the PCA9685 bay
 //
 // Layout rationale:
 //   * PCA9685 nearest the power entry: the soldered V+ feed stays short.
@@ -51,6 +51,18 @@ pca_x   = entry_wall;                        // PCA9685 bay start
 esp_x   = entry_wall + pca_pcb_l + bay_gap;  // ESP32 bay start
 bay_y   = 2 * wall_t + usb_chan_w;           // bays sit past the USB channel
 
+// --- 6V power inlet (entry wall, PCA bay) ---------------------------
+// Defaults fit an XT60E-M flag-style panel mount. For a different
+// connector, adjust the nose cutout / flange pocket / screw spacing.
+pwr_cut_w   = 15.8;   // nose cutout width  (across the wall, y)
+pwr_cut_h   = 8.4;    // nose cutout height (z)
+pwr_pock_w  = 28.5;   // flange pocket on the outer face
+pwr_pock_h  = 14.5;
+pwr_panel_t = 2.0;    // panel thickness left for the flange
+pwr_screw_p = 20.6;   // flange screw spacing
+pwr_screw_d = 2.05;   // thread-forming pilot for the flange screws
+pwr_z       = 10;     // connector centre height
+
 // --- arm-face hardware relief (underside) ---------------------------
 // The arm's own assembly screws stand proud of its mounting face, right
 // at the centre of each 18 mm hole pair (the servo bolt-circle).
@@ -83,11 +95,22 @@ module spine_body() {
         // hollow: USB cable channel from entry to the ESP32 bay mouth
         translate([pca_x, wall_t, floor_t])
             cube([esp_x - entry_wall + 6, usb_chan_w, box_h]);
-        // divider stays: re-add below. Entry-wall cable ports —
-        // OPEN-TOPPED notches (lid closes them: no bridges, no supports)
-        // 6V pair port (into PCA9685 bay, floor level)
-        translate([-0.1, bay_y + inner_w / 2 - 5, floor_t])
-            cube([entry_wall + 0.2, 10, box_h]);
+        // divider stays: re-add below. Entry-wall cable ports:
+        // 6V power inlet — panel-mount connector on the PCA bay's entry
+        // edge (sized for an XT60E-M flag mount; edit the pwr_* params
+        // for another connector). The outer face is pocketed down to a
+        // 2 mm panel; the nose pokes through the cutout and the flange
+        // screws to the panel from outside.
+        translate([-0.1, bay_y + inner_w / 2 - pwr_cut_w / 2,
+                   pwr_z - pwr_cut_h / 2])
+            cube([entry_wall + 0.2, pwr_cut_w, pwr_cut_h]);
+        translate([-0.1, bay_y + inner_w / 2 - pwr_pock_w / 2,
+                   pwr_z - pwr_pock_h / 2])
+            cube([entry_wall - pwr_panel_t + 0.1, pwr_pock_w, pwr_pock_h]);
+        for (sy = [-1, 1])
+            translate([-0.1, bay_y + inner_w / 2 + sy * pwr_screw_p / 2, pwr_z])
+                rotate([0, 90, 0])
+                    cylinder(h = entry_wall + 0.2, d = pwr_screw_d);
         // USB-C cable port (into the channel)
         translate([-0.1, wall_t + usb_chan_w / 2 - 4.5, floor_t])
             cube([entry_wall + 0.2, 9, box_h]);
@@ -148,10 +171,17 @@ module spine_body() {
                    bay_y + inner_w / 2 + py * pca_hole_dw / 2,
                    floor_t])
             standoff(4, m25_pilot_d);
-    // ESP32 support rails (pins hang between them, breadboard-style)
-    for (y = [bay_y + 3, bay_y + inner_w - 3 - rail_w_spine])
+    // ESP32 support rails (pins hang between them, breadboard-style).
+    // Inset 4.5 from the bay walls so the pin-header bases clear the
+    // plastic, and tapered to a 2 mm top so the board drops on without
+    // a fight (v1 at 3 mm inset needed a shove).
+    for (y = [bay_y + 4.5, bay_y + inner_w - 4.5 - rail_w_spine])
         translate([esp_x, y, floor_t])
-            cube([esp32_pcb_l - 4, rail_w_spine, esp32_pin_h]);
+            hull() {
+                cube([esp32_pcb_l - 4, rail_w_spine, 0.1]);
+                translate([0, rail_w_spine / 2 - 1, esp32_pin_h - 0.1])
+                    cube([esp32_pcb_l - 4, 2, 0.1]);
+            }
     }   // end union
 
     // ---- cuts through EVERYTHING (floor + pad + rails) ----------------
