@@ -114,17 +114,19 @@ color("red") wire([[-12, pwr_y - 2, pwr_z], [-24, pwr_y - 2, pwr_z - 2],
                    [-32, pwr_y - 1, pwr_z - 6]], 2.4);
 color("#111111") wire([[-12, pwr_y + 2, pwr_z], [-24, pwr_y + 2, pwr_z - 2],
                        [-32, pwr_y + 3, pwr_z - 6]], 2.4);
-// internal run drops from the raised inlet, passing ABOVE the board's
-// entry-end pins, then along the FRONT band via the inline pair
+// internal run: the panel tails drop from the raised inlet, pass
+// ABOVE the board's entry-end pins, and enter the inline pair's entry
+// end; fresh tails leave its far end for the V+/GND solder joints
 color("red") wire([[12, pwr_y - 3, pwr_z],
-                   [pca_bx0 + 2, pwr_y - 5, 13.5],
-                   [pcb_x0 + 2, pcb_y0 + 6, pcb_z0 + 6.5],
-                   [pcb_x0 + 21, pcb_y0 + 6, pcb_z0 + 6.5],
-                   [pcb_x0 + 30, pcb_y0 + 4, pcb_z0 + 3]]);
+                   [pca_bx0 + 1.5, pcb_y0 + 7, 14.5],
+                   [pcb_x0 + 3.5, pcb_y0 + 4.5, pcb_z0 + 5.5]]);
 color("#111111") wire([[12, pwr_y + 3, pwr_z],
-                       [pca_bx0 + 2, pwr_y - 3, 14.5],
-                       [pcb_x0 + 2, pcb_y0 + 8, pcb_z0 + 8.5],
-                       [pcb_x0 + 21, pcb_y0 + 8, pcb_z0 + 8.5],
+                       [pca_bx0 + 1.5, pcb_y0 + 9.5, 15.5],
+                       [pcb_x0 + 3.5, pcb_y0 + 7, pcb_z0 + 5.7]]);
+color("red") wire([[pcb_x0 + 27.5, pcb_y0 + 4.5, pcb_z0 + 5.5],
+                   [pcb_x0 + 30, pcb_y0 + 4, pcb_z0 + 3]]);
+color("#111111") wire([[pcb_x0 + 27.5, pcb_y0 + 7, pcb_z0 + 5.7],
+                       [pcb_x0 + 33, pcb_y0 + 6.5, pcb_z0 + 6],
                        [pcb_x0 + 36, pcb_y0 + 4, pcb_z0 + 3]]);
 
 // ---- USB-C run: entry port -> raceway -> plug bay -> ESP32 ----------
