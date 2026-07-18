@@ -207,6 +207,14 @@ inline XT60 service disconnect (lengthwise along the board's back
 edge), the 6V feed and the USB-C run placed in situ:
 
 <figure markdown>
+  ![Spine assembly turntable](img/spine-assembly-turntable.gif){ width="700" }
+  <figcaption>Turntable of the populated spine. For a real look-around,
+  open <code>hardware/openscad/spine_assembly.scad</code> in OpenSCAD and
+  press F5 — drag to orbit, scroll to zoom (preview keeps the
+  colours).</figcaption>
+</figure>
+
+<figure markdown>
   ![Spine assembly, isometric](img/spine-assembly-iso.png){ width="700" }
   <figcaption>PCA9685 (green) and ESP32 (blue) in their bays; XT60 inlet
   in the entry wall, inline XT60 pair beside the old terminal block,
