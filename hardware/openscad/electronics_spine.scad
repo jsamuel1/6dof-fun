@@ -365,8 +365,11 @@ module spine_lid() {
             translate([6.3, 39.8, -5]) cube([lid_jx - 18 - 6.3, 1.6, 5]);
             translate([lid_jx + 3.5, esp_bay_y + 0.5, -5])
                 cube([lid_x1 - lid_jx - 8.5, 1.6, 5]);
-            translate([lid_jx + 14.5, esp_bay_y + inner_w - 2.1, -5])
-                cube([lid_x1 - lid_jx - 19.5, 1.6, 5]);
+            // nose back strip in segments — gaps clear the I2C Dupont
+            // shells standing on D21/D22 (x ~126-137) and GND/3V3
+            for (xr = [[lid_jx + 14.5, lid_jx + 31], [lid_jx + 45, lid_jx + 50.9]])
+                translate([xr[0], esp_bay_y + inner_w - 2.1, -5])
+                    cube([xr[1] - xr[0], 1.6, 5]);
             translate([6.3, 14.0, -5]) cube([1.6, 27.4, 5]);
             translate([lid_x1 - 4, esp_bay_y + 0.5, -5])
                 cube([1.6, inner_w - 1, 5]);

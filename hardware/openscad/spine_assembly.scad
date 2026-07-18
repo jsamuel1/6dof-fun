@@ -59,16 +59,22 @@ color("silver") {                  // RF can BELOW the board, on its pad
     translate([esp_x - 1.5, esp_y0 + esp32_pcb_w / 2 - 4.5, esp_z0 - 3.2])
         cube([7, 9, 3.2]);         // USB-C receptacle, faces the plug bay
 }
-color("#222222")                   // pin rows standing UP off the board
+color("#222222")                   // 15-pin rows standing UP off the board
     for (y = [esp_y0 + 0.6, esp_y0 + esp32_pcb_w - 3.1])
-        translate([esp_x + 1, y, esp_z0 + 1.6])
-            cube([esp32_pcb_l - 2, 2.5, 6]);
-// I2C hookup: 4-way Dupont block pressed onto the up-facing pins
-// (GND / 3V3 / D21 SDA / D22 SCL, back row, divider end) — reachable
-// from above even with the board installed
+        translate([esp_x + 7, y, esp_z0 + 1.6])
+            cube([38, 2.5, 6]);
+// I2C hookup on the REAL 30-pin layout: all four connections live on
+// the one row (the back row once the board is flipped), but scattered —
+// indexed from the antenna end: D23(1) D22(2) TX0 RX0 D21(5) ... GND(14)
+// 3V3(15). Individual Dupont shells drop onto each pin from above.
+esp_row_y = esp_y0 + esp32_pcb_w - 1.85;      // back pin row centre
+function esp_pin_x(i) = esp_x + esp32_pcb_l - 8.2 - i * 2.54;
+i2c_esp_idx = [13, 1, 4, 14];   // GND, D22 SCL, D21 SDA, 3V3 (0-based)
 color("#333366")
-    translate([esp_x + 3, esp_y0 + esp32_pcb_w - 3.2, esp_z0 + 1.6])
-        cube([10.2, 2.9, 14]);
+    for (k = [0 : 3])
+        translate([esp_pin_x(i2c_esp_idx[k]) - 1.27, esp_row_y - 1.3,
+                   esp_z0 + 1.6])
+            cube([2.54, 2.6, 14]);
 
 // ---- XT60 power inlet (panel mount, entry wall) ---------------------
 pwr_y = bay_y + inner_w / 2;
@@ -141,17 +147,17 @@ i2c_cols = ["#7a4a21", "#e07000", "#e8c520", "#2e9e3e"];
 i2c_pin  = [0, 2, 3, 4];   // positions on the PCA's 6-pin row
 for (i = [0 : 3])
     color(i2c_cols[i])
-        // flat 4-wide ribbon: >=1.8 lateral spacing at every waypoint
-        // (wire dia 1.5). Leaves the horizontal housings on the PCA's
+        // Each jumper leaves the horizontal housing on the PCA's
         // right-angle pins (z ~10, over the notched divider and above
-        // the USB plug), swings up through the plug bay onto the
-        // ESP32's up-facing pin block.
+        // the USB plug), swings up through the plug bay, then runs
+        // east along the board's back band at staggered heights/offsets
+        // (>= 1.6 spacing, wire dia 1.5) to its own pin's shell.
         wire([[pcb_x0 + pca_pcb_l + 14.6,
                pcb_y0 + 6.8 + i2c_pin[i] * 2.54, 10.1],
-              [esp_x - 3, 27 + 2.2 * (i - 1.5), 15],
-              [esp_x + 1.5 + 1.9 * (i - 1.5), 31 + 1.5 * (i - 1.5), 20.5],
-              [esp_x + 4.3 + i * 2.54, esp_y0 + esp32_pcb_w - 1.7,
-               esp_z0 + 15.8]], 1.5);
+              [esp_x - 2, 27 + 2.2 * (i - 1.5), 15],
+              [esp_x + 4, 31.4 + 0.9 * i, 19 + 0.6 * i],
+              [esp_pin_x(i2c_esp_idx[i]) - 3, 31.4 + 0.9 * i, 20 + 0.6 * i],
+              [esp_pin_x(i2c_esp_idx[i]), esp_row_y, esp_z0 + 15.8]], 1.5);
 
 // ---- destination labels (floating, read from above) -----------------
 module tag(t, pos, s = 2.4, c = "#222222", rot = 0)
@@ -175,12 +181,12 @@ for (p = [0 : 5]) {
                        pcb_y0 + 6.8 + p * 2.54, 24])
                 cylinder(h = 0.6, d = 1.8);
 }
-// ESP32 header pins carrying the I2C block (back row, divider end)
-esp_pin_names = ["GND", "3V3", "D21 SDA", "D22 SCL"];
+// ESP32 hookup pins, labelled at their true 30-pin-row positions
+esp_pin_names = ["GND", "D22 SCL", "D21 SDA", "3V3"];
 for (i = [0 : 3])
     tag(esp_pin_names[i],
-        [esp_x + 5.2 + i * 2.54, esp_y0 + esp32_pcb_w + 2, 24.4], 2.0,
-        i2c_cols[i], 90);
+        [esp_pin_x(i2c_esp_idx[i]) + 1, esp_y0 + esp32_pcb_w + 2.2, 24.4],
+        2.0, i2c_cols[i], 90);
 // power attachments
 tag("V+",  [pcb_x0 + 28.5, pcb_y0 + pca_pcb_w - 1, 24], 2.2, "#cc2222");
 tag("GND", [pcb_x0 + 34.5, pcb_y0 + pca_pcb_w - 1, 24], 2.2, "#222222");
