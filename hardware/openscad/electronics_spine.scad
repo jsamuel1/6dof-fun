@@ -195,6 +195,10 @@ module spine_body() {
             translate([3, 11.2, box_h - 3])
                 rotate([-90, 0, 0]) cylinder(h = 34.6, r = 3);
         }
+        // nose top slope: exterior 45° face, 2.4 behind the interior
+        // ceiling — the profile drops from 24 to ~15 at the tip
+        translate([box_l - 9, -0.1, box_h])
+            rotate([0, 45, 0]) cube([20, box_w + 0.2, 20]);
 
         // inner raceway wall: a LOW straight curb (8 mm) — it only has
         // to keep the USB cable in its channel. Wires arrive from above
@@ -225,6 +229,18 @@ module spine_body() {
             cube([wall_t + 2, bay_y + inner_w - esp_bay_y, 10]);
         translate([pca_bx0 + pca_pcb_l + 0.9, 19, floor_t + 6])
             cube([wall_t + 2.2, 18.5, 10]);
+    }
+    // nose roof: the bay's last stretch is closed by an integral 45°
+    // sloped roof (interior ceiling from x = box_l - 11.4 at full
+    // height down to the end wall) — the top tapers in at the ESP32
+    // end. 45° prints support-free; every tall component (the D21/D22
+    // Dupont shells, ~23.4) ends before the slope starts.
+    intersection() {
+        translate([box_l - 11.4, esp_bay_y - 0.1, box_h])
+            rotate([0, 45, 0])
+                cube([18, inner_w + 0.2, 18]);
+        translate([box_l - 12, esp_bay_y - 0.2, 0])
+            cube([12.1, inner_w + 0.4, box_h]);
     }
     // interior relief pads at BOTH pair centres: give the head recess
     // its depth whichever end faces the screw heads. 2.4 above the
@@ -307,12 +323,12 @@ ear_group_center = box_l / 2 + 3.75;
 // wall band, feet onto the low curb between the servo-lead windows;
 // back edge at the round-over crest) jogging in to a narrower, centred
 // rectangle over the ESP32 nose.
-lid_x0 = 0;      lid_x1 = box_l - 2.5;
+lid_x0 = 0;      lid_x1 = box_l - 11.4;        // ends at the nose roof
 lid_y0 = 11.9;   lid_y1 = 43.4;                // PCA section edges
 lid_ey0 = esp_bay_y - wall_t + 0.5;            // 6.2 — ESP section edges
 lid_ey1 = esp_bay_y + inner_w + wall_t - 2.2;  // 37.7
 lid_jx  = esp_x;                               // outline jog position
-hex_cx = esp_x + 42;  hex_cy = box_w / 2;  // WiFi vent, over the RF can
+hex_cx = esp_x + 35;  hex_cy = box_w / 2;  // WiFi vent, over the RF can
 hex_d  = 16;                               // across corners
 
 // The shared motif at a finer pitch to suit the narrow lid; the '#'
@@ -367,7 +383,7 @@ module spine_lid() {
                 cube([lid_x1 - lid_jx - 8.5, 1.6, 5]);
             // nose back strip in segments — gaps clear the I2C Dupont
             // shells standing on D21/D22 (x ~126-137) and GND/3V3
-            for (xr = [[lid_jx + 14.5, lid_jx + 31], [lid_jx + 45, lid_jx + 50.9]])
+            for (xr = [[lid_jx + 14.5, lid_jx + 31], [lid_jx + 44.5, lid_x1 - 0.7]])
                 translate([xr[0], esp_bay_y + inner_w - 2.1, -5])
                     cube([xr[1] - xr[0], 1.6, 5]);
             translate([6.3, 14.0, -5]) cube([1.6, 27.4, 5]);

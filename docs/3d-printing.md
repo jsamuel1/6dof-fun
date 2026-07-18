@@ -185,7 +185,10 @@ Lessons from the first printed set, designed back into the sources:
   cove over the open trough, which is why the shape uses round-overs
   rather than scooped curves). The old wide antenna opening is a solid
   rounded nose now, vented by a hexagon through the lid over the RF
-  can. The lid follows the body as a jogged plate: wide over the PCA
+  can — and the nose tapers in height as well: an integral 45° roof
+  (the steepest support-free interior ceiling) closes the bay's last
+  stretch, dropping the profile from 24mm to ~15mm at the tip, starting
+  just past the tallest component (the D22 Dupont shell). The lid follows the body as a jogged plate: wide over the PCA
   run (with four feet onto the curb between the servo-lead windows),
   narrow and centred over the nose.
 
