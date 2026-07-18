@@ -148,16 +148,16 @@ Lessons from the first printed set, designed back into the sources:
 - **Pi case is one punch-row lower** (24mm inner) and the GPIO jumpers
   now exit through the same open-topped side opening as the power/HDMI
   ports — no separate slot on the GPIO side.
-- **ESP32 rides components-up on tall rails**: the board sits pins-down
-  on 14.5mm tapered rails (4.5mm inset clears the pin-header bases),
-  with the four I2C Dupont shells hanging pre-fitted from the hookup
-  pins in the rail-to-wall gap — they clear the floor by half a
-  millimetre, and the whole stack fits under the 24mm lid plane. Fit
-  the shells before dropping the board on. The antenna faces UP,
-  directly under the lid's hexagon vent (no RF penalty), the USB-C
-  plug rides high above the PCA9685's horizontal I2C housings, and
-  nothing above the board tops ~21mm. No soldering on the ESP32; the
-  board stays replaceable.
+- **ESP32 rides components-up on four corner standoffs**: the board
+  sits pins-down on 14.5mm standoffs at its own screw holes (M2.5 into
+  the pilots; hole spacing is a measure-me in the source — 46.5x23.3
+  assumed). Point supports instead of rails leave the underside open,
+  so the four I2C Dupont shells hanging from the hookup pins stay
+  reachable from the side even with the board seated. The antenna
+  faces UP, directly under the lid's hexagon vent (no RF penalty), the
+  USB-C plug rides high above the PCA9685's horizontal I2C housings,
+  and nothing above the board tops ~21mm. No soldering on the ESP32;
+  the board stays replaceable.
 - **Proper 6V power inlet**: the bare-wire pass-through in the entry
   wall is now a panel-mount connector opening on the PCA9685 bay's
   entry edge, sized for an XT60E-M flag mount (parametric — adjust

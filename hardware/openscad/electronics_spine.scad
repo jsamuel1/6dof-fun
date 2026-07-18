@@ -31,6 +31,7 @@ part = "body";
 
 // --- boards (from esp32_mount.scad / pca9685_mount.scad) -------------
 esp32_pcb_l = 52.0;   esp32_pcb_w = 28.9;   esp32_pin_h = 9.0;
+esp_hole_dl = 46.5;   esp_hole_dw = 23.3;   // corner screw holes  *** MEASURE ME ***
 pca_pcb_l   = 62.5;   pca_pcb_w   = 25.4;
 pca_hole_dl = 56.0;   pca_hole_dw = 19.0;   pca_hole_off_l = (pca_pcb_l - 56.0) / 2;
 
@@ -264,22 +265,19 @@ module spine_body() {
                    floor_t])
             standoff(4, m25_pilot_d);
     // ESP32 seat — the board rides pins-DOWN (components up, antenna
-    // under the lid's hex vent). Tapered rails, 14.5 tall: the four
-    // I2C Dupont housings hang pre-fitted from the hookup pins in the
-    // gap between rail and bay wall, clearing the floor by 0.5; the
-    // pin-header bases clear the 4.5 rail inset; the USB-C plug rides
-    // high, above the PCA9685's horizontal I2C housings.
-    for (y = [esp_bay_y + 4.5, esp_bay_y + inner_w - 8.5])
-        translate([esp_x, y, floor_t])
-            hull() {
-                cube([esp32_pcb_l - 4, 4, 0.1]);
-                translate([0, 1, esp_rail_h - 0.1])
-                    cube([esp32_pcb_l - 4, 2, 0.1]);
-            }
-    for (sy = [0, 1])                                   // up-arm end stops
-        translate([esp_x + esp32_pcb_l + 0.35,
-                   esp_bay_y + 0.5 + sy * (inner_w - 5.5), floor_t])
-            cube([2.5, 5, esp_rail_h + 2]);
+    // under the lid's hex vent) on FOUR corner standoffs at its screw
+    // holes, not rails: the underside stays open, so the hanging I2C
+    // Dupont shells are reachable from the side with the board seated.
+    // M2.5 screws into the pilot holes retain the board (no end stops
+    // needed). Screw-hole spacing is a MEASURE-ME: 46.5 x 23.3 is the
+    // common 30-pin devkit pattern — verify on the actual board.
+    for (px = [0, 1], py = [0, 1])
+        translate([esp_x + (esp32_pcb_l - esp_hole_dl) / 2
+                       + px * esp_hole_dl,
+                   esp_bay_y + (inner_w - esp_hole_dw) / 2
+                       + py * esp_hole_dw,
+                   floor_t])
+            standoff(esp_rail_h, m25_pilot_d);
     }   // end union
 
     // ---- cuts through EVERYTHING (floor + pad + rails) ----------------
