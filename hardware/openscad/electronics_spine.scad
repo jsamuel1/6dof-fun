@@ -247,9 +247,17 @@ module spine_body() {
     // floor — under the PCA9685 that leaves ~1.5 to the board's header
     // tails (PETG pad, harmless if they kiss); at the ESP32 end it
     // merges with the board seat pads.
-    for (sx = [-1, 1])
-        translate([ear_group_center + sx * ear_pair_pitch / 2, box_w / 2, 0])
+    // datum end (under the PCA9685)
+    translate([ear_group_center - ear_pair_pitch / 2, box_w / 2, 0])
+        cylinder(h = head_recess_depth + 1.4, d = head_pad_d);
+    // floating end — clipped to the ESP32 bay: the pad's shoulder would
+    // otherwise stand in the USB plug bay floor under the plug body
+    intersection() {
+        translate([ear_group_center + ear_pair_pitch / 2, box_w / 2, 0])
             cylinder(h = head_recess_depth + 1.4, d = head_pad_d);
+        translate([esp_x + 0.05, esp_bay_y, 0])
+            cube([head_pad_d + 10, inner_w, head_recess_depth + 2]);
+    }
     // PCA9685 corner standoffs (M2.5) — board datum sits pca_pin_clear
     // off the entry wall (right-angle pin room), 0.5 off the divider;
     // hole pattern centred across the bay width
@@ -323,12 +331,11 @@ punch_pitch_spine = 5;
 esp_pad_h = 2.6;   // ESP32 end-pad height; USB-C plug then clears the floor
 // Arm hole row (verified): pair-to-pair centre distance = 18/2 + 32 + 18/2.
 ear_pair_pitch   = 50;
-// Mount row sits 3.75 up-arm of the spine's centre: this preserves the
-// verified relief-to-bay relationships from before the entry end grew
-// 7.5 for the PCA9685's right-angle pins (relief pads stay mid-board /
-// mid-ESP-bay); the spine just overhangs the row a little more at the
-// entry end.
-ear_group_center = box_l / 2 + 3.75;
+// Mount row CENTRED on the spine: the arm's seam sits mid-row, so a
+// centred row keeps the spine spanning the two frame segments evenly
+// (as fitted on the arm). The floating-end relief pad is clipped to
+// the ESP32 bay so it can't shoulder into the USB plug bay floor.
+ear_group_center = box_l / 2;
 
 // Lid outline: the streamlined body only has a flat rim over the tall
 // sections — a wide rectangle over the PCA run (front edge on the bay
