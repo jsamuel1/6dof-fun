@@ -160,9 +160,12 @@ Lessons from the first printed set, designed back into the sources:
   through-slot at the floating pair where the screw tip + nut stand
   taller (elongated to match the ±2mm seam-movement slots). Put washers
   under the two datum M3 heads inside the spine.
-- **Servo slots cut through the inner raceway wall** so the leads run
-  straight from outside to the PCA9685 headers, crossing above the
-  USB cable in the channel (v1 dead-ended them against the wall).
+- **Low inner walls**: the raceway wall is an 8mm curb and the bay
+  divider a plain 10mm wall — with every opening top-loaded and the lid
+  closing the roof, wires simply cross over them (servo leads step over
+  the curb to the headers; the I2C ribbon crosses the divider, whose
+  notch is gone). v1's full-height inner walls dead-ended the servo
+  leads and boxed in the USB plug bay.
 
 ### Component placement
 

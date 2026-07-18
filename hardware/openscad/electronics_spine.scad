@@ -119,13 +119,11 @@ module spine_body() {
             cube([entry_wall + 0.2, 9, box_h]);
         // servo lead slots: FRONT wall (away from the bracket/arm side),
         // 3 slots of 2 channels each along the PCA9685 bay. Open to the
-        // rim — wires drop in from above, the lid closes the top. The
-        // slots cut through the inner raceway wall too: the leads cross
-        // the USB channel (the cable lies below the slot sills) straight
-        // to the PCA9685 headers.
+        // rim — wires drop in from above, the lid closes the top, and
+        // the leads step over the LOW inner raceway wall to the headers.
         for (i = [0 : 2])
             translate([pca_x + 6 + i * 18, -0.1, floor_t + 3])
-                cube([13, bay_y + 0.2, box_h]);
+                cube([13, wall_t + 0.2, box_h]);
         // punch-hole ventilation, both long walls + ESP32 bay far side
         for (zr = [0 : 2], xi = [0 : floor((box_l - 16) / punch_pitch_spine)]) {
             x = 8 + xi * punch_pitch_spine + (zr % 2) * punch_pitch_spine / 2;
@@ -138,13 +136,12 @@ module spine_body() {
         translate([box_l - wall_t - 0.1, bay_y + 4, floor_t + 4])
             cube([wall_t + 0.2, inner_w - 8, box_h]);
 
-        // inner raceway wall: punched through for weight and cross-flow
-        // (air path: outer wall punches -> bay -> raceway -> outer wall)
-        for (zr = [0, 1], xi = [0 : 10])
-            translate([10 + xi * 5.2 + zr * 2.6,
-                       wall_t + usb_chan_w - 0.1, 8 + zr * 5])
-                rotate([-90, 0, 0])
-                    cylinder(h = wall_t + 0.2, d = 2.2);
+        // inner raceway wall: a LOW straight curb (8 mm) — it only has
+        // to keep the USB cable in its channel. Wires arrive from above
+        // with the lid off and simply cross over it; no punched
+        // openings needed, and the whole interior is hand-accessible.
+        translate([pca_x, wall_t + usb_chan_w - 0.5, floor_t + 8])
+            cube([esp_x - entry_wall + 6, wall_t + 1, box_h]);
 
         // raceway mouth: open the channel wall across the USB plug bay so
         // the cable turns 90 deg from the plug into the raceway. Open to
@@ -159,13 +156,12 @@ module spine_body() {
             cube([bay_gap - wall_t - 5, wall_t + 0.2, box_h]);
     }
     // divider wall on the PCA side of the gap — the gap itself is the
-    // USB-C plug bay (plug seats into the ESP32 across it)
-    difference() {
-        translate([pca_x + pca_pcb_l + 1, bay_y, floor_t])
-            cube([wall_t + 2, inner_w, box_h - floor_t - 6]);
-        translate([pca_x + pca_pcb_l + 0.9, bay_y + inner_w / 2 - 8, box_h - 14])
-            cube([wall_t + 2.2, 16, 20]);
-    }
+    // USB-C plug bay (plug seats into the ESP32 across it). A LOW
+    // straight wall: it shields the plug bay and locates the boards,
+    // and the I2C ribbon simply crosses over the top (the old notch is
+    // gone) — more finger room for the USB plug too.
+    translate([pca_x + pca_pcb_l + 1, bay_y, floor_t])
+        cube([wall_t + 2, inner_w, 10]);
     // interior pad under the PCA9685: gives the head recess its depth.
     // 2.4 tall — stays 1.6 under the board (standoffs are 4).
     translate([ear_group_center - ear_pair_pitch / 2, box_w / 2, 0])
