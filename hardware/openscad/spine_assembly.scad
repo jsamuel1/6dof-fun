@@ -16,34 +16,38 @@ pcb_z0 = floor_t + 4;              // standoff tops
 color("forestgreen")
     translate([pcb_x0, pcb_y0, pcb_z0])
         cube([pca_pcb_l, pca_pcb_w, 1.6]);
-color("#222222") {                 // 16-channel servo headers, front edge
-    translate([pcb_x0 + (pca_pcb_l - 41) / 2, pcb_y0 + 0.6, pcb_z0 + 1.6])
+// Board chirality: with the I2C end connector facing the ESP32, the
+// 16-channel servo row sits on the BACK edge; terminal block, cap and
+// the V+/GND solder points face the front.
+color("#222222") {                 // 16-channel servo headers, BACK edge
+    translate([pcb_x0 + (pca_pcb_l - 41) / 2,
+               pcb_y0 + pca_pcb_w - 8.6, pcb_z0 + 1.6])
         cube([41, 8, 8]);
     translate([pcb_x0 + 27, pcb_y0 + pca_pcb_w / 2 - 3, pcb_z0 + 1.6])
         cube([7, 6, 1.2]);         // PCA9685 chip
     // RIGHT-ANGLE 6-pin headers at both board ends, pins horizontal
     // out past the edges (~6 mm at ~z 10)
-    translate([pcb_x0, pcb_y0 + 5.5, pcb_z0 + 1.6]) cube([2.5, 15.2, 2.5]);
-    translate([pcb_x0 + pca_pcb_l - 2.5, pcb_y0 + 5.5, pcb_z0 + 1.6])
+    translate([pcb_x0, pcb_y0 + 4.6, pcb_z0 + 1.6]) cube([2.5, 15.2, 2.5]);
+    translate([pcb_x0 + pca_pcb_l - 2.5, pcb_y0 + 4.6, pcb_z0 + 1.6])
         cube([2.5, 15.2, 2.5]);
 }
 color("silver") {                  // the horizontal pin combs
-    translate([pcb_x0 - 6, pcb_y0 + 5.5, 9.7]) cube([6.2, 15.2, 0.7]);
-    translate([pcb_x0 + pca_pcb_l - 0.2, pcb_y0 + 5.5, 9.7])
+    translate([pcb_x0 - 6, pcb_y0 + 4.6, 9.7]) cube([6.2, 15.2, 0.7]);
+    translate([pcb_x0 + pca_pcb_l - 0.2, pcb_y0 + 4.6, 9.7])
         cube([6.4, 15.2, 0.7]);
 }
 color("#333366")                   // I2C Dupont housings, plugged on
-    translate([pcb_x0 + pca_pcb_l + 0.4, pcb_y0 + 5.3, 8.5])
+    translate([pcb_x0 + pca_pcb_l + 0.4, pcb_y0 + 4.4, 8.5])
         cube([14, 15.4, 3.0]);     // horizontally over the notched divider
 color("#1a4d1a")                   // old (dead-FET) terminal block
-    translate([pcb_x0 + 28, pcb_y0 + pca_pcb_w - 8, pcb_z0 + 1.6])
+    translate([pcb_x0 + 28, pcb_y0 + 0.4, pcb_z0 + 1.6])
         cube([10, 7.6, 10]);
 color("silver") {                  // 16AWG solder joints: V+ and GND
-    translate([pcb_x0 + 30, pcb_y0 + pca_pcb_w - 4, pcb_z0 + 2]) sphere(d = 3.2);
-    translate([pcb_x0 + 36, pcb_y0 + pca_pcb_w - 4, pcb_z0 + 2]) sphere(d = 3.2);
+    translate([pcb_x0 + 30, pcb_y0 + 4, pcb_z0 + 2]) sphere(d = 3.2);
+    translate([pcb_x0 + 36, pcb_y0 + 4, pcb_z0 + 2]) sphere(d = 3.2);
 }
 color("dimgray")                   // 1000uF electrolytic
-    translate([pcb_x0 + 45, pcb_y0 + pca_pcb_w - 5.5, pcb_z0 + 1.6])
+    translate([pcb_x0 + 45, pcb_y0 + 5.5, pcb_z0 + 1.6])
         cylinder(h = 11.5, d = 8.5);
 
 // ---- ESP32 devkit — UPSIDE DOWN (pins up) on the end pads -----------
@@ -86,11 +90,12 @@ color("gold") {
 }
 
 // ---- inline XT60 service disconnect ---------------------------------
-// Lengthwise in the clear band along the board's back edge, between
-// the entry breakout header and the old terminal block; the servo
-// header strip along the front edge stays unobstructed.
+// Lengthwise in the clear band along the board's FRONT edge (with the
+// mirrored board the terminal/cap side faces front), between the entry
+// header and the old terminal block; the servo strip at the back stays
+// unobstructed.
 color("gold")
-    translate([pcb_x0 + 3.5, pcb_y0 + pca_pcb_w - 9.5, pcb_z0 + 1.7])
+    translate([pcb_x0 + 3.5, pcb_y0 + 1.3, pcb_z0 + 1.7])
         cube([24, 8.2, 8]);
 
 // ---- 6V feed: panel tails -> inline pair -> V+/GND through-holes ----
@@ -110,17 +115,17 @@ color("red") wire([[-12, pwr_y - 2, pwr_z], [-24, pwr_y - 2, pwr_z - 2],
 color("#111111") wire([[-12, pwr_y + 2, pwr_z], [-24, pwr_y + 2, pwr_z - 2],
                        [-32, pwr_y + 3, pwr_z - 6]], 2.4);
 // internal run drops from the raised inlet, passing ABOVE the board's
-// entry-end pins, then along the back band via the inline pair
+// entry-end pins, then along the FRONT band via the inline pair
 color("red") wire([[12, pwr_y - 3, pwr_z],
-                   [pca_bx0 + 2, pwr_y + 3, 13.5],
-                   [pcb_x0 + 2, pcb_y0 + pca_pcb_w - 6, pcb_z0 + 6.5],
-                   [pcb_x0 + 21, pcb_y0 + pca_pcb_w - 6, pcb_z0 + 6.5],
-                   [pcb_x0 + 30, pcb_y0 + pca_pcb_w - 4, pcb_z0 + 3]]);
+                   [pca_bx0 + 2, pwr_y - 6, 13.5],
+                   [pcb_x0 + 2, pcb_y0 + 6, pcb_z0 + 6.5],
+                   [pcb_x0 + 21, pcb_y0 + 6, pcb_z0 + 6.5],
+                   [pcb_x0 + 30, pcb_y0 + 4, pcb_z0 + 3]]);
 color("#111111") wire([[12, pwr_y + 3, pwr_z],
-                       [pca_bx0 + 2, pwr_y + 5, 14.5],
-                       [pcb_x0 + 2, pcb_y0 + pca_pcb_w - 8, pcb_z0 + 8.5],
-                       [pcb_x0 + 21, pcb_y0 + pca_pcb_w - 8, pcb_z0 + 8.5],
-                       [pcb_x0 + 36, pcb_y0 + pca_pcb_w - 4, pcb_z0 + 3]]);
+                       [pca_bx0 + 2, pwr_y - 4, 14.5],
+                       [pcb_x0 + 2, pcb_y0 + 8, pcb_z0 + 8.5],
+                       [pcb_x0 + 21, pcb_y0 + 8, pcb_z0 + 8.5],
+                       [pcb_x0 + 36, pcb_y0 + 4, pcb_z0 + 3]]);
 
 // ---- USB-C run: entry port -> raceway -> plug bay -> ESP32 ----------
 color("#555555") {
@@ -153,7 +158,7 @@ for (i = [0 : 3])
         // east along the board's back band at staggered heights/offsets
         // (>= 1.6 spacing, wire dia 1.5) to its own pin's shell.
         wire([[pcb_x0 + pca_pcb_l + 14.6,
-               pcb_y0 + 6.8 + i2c_pin[i] * 2.54, 10.1],
+               pcb_y0 + pca_pcb_w - 6.8 - i2c_pin[i] * 2.54, 10.1],
               [esp_x - 2, 27 + 2.2 * (i - 1.5), 15],
               [esp_x + 4, 31.4 + 0.9 * i, 19 + 0.6 * i],
               [esp_pin_x(i2c_esp_idx[i]) - 3, 31.4 + 0.9 * i, 20 + 0.6 * i],
@@ -163,22 +168,23 @@ for (i = [0 : 3])
 module tag(t, pos, s = 2.4, c = "#222222", rot = 0)
     color(c) translate(pos) rotate([0, 0, rot])
         linear_extrude(0.6) text(t, size = s, halign = "left");
-// PCA9685 servo channels: numbers above the six plugs
+// PCA9685 servo channels: numbers in front of the six plugs (back row)
 for (c = [0 : 5])
-    tag(str(c), [hdr_x0 + c * 2.54 + 0.4, pcb_y0 + 10, 24], 2.2, "white");
-tag("CH", [hdr_x0 - 4.5, pcb_y0 + 10, 24], 2.2, "white");
+    tag(str(c), [hdr_x0 + c * 2.54 + 0.4, pcb_y0 + 12, 24], 2.2, "white");
+tag("CH", [hdr_x0 - 4.5, pcb_y0 + 12, 24], 2.2, "white");
 // PCA9685 6-pin breakout row (divider end), pin 1 nearest the servo
-// headers; dots colour-matched to the wires on the used pins
+// headers (the BACK edge); dots colour-matched on the used pins
 pca_pin_names = ["1 GND", "2 OE", "3 SCL", "4 SDA", "5 VCC", "6 V+"];
 pca_pin_used  = [0, undef, 1, 2, 3, undef];   // index into i2c_cols
 for (p = [0 : 5]) {
     tag(pca_pin_names[p],
-        [pcb_x0 + pca_pcb_l - 15.5, pcb_y0 + 5.9 + p * 2.54, 24], 2.0,
+        [pcb_x0 + pca_pcb_l - 15.5,
+         pcb_y0 + pca_pcb_w - 7.7 - p * 2.54, 24], 2.0,
         pca_pin_used[p] == undef ? "#777777" : i2c_cols[pca_pin_used[p]]);
     if (pca_pin_used[p] != undef)
         color(i2c_cols[pca_pin_used[p]])
             translate([pcb_x0 + pca_pcb_l + 4,
-                       pcb_y0 + 6.8 + p * 2.54, 24])
+                       pcb_y0 + pca_pcb_w - 6.8 - p * 2.54, 24])
                 cylinder(h = 0.6, d = 1.8);
 }
 // ESP32 hookup pins, labelled at their true 30-pin-row positions
@@ -187,9 +193,9 @@ for (i = [0 : 3])
     tag(esp_pin_names[i],
         [esp_pin_x(i2c_esp_idx[i]) + 1, esp_y0 + esp32_pcb_w + 2.2, 24.4],
         2.0, i2c_cols[i], 90);
-// power attachments
-tag("V+",  [pcb_x0 + 28.5, pcb_y0 + pca_pcb_w - 1, 24], 2.2, "#cc2222");
-tag("GND", [pcb_x0 + 34.5, pcb_y0 + pca_pcb_w - 1, 24], 2.2, "#222222");
+// power attachments (front edge with the mirrored board)
+tag("V+",  [pcb_x0 + 28.5, pcb_y0 + 8.7, 24], 2.2, "#cc2222");
+tag("GND", [pcb_x0 + 34.5, pcb_y0 + 8.7, 24], 2.2, "#222222");
 tag("6V IN (XT60)", [-30, pwr_y + 7, 18], 2.4);
 tag("USB-C", [esp_x - 13, esp_y0 - 3.5, 20], 2.2);
 
@@ -203,18 +209,19 @@ hdr_x0 = pcb_x0 + (pca_pcb_l - 41) / 2;   // channel 0 pin column
 module servo_lead(fx, tx) {
     // three wires modelled at their real ~1.3 dia, held 1.5 apart at
     // every waypoint — the flat ribbon twists from the vertical pin
-    // column to lie flat through the slot, never merging
+    // column to lie flat through the BACK-wall slot, never merging
     cols = ["#553311", "#cc2222", "#cc6600"];   // brown / red / orange
     for (i = [0 : 2])
         color(cols[i])
-            wire([[fx, pcb_y0 + 1.8 + 2.54 * i, pcb_z0 + 14.5],
-                  [(fx + tx) / 2 + 1.5 * (i - 1), 12, 12.5 - 1.5 * (i - 1)],
-                  [tx - 4.5 + 1.5 * i, 6, 8.5],
-                  [tx - 4.5 + 1.5 * i, -6, 7.5]], 1.3);
+            wire([[fx, pcb_y0 + pca_pcb_w - 1.8 - 2.54 * i, pcb_z0 + 14.5],
+                  [(fx + tx) / 2 + 1.5 * (i - 1), 41.5, 13 - 1.5 * (i - 1)],
+                  [tx - 4.5 + 1.5 * i, 44.5, 8.5],
+                  [tx - 4.5 + 1.5 * i, 52, 7.5]], 1.3);
 }
 for (c = [0 : 5]) {
     color("#111111")                          // plug housing on the pins
-        translate([hdr_x0 + c * 2.54 + 0.1, pcb_y0 + 0.7, pcb_z0 + 3.5])
+        translate([hdr_x0 + c * 2.54 + 0.1, pcb_y0 + pca_pcb_w - 8.7,
+                   pcb_z0 + 3.5])
             cube([2.35, 8, 12]);
     servo_lead(hdr_x0 + c * 2.54 + 1.27,
                pca_bx0 + [12, 12, 30, 30, 48, 48][c] + (c % 2 == 0 ? -2 : 2));

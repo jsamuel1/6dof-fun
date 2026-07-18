@@ -172,12 +172,11 @@ Lessons from the first printed set, designed back into the sources:
   inside.
 - **Low inner walls**: the raceway wall is an 8mm curb and the bay
   divider a plain 10mm wall — with every opening top-loaded and the lid
-  closing the roof, wires simply cross over them (servo leads step over
-  the curb to the headers; the I2C ribbon crosses the divider, whose
-  notch is gone). v1's full-height inner walls dead-ended the servo
-  leads and boxed in the USB plug bay.
+  closing the roof, wires simply cross over them (the I2C run crosses the notched
+  divider; the USB cable stays behind the curb). v1's full-height
+  inner walls boxed in the USB plug bay.
 - **Streamlined outside**: the box is only full-height where the
-  interior needs it. The whole front tier (servo slots + cable trough)
+  interior needs it. The whole front tier (the cable trough)
   drops to 13mm, and the **ESP32 nose section is centred on the arm's
   mount line**, both long faces sweeping in to it with rounded plan
   blends. The long top edges, nose and entry edges carry proper

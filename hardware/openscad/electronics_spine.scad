@@ -133,12 +133,14 @@ module spine_body() {
         // USB-C cable port (into the channel)
         translate([-0.1, wall_t + usb_chan_w / 2 - 4.5, floor_t])
             cube([entry_wall + 0.2, 9, box_h]);
-        // servo lead slots: FRONT wall (away from the bracket/arm side),
-        // 3 slots of 2 channels each along the PCA9685 bay. Open to the
-        // rim — wires drop in from above, the lid closes the top, and
-        // the leads step over the LOW inner raceway wall to the headers.
+        // servo lead slots: BACK wall. With the board's I2C end
+        // connector facing the ESP32, the 16-channel header row lands
+        // on the BACK edge (board chirality) — so the leads exit
+        // straight out the back. 3 slots of 2 channels each, open to
+        // the rim (wires drop in from above, the lid closes the top).
         for (i = [0 : 2])
-            translate([pca_bx0 + 5.5 + i * 18, -0.1, floor_t + 3])
+            translate([pca_bx0 + 5.5 + i * 18, box_w - wall_t - 0.1,
+                       floor_t + 3])
                 cube([13, wall_t + 0.2, box_h]);
         // punch-hole ventilation on the tall back wall (the low front
         // tier is all slots and open trough — no punches needed there)
