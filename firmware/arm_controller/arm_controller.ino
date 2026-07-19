@@ -321,7 +321,13 @@ static void destroy_entities() {
 // ---------------------------------------------------------------------------
 // Publishing
 // ---------------------------------------------------------------------------
+uint32_t loop_count = 0;           // incremented in loop(); reported 1/s in status
+static uint32_t js_pub_count = 0;  // publish_joint_states calls since last status
+uint32_t ping_ms_max = 0;          // worst rmw_uros_ping_agent time this window
+uint32_t spin_ms_max = 0;          // worst executor spin_some time this window
+
 static void publish_joint_states() {
+  ++js_pub_count;
   stamp_now(&joint_state_msg.header.stamp);
   for (int i = 0; i < NUM_JOINTS; ++i) {
     // Commanded (interpolated) angle; MG996R has no feedback. Joints that
@@ -337,10 +343,17 @@ static void publish_status() {
   int written = snprintf(
       status_buf, sizeof(status_buf),
       "{\"uptime_s\":%lu,\"rssi\":%d,\"agent_connected\":%s,\"estop\":%s,"
-      "\"cal_ch\":%d,\"cal_us\":%u}",
+      "\"cal_ch\":%d,\"cal_us\":%u,\"loop_hz\":%lu,\"js_hz\":%lu,"
+      "\"ping_ms\":%lu,\"spin_ms\":%lu}",
       (unsigned long)(millis() / 1000UL), (int)WiFi.RSSI(),
       connected ? "true" : "false", estop ? "true" : "false", cal_channel,
-      (unsigned)cal_us);
+      (unsigned)cal_us, (unsigned long)loop_count,
+      (unsigned long)js_pub_count, (unsigned long)ping_ms_max,
+      (unsigned long)spin_ms_max);
+  loop_count = 0;
+  js_pub_count = 0;
+  ping_ms_max = 0;
+  spin_ms_max = 0;
   if (written < 0) {
     return;
   }
@@ -606,7 +619,18 @@ void setup() {
   static char wifi_ssid[] = WIFI_SSID;
   static char wifi_pass[] = WIFI_PASSWORD;
   static char agent_ip[] = AGENT_IP;
+  // DHCP hostname (shows in the router's client list / local DNS). On
+  // esp32 core 3.x this must run before ANY other WiFi call: the name is
+  // applied when the STA interface is created, so calling mode()/begin()
+  // first bakes in the default esp32-XXXXXX name.
+  WiFi.setHostname("armesp32");
   set_microros_wifi_transports(wifi_ssid, wifi_pass, agent_ip, AGENT_PORT);
+  Serial.print("[arm] hostname ");
+  Serial.println(WiFi.getHostname());
+  // Modem power-save (on by default) adds second-scale latency spikes that
+  // trip the 2 s agent-ping timeout. This is a mains-powered controller —
+  // trade the power saving for a stable link.
+  WiFi.setSleep(false);
   Serial.print("[arm] WiFi up, IP ");
   Serial.print(WiFi.localIP());
   Serial.print(", agent ");
@@ -624,6 +648,7 @@ void setup() {
 }
 
 void loop() {
+  ++loop_count;
   uint32_t now = millis();
 
   // -- Serial diagnostic console (bench tool) ------------------------------
@@ -692,14 +717,16 @@ void loop() {
       }
       break;
 
-    case AGENT_CONNECTED:
+    case AGENT_CONNECTED: {
       // Ping-based watchdog: a single missed probe is tolerated; the link
       // is declared lost only after AGENT_TIMEOUT_MS without a response.
       if ((uint32_t)(now - last_ping_ms) >= PING_PERIOD_MS) {
         last_ping_ms = now;
+        uint32_t t0 = millis();
         if (rmw_uros_ping_agent(PING_TIMEOUT_MS, 1) == RMW_RET_OK) {
           last_agent_ok_ms = now;
         }
+        if (millis() - t0 > ping_ms_max) ping_ms_max = millis() - t0;
       }
       if ((uint32_t)(now - last_agent_ok_ms) > AGENT_TIMEOUT_MS) {
         Serial.println(
@@ -708,8 +735,13 @@ void loop() {
         break;
       }
 
-      // Service incoming commands (bounded, non-blocking-ish).
-      (void)rclc_executor_spin_some(&executor, RCL_MS_TO_NS(2));
+      // Service incoming commands. Timeout 0 = non-blocking poll: with a
+      // small nonzero timeout this rmw blocks ~1 s (measured spin_ms:991),
+      // strangling the whole loop to 1 Hz.
+      uint32_t t1 = millis();
+      (void)rclc_executor_spin_some(&executor, 0);
+      if (millis() - t1 > spin_ms_max) spin_ms_max = millis() - t1;
+    }
 
       if ((uint32_t)(now - last_joint_state_ms) >= JOINT_STATE_PERIOD_MS) {
         last_joint_state_ms = now;
