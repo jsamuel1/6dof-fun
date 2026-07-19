@@ -64,3 +64,41 @@ services:
     devices:
       - /dev/video0:/dev/video0
     restart: unless-stopped
+
+  # --- Touchscreen / web UI (docs/superpowers/specs/2026-07-19-touchscreen-ui-design.md)
+
+  rosbridge:
+    build: ./rosbridge
+    image: arduino-arm/rosbridge:jazzy
+    container_name: arm-rosbridge
+    command: >
+      ros2 launch rosbridge_server rosbridge_websocket_launch.xml
+      port:=9090 address:=0.0.0.0
+    network_mode: host
+    environment:
+      - ROS_DOMAIN_ID=0
+    depends_on:
+      - micro-ros-agent
+    restart: unless-stopped
+
+  web-video:
+    build: ./rosbridge
+    image: arduino-arm/rosbridge:jazzy
+    container_name: arm-web-video
+    command: >
+      ros2 run web_video_server web_video_server --ros-args -p port:=8080
+    network_mode: host
+    environment:
+      - ROS_DOMAIN_ID=0
+    depends_on:
+      - camera
+    restart: unless-stopped
+
+  web:
+    image: nginx:alpine
+    container_name: arm-web
+    ports:
+      - "8088:80"
+    volumes:
+      - ../web:/usr/share/nginx/html:ro
+    restart: unless-stopped
