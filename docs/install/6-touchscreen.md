@@ -79,6 +79,30 @@ sudo systemctl daemon-reload
 sudo systemctl enable --now kiosk.service
 ```
 
+### Single-output: disable the laptop's internal panel
+
+On a laptop host, `cage` tiles **every** connected DRM output into one
+wide logical desktop and stretches the kiosk window across all of them —
+so with the lid panel (`eDP-1`) still active alongside the Magedok
+(`HDMI-A-1`), the UI spans both screens and, worse, the touchscreen's
+absolute coordinates map into the combined space and land on the wrong
+panel. Taps appear to do nothing.
+
+Fix: disable the internal connector at the kernel level so only the
+Magedok remains. Add a GRUB drop-in and reboot:
+
+```sh
+echo 'GRUB_CMDLINE_LINUX_DEFAULT="$GRUB_CMDLINE_LINUX_DEFAULT video=eDP-1:d"' \
+  | sudo tee /etc/default/grub.d/99-kiosk-display.cfg
+sudo update-grub
+sudo reboot
+```
+
+After reboot, `for c in /sys/class/drm/card*-*/status; do echo "$c $(cat
+$c)"; done` should show only `HDMI-A-1: connected`, and the panel fills
+the Magedok at its native 1540×720. (Find your internal connector name
+in that same list — it is `eDP-1` on most laptops.)
+
 ## Safety notes
 
 - The UI clamps jogs to ±90°, but the **firmware's soft limits are the
