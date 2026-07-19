@@ -8,6 +8,12 @@
       "port": 8000
     },
     {
+      "name": "web-ui",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["-m", "http.server", "8090", "--directory", "host/web"],
+      "port": 8090
+    },
+    {
       "name": "ros2-stack",
       "runtimeExecutable": "docker",
       "runtimeArgs": ["compose", "-f", "host/docker-compose.yml", "up"],

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>6DOF Arm — Jog &amp; Calibrate</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="banner" class="banner hidden">connecting to rosbridge…</div>
+
+<main class="grid">
+  <!-- Left: camera -->
+  <section class="cam">
+    <img id="cam-img" alt="camera stream">
+    <div id="cam-fallback" class="cam-fallback hidden">
+      <p>camera stream unavailable</p>
+      <button id="cam-retry" class="btn">retry</button>
+    </div>
+  </section>
+
+  <!-- Middle: joint jog rows (populated by app.js) -->
+  <section class="joints" id="joints"></section>
+
+  <!-- Right: safety / cal / status -->
+  <section class="side">
+    <button id="stop" class="stop">STOP</button>
+    <button id="cal-toggle" class="btn cal-toggle">CAL MODE</button>
+    <div class="status" id="status">
+      <div><span class="dot" id="dot-ros"></span> rosbridge</div>
+      <div><span class="dot" id="dot-agent"></span> agent</div>
+      <div id="st-rssi">rssi —</div>
+      <div id="st-uptime">up —</div>
+      <div id="st-cal">cal ch — / — µs</div>
+      <div id="st-estop" class="hidden estop-flag">E-STOP</div>
+    </div>
+  </section>
+</main>
+
+<script src="vendor/roslib.min.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
