@@ -249,4 +249,7 @@ setInterval(() => {
 renderRows();
 renderConnection();
 connect();
-camStart();
+// Start the MJPEG stream only after the page's load event: the stream never
+// "finishes", and starting it earlier holds the document in loading state
+// forever (breaks load-based tooling and Chromium's spinner).
+window.addEventListener('load', camStart);
