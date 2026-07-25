@@ -40,11 +40,12 @@ pca_hole_dl = 56.0;   pca_hole_dw = 19.0;   pca_hole_off_l = (pca_pcb_l - 56.0) 
 bay_gap     = 18;     // divider + USB-C plug bay (plug ~12 mm + finger room)
 entry_wall  = 6;      // thick bottom wall carrying the two cable ports
 usb_chan_w  = 9;      // floor channel beside the PCA9685 bay for USB run
-pca_pin_clear = 7.5;  // the PCA9685's 6-pin end headers are RIGHT-ANGLE,
+pca_pin_clear = 10;   // the PCA9685's 6-pin end headers are RIGHT-ANGLE,
                       // pins pointing horizontally out past each board
                       // end (~6 mm at ~10 mm height) — the board sits
                       // this far off the entry wall so the unused
-                      // entry-end pins float in free air
+                      // entry-end pins clear both the wall AND the
+                      // XT60E-F's through-panel body (~9 mm inward)
 inner_w     = max(esp32_pcb_w, pca_pcb_w) + 2 * fit_clearance;  // 29.4
 box_inner_l = entry_wall + pca_pin_clear + pca_pcb_l + bay_gap
               + esp32_pcb_l + 4;
@@ -68,18 +69,19 @@ esp_bay_y = box_w / 2 - inner_w / 2;         // ESP32 section CENTRED on the
                                              // tapers in from BOTH sides
 
 // --- 6V power inlet (entry wall, PCA bay) ---------------------------
-// Defaults fit an XT60E-M flag-style panel mount. For a different
-// connector, adjust the nose cutout / flange pocket / screw spacing.
-pwr_cut_w   = 15.8;   // nose cutout width  (across the wall, y)
-pwr_cut_h   = 8.4;    // nose cutout height (z)
-pwr_pock_w  = 28.5;   // flange pocket on the outer face
-pwr_pock_h  = 14.5;
+// Sized for the Amass XT60E-F panel mount in hand (photos 2026-07-24):
+// 34 x 16 flange with gasket, 3mm ears at 25 spacing, body passing
+// ~9 mm through/behind the panel, solder cups at the rear.
+pwr_cut_w   = 16.6;   // body cutout width  (across the wall, y)
+pwr_cut_h   = 13.0;   // body cutout height (z) — generous, the
+                      // gasketed flange covers it
+pwr_pock_w  = 35.0;   // flange + gasket pocket on the outer face
+pwr_pock_h  = 17.0;
 pwr_panel_t = 2.0;    // panel thickness left for the flange
-pwr_screw_p = 20.6;   // flange screw spacing
-pwr_screw_d = 2.05;   // thread-forming pilot for the flange screws
-pwr_z       = 16.5;   // connector centre height — RAISED so the body
-                      // and solder cups pass above the PCA9685's
-                      // entry-end right-angle pins (~z 8.6-11.4)
+pwr_screw_p = 25.0;   // flange screw spacing (XT60E-F)
+pwr_screw_d = 2.05;   // thread-forming pilot for the kit screws
+pwr_z       = 15;     // connector centre height — body and cups pass
+                      // above the PCA9685's entry-end pins (~z 8.6-11.4)
 
 // --- arm-face hardware relief (underside) ---------------------------
 // The arm's proud assembly screws sit a further 18 mm OUTBOARD of each
@@ -308,17 +310,19 @@ module spine_body() {
             rotate([-90, 0, 0])
                 cylinder(h = box_w + 0.4, r = 6.6, $fn = 96);
     }
-    // symmetric relief at BOTH hardware positions (52 from the row
-    // centre): circular head recess with an elongated nut through-slot
-    // in its middle — either end deals with either the screw heads or
-    // the screw tip + nut
+    // relief at BOTH hardware positions (52 from the row centre):
+    // circular head recess with a nut through-hole in its middle.
+    // The nose-side hole is ELONGATED (seam travel happens at the
+    // floating end); the entry-side one is round — a slot there would
+    // cut into a PCA9685 standoff, and if the nut lands at the entry
+    // end, mount the spine datum-at-entry so it needs no travel.
     for (sx = [-1, 1]) {
         translate([ear_group_center + sx * hw_dx, box_w / 2, -0.1])
             cylinder(h = head_recess_depth + 0.1, d = head_recess_d);
+        travel = sx > 0 ? (nut_slot_l - nut_slot_w) / 2 : 0;
         translate([ear_group_center + sx * hw_dx, box_w / 2, -0.1])
             hull()
-                for (ox = [-(nut_slot_l - nut_slot_w) / 2,
-                            (nut_slot_l - nut_slot_w) / 2])
+                for (ox = [-travel, travel])
                     translate([ox, 0, 0])
                         cylinder(h = 8.1, d = nut_slot_w);
     }

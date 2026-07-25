@@ -39,13 +39,11 @@ color("silver") {                  // the horizontal pin combs
 color("#333366")                   // I2C Dupont housings, plugged on
     translate([pcb_x0 + pca_pcb_l + 0.4, pcb_y0 + 4.4, 8.5])
         cube([14, 15.4, 3.0]);     // horizontally over the notched divider
-color("#1a4d1a")                   // old (dead-FET) terminal block
-    translate([pcb_x0 + 28, pcb_y0 + 0.4, pcb_z0 + 1.6])
-        cube([10, 7.6, 10]);
-color("silver") {                  // 16AWG solder joints: V+ and GND
-    translate([pcb_x0 + 30, pcb_y0 + 4, pcb_z0 + 2]) sphere(d = 3.2);
-    translate([pcb_x0 + 36, pcb_y0 + 4, pcb_z0 + 2]) sphere(d = 3.2);
-}
+color("#2e8b57")                   // V+ / GND screw terminal — the new
+    // blue clone carries it MID-BOARD and it WORKS (no dead FET):
+    // the 6V feed lands here, zero soldering anywhere
+    translate([pcb_x0 + 29, pcb_y0 + 9, pcb_z0 + 1.6])
+        cube([7.6, 8, 10]);
 color("dimgray")                   // 1000uF electrolytic
     translate([pcb_x0 + 45, pcb_y0 + 5.5, pcb_z0 + 1.6])
         cylinder(h = 11.5, d = 8.5);
@@ -84,11 +82,12 @@ color("#333366")
 
 // ---- XT60 power inlet (panel mount, entry wall) ---------------------
 pwr_y = box_w - bay_y - inner_w / 2;   // mirrored-shell world y
-color("gold") {
-    translate([0.3, pwr_y - pwr_pock_w / 2 + 0.5, pwr_z - pwr_pock_h / 2 + 0.5])
-        cube([pwr_panel_t + 1.4, pwr_pock_w - 1, pwr_pock_h - 1]);  // flange
-    translate([-6, pwr_y - pwr_cut_w / 2 + 0.3, pwr_z - pwr_cut_h / 2 + 0.3])
-        cube([entry_wall + 8, pwr_cut_w - 0.6, pwr_cut_h - 0.6]);   // body
+color("gold") {                    // XT60E-F: 34x16 gasketed flange on
+    // the pocket panel, body reaching ~9 inward, cups at the rear
+    translate([0.3, pwr_y - 16.5, pwr_z - 7.7])
+        cube([pwr_panel_t + 0.5, 33, 15.4]);            // flange
+    translate([2.5, pwr_y - pwr_cut_w / 2 + 0.3, pwr_z - pwr_cut_h / 2 + 0.3])
+        cube([12.5, pwr_cut_w - 0.6, pwr_cut_h - 0.6]); // body inward
 }
 
 // ---- inline XT60 service disconnect ---------------------------------
@@ -126,10 +125,11 @@ color("#111111") wire([[12, pwr_y + 3, pwr_z],
                        [pca_bx0 + 1.5, pcb_y0 + 9.5, 15.5],
                        [pcb_x0 + 3.5, pcb_y0 + 7, pcb_z0 + 5.7]]);
 color("red") wire([[pcb_x0 + 27.5, pcb_y0 + 4.5, pcb_z0 + 5.5],
-                   [pcb_x0 + 30, pcb_y0 + 4, pcb_z0 + 3]]);
+                   [pcb_x0 + 31, pcb_y0 + 8, pcb_z0 + 9],
+                   [pcb_x0 + 31, pcb_y0 + 11, pcb_z0 + 12]]);
 color("#111111") wire([[pcb_x0 + 27.5, pcb_y0 + 7, pcb_z0 + 5.7],
-                       [pcb_x0 + 33, pcb_y0 + 6.5, pcb_z0 + 6],
-                       [pcb_x0 + 36, pcb_y0 + 4, pcb_z0 + 3]]);
+                       [pcb_x0 + 34.5, pcb_y0 + 8.5, pcb_z0 + 9],
+                       [pcb_x0 + 34.5, pcb_y0 + 11, pcb_z0 + 12]]);
 
 // ---- USB-C run: entry port -> raceway -> plug bay -> ESP32 ----------
 color("#555555") {
@@ -197,9 +197,9 @@ for (i = [0 : 3])
     tag(esp_pin_names[i],
         [esp_pin_x(i2c_esp_idx[i]) + 1, esp_y0 + esp32_pcb_w + 2.2, 24.4],
         2.0, i2c_cols[i], 90);
-// power attachments (front edge with the mirrored board)
-tag("V+",  [pcb_x0 + 28.5, pcb_y0 + 8.7, 24], 2.2, "#cc2222");
-tag("GND", [pcb_x0 + 34.5, pcb_y0 + 8.7, 24], 2.2, "#222222");
+// power attachments: the mid-board screw terminal (zero-solder feed)
+tag("V+",  [pcb_x0 + 28.5, pcb_y0 + 18, 24], 2.2, "#cc2222");
+tag("GND", [pcb_x0 + 33.5, pcb_y0 + 18, 24], 2.2, "#222222");
 tag("6V IN (XT60)", [-30, pwr_y + 7, 18], 2.4);
 tag("USB-C", [esp_x - 13, esp_y0 + esp32_pcb_w + 2, 20], 2.2);
 

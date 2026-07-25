@@ -158,10 +158,13 @@ Lessons from the first printed set, designed back into the sources:
   USB-C plug rides high above the PCA9685's horizontal I2C housings,
   and nothing above the board tops ~21mm. No soldering on the ESP32;
   the board stays replaceable.
-- **Proper 6V power inlet**: the bare-wire pass-through in the entry
-  wall is now a panel-mount connector opening on the PCA9685 bay's
-  entry edge, sized for an XT60E-M flag mount (parametric — adjust
-  `pwr_*` in the spine source for a different connector).
+- **Proper 6V power inlet — zero solder**: the entry wall carries a
+  panel-mount opening sized for the Amass XT60E-F in hand (34×16
+  gasketed flange, ears at 25mm, body passing ~9mm through the panel;
+  parametric via `pwr_*`). With the replacement blue PCA9685's working
+  mid-board screw terminal, the whole power path is now solder-free:
+  panel XT60 → inline XT60 service disconnect → screw terminal. The
+  old board's dead-FET bypass story is retired with the old board.
 - **Right-angle end headers accounted for**: the PCA9685's 6-pin
   breakouts point horizontally out past both board ends. The board
   datum sits 7.5mm off the entry wall so the unused entry-end pins
