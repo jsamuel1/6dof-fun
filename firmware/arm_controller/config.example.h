@@ -19,11 +19,21 @@
 
 // ---------------------------------------------------------------------------
 // micro-ROS agent — the host running `micro-ros-agent udp4 --port 8888`
-// (see host/docker-compose.yml). When migrating Mac -> Raspberry Pi, this IP
-// is the only value that changes.
+// (see host/docker-compose.yml). When migrating between hosts, this IP is
+// the only value that changes.
 // ---------------------------------------------------------------------------
 #define AGENT_IP "192.168.1.100"  // IPv4 address of the Docker host
 #define AGENT_PORT 8888           // UDP port of the micro-ROS agent (default)
+
+// ---------------------------------------------------------------------------
+// Over-the-air update password (ArduinoOTA, port 3232). After the first USB
+// flash, update wirelessly with:
+//   arduino-cli upload --fqbn esp32:esp32:esp32 -p <esp32-ip> \
+//     --upload-field password=<this value> firmware/arm_controller
+// OTA reboots into the new image with all joints disarmed (arm goes limp) —
+// flash only with the arm supported or servo power off.
+// ---------------------------------------------------------------------------
+#define OTA_PASSWORD "change-me"
 
 // ---------------------------------------------------------------------------
 // I2C bus to the PCA9685 servo driver board.

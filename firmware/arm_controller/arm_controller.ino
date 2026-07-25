@@ -42,6 +42,7 @@
 #include <rosidl_runtime_c/string_functions.h>
 #include <rosidl_runtime_c/primitives_sequence_functions.h>
 
+#include <ArduinoOTA.h>
 #include <WiFi.h>
 #include <Wire.h>
 
@@ -627,6 +628,19 @@ void setup() {
   set_microros_wifi_transports(wifi_ssid, wifi_pass, agent_ip, AGENT_PORT);
   Serial.print("[arm] hostname ");
   Serial.println(WiFi.getHostname());
+
+  // Over-the-air firmware updates (arduino-cli upload -p <IP> ...).
+  // OTA reboots into the new image with all joints disarmed and the servo
+  // driver re-initialised (channels off) — flash with the arm mechanically
+  // supported or servo power off, or it goes limp on the post-flash boot.
+  ArduinoOTA.setHostname("armesp32");
+  ArduinoOTA.setPassword(OTA_PASSWORD);
+  ArduinoOTA.onStart([]() { Serial.println("[arm] OTA update starting"); });
+  ArduinoOTA.onError([](ota_error_t err) {
+    Serial.print("[arm] OTA error ");
+    Serial.println((int)err);
+  });
+  ArduinoOTA.begin();
   // Modem power-save (on by default) adds second-scale latency spikes that
   // trip the 2 s agent-ping timeout. This is a mains-powered controller —
   // trade the power saving for a stable link.
@@ -651,7 +665,8 @@ void loop() {
   ++loop_count;
   uint32_t now = millis();
 
-  // -- Serial diagnostic console (bench tool) ------------------------------
+  // -- OTA + serial diagnostic console (bench tools) -----------------------
+  ArduinoOTA.handle();
   handle_serial_diag();
 
   // -- 50 Hz servo loop, decoupled from all ROS activity ------------------
