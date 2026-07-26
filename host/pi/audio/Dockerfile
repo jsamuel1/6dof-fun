@@ -1,7 +1,7 @@
 FROM ros:jazzy-ros-core
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-        alsa-utils python3-numpy python3-rclpy ros-jazzy-std-msgs \
+        alsa-utils python3-numpy ros-jazzy-rclpy ros-jazzy-std-msgs \
     && rm -rf /var/lib/apt/lists/*
 
 COPY audio_monitor.py /audio_monitor.py
