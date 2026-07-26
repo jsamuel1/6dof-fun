@@ -55,13 +55,14 @@ services:
     image: arduino-arm/camera:jazzy
     container_name: arm-camera
     # 640x480 @ 15fps MJPEG keeps WiFi/CPU load low; raise once proven.
-    # CAMERA_DEVICE picks the capture device (default: first V4L device).
-    # On armdell use the external Logitech BRIO via its stable by-id path:
+    # CAMERA_DEVICE picks the HOST capture device; it is always mapped to
+    # /dev/video0 inside the container, so the ROS config never changes.
+    # On armdell use the external Logitech BRIO via its stable by-id path
+    # (set in host/pi/.env; /dev/videoN indices shuffle across reboots):
     #   CAMERA_DEVICE=/dev/v4l/by-id/usb-046d_Logitech_BRIO_D418730A-video-index0
-    # (set in host/pi/.env; /dev/videoN indices shuffle across reboots).
     command: >
       ros2 run usb_cam usb_cam_node_exe --ros-args
-      -p video_device:=${CAMERA_DEVICE:-/dev/video0}
+      -p video_device:=/dev/video0
       -p image_width:=640 -p image_height:=480
       -p framerate:=15.0 -p pixel_format:=mjpeg2rgb
     network_mode: host
@@ -69,7 +70,7 @@ services:
     environment:
       - ROS_DOMAIN_ID=0
     devices:
-      - ${CAMERA_DEVICE:-/dev/video0}:${CAMERA_DEVICE:-/dev/video0}
+      - ${CAMERA_DEVICE:-/dev/video0}:/dev/video0
     restart: unless-stopped
 
   # --- Touchscreen / web UI (docs/superpowers/specs/2026-07-19-touchscreen-ui-design.md)
