@@ -3,8 +3,10 @@
 // Topics (see docs/superpowers/specs/2026-07-19-touchscreen-ui-design.md):
 //   pub /arm/joint_commands  sensor_msgs/JointState  (one named joint, radians)
 //   pub /arm/cal             std_msgs/String         (firmware diag alphabet)
+//   pub /arm/audio/enable    std_msgs/Bool           (mic on/off)
 //   sub /joint_states        sensor_msgs/JointState
 //   sub /arm/status          std_msgs/String (JSON @ 1 Hz)
+//   sub /arm/audio           std_msgs/String (JSON @ ~5 Hz, buzz detector)
 
 'use strict';
 
@@ -27,12 +29,14 @@ let calMode = false;
 let rosConnected = false;
 let lastStatusMs = 0;
 let calUs = null, calCh = null;
+let micOn = null;                  // null until first /arm/audio message
+let buzzHideAt = 0;                // latch: overlay visible until this time
 
 // ---------------------------------------------------------------------------
 // rosbridge connection with backoff
 // ---------------------------------------------------------------------------
 let ros = null;
-let cmdTopic = null, calTopic = null;
+let cmdTopic = null, calTopic = null, micTopic = null;
 let retryDelay = 500;
 
 function connect() {
@@ -46,6 +50,21 @@ function connect() {
     });
     calTopic = new ROSLIB.Topic({
       ros, name: '/arm/cal', messageType: 'std_msgs/String',
+    });
+    micTopic = new ROSLIB.Topic({
+      ros, name: '/arm/audio/enable', messageType: 'std_msgs/Bool',
+    });
+
+    const audio = new ROSLIB.Topic({
+      ros, name: '/arm/audio', messageType: 'std_msgs/String',
+    });
+    audio.subscribe((msg) => {
+      try {
+        const a = JSON.parse(msg.data);
+        micOn = !!a.enabled;
+        if (a.buzz) buzzHideAt = Date.now() + 800;   // latch past detector flicker
+        renderAudio(a);
+      } catch (_) { /* malformed audio msg — ignore */ }
     });
 
     const js = new ROSLIB.Topic({
@@ -82,7 +101,7 @@ function connect() {
   const onDown = () => {
     if (ros) { ros.close(); ros = null; }
     rosConnected = false;
-    cmdTopic = calTopic = null;
+    cmdTopic = calTopic = micTopic = null;
     renderConnection();
     setTimeout(connect, retryDelay);
     retryDelay = Math.min(retryDelay * 2, 5000);
@@ -136,6 +155,15 @@ function renderReadouts() {
       el.textContent = havePositions ? `${(positions[i] / DEG).toFixed(1)}°` : '—';
     }
   }
+}
+
+function renderAudio(a) {
+  const btn = document.getElementById('mic-toggle');
+  btn.classList.toggle('on', micOn === true);
+  document.getElementById('st-audio').textContent =
+    micOn ? `mic ${a.band_db} dB` : 'mic off';
+  document.getElementById('buzz-overlay')
+    .classList.toggle('hidden', Date.now() >= buzzHideAt);
 }
 
 function renderCalStrip() {
@@ -213,6 +241,12 @@ function selectRow(i) {
 // ---------------------------------------------------------------------------
 document.getElementById('stop').addEventListener('click', () => sendCal('x'));
 
+document.getElementById('mic-toggle').addEventListener('click', () => {
+  if (!rosConnected || !micTopic) return;
+  const next = micOn === null ? false : !micOn;   // detector defaults on
+  micTopic.publish(new ROSLIB.Message({ data: next }));
+});
+
 document.getElementById('cal-toggle').addEventListener('click', () => {
   calMode = !calMode;
   document.getElementById('cal-toggle').classList.toggle('on', calMode);
@@ -243,7 +277,12 @@ setInterval(() => {
   if (Date.now() - lastStatusMs > STATUS_STALE_MS) {
     document.getElementById('dot-agent').classList.remove('ok');
   }
-}, 1000);
+  // clear the buzz latch even if no fresh /arm/audio message arrives
+  if (buzzHideAt && Date.now() >= buzzHideAt) {
+    document.getElementById('buzz-overlay').classList.add('hidden');
+    buzzHideAt = 0;
+  }
+}, 250);
 
 // ---------------------------------------------------------------------------
 renderRows();

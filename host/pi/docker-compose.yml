@@ -104,6 +104,21 @@ services:
       - camera
     restart: unless-stopped
 
+  audio:
+    build: ./audio
+    image: arduino-arm/audio:jazzy
+    container_name: arm-audio
+    # Servo stall-buzz detector: BRIO mic -> /arm/audio JSON @ ~5 Hz.
+    # Mic on/off via /arm/audio/enable (std_msgs/Bool); kiosk MIC button.
+    network_mode: host
+    ipc: host
+    environment:
+      - ROS_DOMAIN_ID=0
+      - AUDIO_DEVICE=${AUDIO_DEVICE:-hw:BRIO,0}
+    devices:
+      - /dev/snd:/dev/snd
+    restart: unless-stopped
+
   web:
     image: nginx:alpine
     container_name: arm-web

@@ -73,6 +73,23 @@ body {
 .stop:active { background: #9c262f; }
 .cal-toggle { min-height: 84px; font-size: 22px; }
 .cal-toggle.on { background: #8a5a1c; color: #0e0f16; }
+.mic-toggle { min-height: 60px; font-size: 22px; }
+.mic-toggle.on { background: #2c6e49; color: #eef2ee; }
+
+/* Full-screen stall-buzz alert */
+.buzz-overlay {
+  position: fixed; inset: 0; z-index: 20;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 64px; font-weight: 800; color: #fff;
+  background: rgba(156, 38, 47, 0.55);
+  border: 12px solid #d4595f;
+  animation: buzzflash 0.25s linear infinite alternate;
+  pointer-events: none;               /* never block the jog buttons */
+}
+@keyframes buzzflash {
+  from { background: rgba(156, 38, 47, 0.65); }
+  to   { background: rgba(156, 38, 47, 0.25); }
+}
 
 .status {
   flex: 1;

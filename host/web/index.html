@@ -26,16 +26,20 @@
   <section class="side">
     <button id="stop" class="stop">STOP</button>
     <button id="cal-toggle" class="btn cal-toggle">CAL MODE</button>
+    <button id="mic-toggle" class="btn mic-toggle">MIC</button>
     <div class="status" id="status">
       <div><span class="dot" id="dot-ros"></span> rosbridge</div>
       <div><span class="dot" id="dot-agent"></span> agent</div>
       <div id="st-rssi">rssi —</div>
       <div id="st-uptime">up —</div>
       <div id="st-cal">cal ch — / — µs</div>
+      <div id="st-audio">mic —</div>
       <div id="st-estop" class="hidden estop-flag">E-STOP</div>
     </div>
   </section>
 </main>
+
+<div id="buzz-overlay" class="buzz-overlay hidden">BUZZ — BACK OFF</div>
 
 <script src="vendor/roslib.min.js"></script>
 <script src="app.js"></script>
