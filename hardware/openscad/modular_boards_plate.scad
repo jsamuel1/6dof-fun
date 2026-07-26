@@ -7,13 +7,17 @@
 //     V+ terminal facing UP; right-angle end headers overhang the
 //     standoffs into free air at both ends.
 //   * ESP32 (30-pin devkit) FLIPPED, PINS UP — every pin jumper-usable
-//     from above; RF can and USB-C hang beneath the raised board, and
-//     the USB-C plug approaches over the deck from the plate edge.
+//     from above; RF can and USB-C hang beneath the raised board. The
+//     USB end faces the x=0 plate edge, and a through-slot in the deck
+//     runs from that edge to under the port so the plug body (which
+//     rides ~0.5 below deck at these standoffs) slides straight in.
 //
-// Height notes (deck = plate top): ESP32 pin tips 13.1; PCA servo pins
-// 14.6. With jumper housings / servo plugs seated the stacks reach
-// ~20-21 — poke a touch past the system's 19.4 lid line, fine with the
-// lid off or a vented lid.
+// Height notes (deck = plate top): ESP32 pin tips 11.6; PCA servo pins
+// 12.6. Seated servo plugs top out ~18.6 — now UNDER the system's 19.4
+// lid line. Seated jumper housings on the ESP32 reach ~19.6, grazing
+// the line (jumpering is lid-off work anyway). ESP32 standoffs are
+// floored by the RF can / boot buttons hanging under the flipped board
+// (~3.2-3.5 tall), not the USB-C plug — the deck slot absorbs that.
 //
 // Interface dims extracted from the donor plate mesh (proj.3mf):
 // outline 110 x 97 x 5, corner holes D4 at (+-50, +-40).
@@ -28,8 +32,14 @@ plate_r = 6;
 
 pca_y  = 22;     // PCA9685 board centre (servo edge toward +y rim)
 esp_y  = -22;    // ESP32 board centre
-esp_standoff_h = 5.5;   // flipped board: USB-C plug clears the deck
-pca_standoff_h = 5;
+esp_standoff_h = 4;     // clears the RF can/buttons under the flipped board
+pca_standoff_h = 3;     // solder tails need ~2; keeps servo plugs under the lid line
+
+// USB-C deck slot: the ESP32's USB end faces the x=0 edge (board end at
+// x=29); the seated plug body sits x~16..28 with its underside ~0.5
+// below deck, so cut a full-depth slot from the edge to past the port.
+usb_slot_w   = 14;      // plug body 10.5 wide + slop
+usb_slot_x1  = 33;      // inner (rounded) end — reaches under the port shell
 
 difference() {
     union() {
@@ -56,9 +66,19 @@ difference() {
             for (ox = [-24, 24])
                 translate([ox, 0, -0.1])
                     cylinder(h = plate_t + 0.2, d = 12);
-    // vent/tie slots under each board
-    for (sy = [pca_y, esp_y], sx = [-18, 0, 18])
-        translate([plate_l / 2 + sx, plate_w / 2 + sy, 0])
+    // USB-C plug slot: open to the x=0 edge, rounded inner end
+    translate([0, plate_w / 2 + esp_y, 0]) {
+        translate([-1, -usb_slot_w / 2, -0.1])
+            cube([usb_slot_x1 - usb_slot_w / 2 + 1, usb_slot_w, plate_t + 0.2]);
+        translate([usb_slot_x1 - usb_slot_w / 2, 0, -0.1])
+            cylinder(h = plate_t + 0.2, d = usb_slot_w);
+    }
+    // vent/tie slots under each board (ESP row skips the slot's zone)
+    for (sx = [-18, 0, 18])
+        translate([plate_l / 2 + sx, plate_w / 2 + pca_y, 0])
+            vent_slot(14, 4, plate_t);
+    for (sx = [0, 18])
+        translate([plate_l / 2 + sx, plate_w / 2 + esp_y, 0])
             vent_slot(14, 4, plate_t);
 }
 
