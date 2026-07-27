@@ -232,3 +232,16 @@ edge), the 6V feed and the USB-C run placed in situ:
   straight onto the header strip; the I2C ribbon crosses the divider
   notch to the ESP32.</figcaption>
 </figure>
+
+
+## Keel base concept (phase 3, in progress)
+
+`hardware/openscad/keel_base.scad` (v3.7) is the next-generation
+alternative to the on-arm spine: an integrated base plinth UNDER the arm
+— slide-out board drawers, a WAGO servo-power junction with a lift-out
+Dupont coupler comb, an aft power chamber (12V barrel + USB-C PD via
+HUSB238/ORing into the buck), arm adapter plate, optional desk clamps.
+Full rationale, honest review (including the free-standing tipping
+numbers) and the interactive concept viewer live in
+`hardware/keel-concept/`. Blocked on the MEASURE-ME items listed there
+before final printing; fit-check parts can print now.

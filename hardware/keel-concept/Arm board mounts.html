@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Arm board mounts — concepts</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.184.0/build/three.module.js",
+    "three/addons/controls/OrbitControls.js": "https://unpkg.com/three@0.184.0/examples/jsm/controls/OrbitControls.js",
+    "three/addons/exporters/OBJExporter.js": "https://unpkg.com/three@0.184.0/examples/jsm/exporters/OBJExporter.js",
+    "three/addons/exporters/GLTFExporter.js": "https://unpkg.com/three@0.184.0/examples/jsm/exporters/GLTFExporter.js"
+  },
+  "integrity": {
+    "https://unpkg.com/three@0.184.0/build/three.module.js": "sha384-8FCZ1eVO6it4+pbec2aDtnTrwjWXZLJRC+MAGCIPDgsYnUrl/E0A2YlF8ioMKI/J",
+    "https://unpkg.com/three@0.184.0/build/three.core.js": "sha384-dw2ooPewaEIrAgl6oFDBmmBWCE9oW9LxRGcfwZ0hLvEprzo202wXl7vCYHRlSnOT",
+    "https://unpkg.com/three@0.184.0/examples/jsm/controls/OrbitControls.js": "sha384-4rziNxOBZKQ69i+w+f89KJ55TCYquwchVbByQwmaOeIOXdOU2PLDn3kOfXHwIJC9",
+    "https://unpkg.com/three@0.184.0/examples/jsm/exporters/OBJExporter.js": "sha384-nbwtoZENJD3Vq+ACK0CuGQdPMuDWHkamC2KJD70EV5nfg6jQjfppKOea07YJN+N3",
+    "https://unpkg.com/three@0.184.0/examples/jsm/exporters/GLTFExporter.js": "sha384-VofkvpG6HERhFCYbsUOHeNXBCqID2nfqkQqnVzE1jc/oPcz+qJ13ADdXH08hE+cQ"
+  }
+}
+</script>
+<style>
+  :root{
+    --paper:#f2f0ea; --ink:#1b1c1f; --ink-2:#5b5d63; --line:#d6d3ca;
+    --red:#b0271f; --aqua:#1d8e83;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{background:var(--paper);color:var(--ink);font:400 14px/1.5 'IBM Plex Sans',system-ui,sans-serif;overflow:hidden}
+  a{color:var(--red)} a:hover{color:#8b1c16}
+  three-d-stage:not(:defined){visibility:hidden}
+  three-d-stage{position:fixed;inset:0}
+  .col{
+    position:fixed;left:22px;top:22px;width:300px;z-index:5;
+    display:grid;gap:10px;max-height:calc(100vh - 44px);overflow-y:auto;
+    scrollbar-width:thin;
+  }
+  .panel{
+    background:rgba(248,247,243,.92);backdrop-filter:blur(8px);
+    border:1px solid var(--line);border-radius:3px;padding:16px 16px 14px;
+  }
+  .eyebrow{font:500 10px/1 'IBM Plex Mono',monospace;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-2)}
+  h1{font:600 17px/1.25 'IBM Plex Sans',sans-serif;margin:7px 0 10px}
+  .sub{display:none}
+  .cards{display:grid;gap:7px}
+  button.card{
+    display:grid;grid-template-columns:22px 1fr;gap:10px;align-items:start;
+    text-align:left;font:inherit;color:inherit;cursor:pointer;
+    background:#fff;border:1px solid var(--line);border-radius:3px;padding:9px 11px;
+  }
+  button.card:hover{border-color:#b3afa4}
+  button.card[aria-pressed="true"]{border-color:var(--ink);background:var(--ink);color:#f6f5f1}
+  button.card[aria-pressed="true"] .k,button.card[aria-pressed="true"] .cd{color:#b9b6ad}
+  .k{font:600 11px/1.6 'IBM Plex Mono',monospace;color:var(--ink-2)}
+  .cn{display:block;font-weight:600;font-size:13px}
+  .cd{display:block;font-size:11.5px;color:var(--ink-2);margin-top:2px}
+  .toggles{display:flex;flex-wrap:wrap;gap:6px;margin-top:13px;padding-top:13px;border-top:1px solid var(--line)}
+  button.tog{
+    font:500 11px/1 'IBM Plex Mono',monospace;letter-spacing:.04em;cursor:pointer;
+    background:#fff;border:1px solid var(--line);border-radius:2px;padding:7px 9px;color:var(--ink-2);
+  }
+  button.tog[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:#f6f5f1}
+  .spec{
+    background:rgba(248,247,243,.92);backdrop-filter:blur(8px);
+    border:1px solid var(--line);border-radius:3px;padding:14px 16px;
+  }
+  .spec .dim{font:500 11.5px/1.5 'IBM Plex Mono',monospace;color:var(--red);margin:2px 0 9px}
+  .spec ul{margin:0;padding-left:15px;display:grid;gap:5px}
+  .spec li{font-size:12px;line-height:1.45;color:var(--ink-2);text-wrap:pretty}
+  .spec li strong{color:var(--ink);font-weight:500}
+  .parts{font:400 10.5px/1.45 'IBM Plex Mono',monospace;color:var(--ink-2);margin:10px 0 0;padding-top:9px;border-top:1px solid var(--line)}
+  .swatches{position:fixed;right:22px;top:22px;z-index:5;display:flex;border:1px solid var(--line);border-radius:2px;overflow:hidden}
+  .sw{width:46px;height:26px;display:grid;place-items:end center;font:500 8px/1 'IBM Plex Mono',monospace;letter-spacing:.06em;padding-bottom:3px}
+  @media (max-width:900px){.col{width:250px}}
+</style>
+</head>
+<body>
+
+<three-d-stage name="arm-board-mount" background="#f2f0ea"></three-d-stage>
+
+<div class="col">
+<div class="panel">
+  <div class="eyebrow">6DOF arm · electronics</div>
+  <h1>Board mount concepts</h1>
+  <p class="sub">Three ways to carry the ESP32, PCA9685 and buck converter without the 165 mm spine box.</p>
+  <div class="cards" id="cards">
+    <button class="card" data-c="keel" aria-pressed="true">
+      <span class="k">A</span>
+      <span><span class="cn">Keel <span style="font:600 8px/1 'IBM Plex Mono',monospace;letter-spacing:.1em;color:#2e8b3f;vertical-align:2px">● SELECTED</span></span><span class="cd">Integrated base: boards + full power chain, ballast, anchors.</span></span>
+    </button>
+    <button class="card" data-c="fin" aria-pressed="false" style="opacity:.55">
+      <span class="k">B</span>
+      <span><span class="cn">Card <span style="font:500 8px/1 'IBM Plex Mono',monospace;letter-spacing:.1em;color:var(--ink-2)">ARCHIVE</span></span><span class="cd">Two 22 mm cards flat on the bracket + outriggers.</span></span>
+    </button>
+    <button class="card" data-c="tap" aria-pressed="false" style="opacity:.55">
+      <span class="k">C</span>
+      <span><span class="cn">Tap <span style="font:500 8px/1 'IBM Plex Mono',monospace;letter-spacing:.1em;color:var(--ink-2)">ARCHIVE</span></span><span class="cd">Buck pod — superseded: buck now lives in the Keel.</span></span>
+    </button>
+  </div>
+  <div class="toggles">
+    <button class="tog" id="tBoards" aria-pressed="true">PCBs</button>
+    <button class="tog" id="tArm" aria-pressed="true">ARM STUB</button>
+    <button class="tog" id="tExp" aria-pressed="false">SERVICE</button>
+    <button class="tog" id="tAdp" aria-pressed="false">ADAPTER</button>
+    <button class="tog" id="tBase" aria-pressed="true">BASE</button>
+    <button class="tog" id="tXray" aria-pressed="false">X-RAY</button>
+    <button class="tog" id="tClamp" aria-pressed="true">CLAMPS</button>
+    <button class="tog" id="tSpin" aria-pressed="true" title="Turntable: slowly auto-rotates the 3D view. Click to stop.">SPIN</button>
+  </div>
+  <div class="toggles" style="border-top:none;padding-top:0;margin-top:7px">
+    <span style="font:500 9px/2.4 'IBM Plex Mono',monospace;letter-spacing:.1em;color:var(--ink-2)">VIEW</span>
+    <button class="tog" id="tComb" aria-pressed="false" title="Isolate the coupler comb: the six 3-pin Dupont joints, latch bar open.">COMB DETAIL</button>
+    <button class="tog" id="tParts" aria-pressed="false" title="Every separately printed component, laid out and labelled.">PRINTED PARTS</button>
+  </div>
+  <div class="toggles" style="border-top:none;padding-top:0;margin-top:7px">
+    <span style="font:500 9px/2.4 'IBM Plex Mono',monospace;letter-spacing:.1em;color:var(--ink-2)">CABLES</span>
+    <button class="tog" id="tPwr" aria-pressed="false">6V PWR</button>
+    <button class="tog" id="tI2c" aria-pressed="false">I2C</button>
+    <button class="tog" id="tSrv" aria-pressed="false">SERVO ×6</button>
+  </div>
+</div>
+
+<div class="spec" id="spec"></div>
+</div>
+
+<div class="swatches">
+  <div class="sw" style="background:#24262b;color:#a9a6a0">PETG</div>
+  <div class="sw" style="background:#e9e7e1;color:#6b6862">PETG</div>
+  <div class="sw" style="background:#b0271f;color:#e8b6b2">PETG</div>
+  <div class="sw" style="background:#27b3a4;color:#0b4c46">TPU</div>
+</div>
+
+<script src="./three-d-stage.js"></script>
+<script type="module">
+import * as THREE from 'three';
+import { CONCEPTS as MAIN } from './mounts.js';
+import { ARCHIVE } from './mounts-archive.js';
+import { buildParts } from './parts-view.js';
+const CONCEPTS = { ...MAIN, ...ARCHIVE };
+
+const stage = document.querySelector('three-d-stage');
+await stage.ready;
+
+const state = { c: 'keel', boards: true, arm: true, exp: false,
+  adp: false, base: true, xray: false, clamps: true, pwr: false, i2c: false, servo: false,
+  comb: false, parts: false };
+let current = null;
+
+// comb detail: everything that isn't the coupler joint or its immediate
+// context is stripped away, and the latch bar swings open on its hinge
+const COMB_KEEP =
+  /^(comb_|keel_coupler_comb|dupont_|lead_(arm|pca)_ch|keel_wago_|wago_|keel_edge_bushing|keel_pigtail_pass_|cable_servo)/;
+
+function isolateComb(built) {
+  const kill = [];
+  built.traverse(o => {
+    if (o === built || o.children.length) return;
+    for (let p = o; p && p !== built; p = p.parent)
+      if (COMB_KEEP.test(p.name)) return;
+    kill.push(o);
+  });
+  kill.forEach(o => o.parent && o.parent.remove(o));
+  for (let i = 0; i < 4; i++) {
+    const empty = [];
+    built.traverse(o => { if (o !== built && !o.isMesh && !o.isSprite && !o.children.length) empty.push(o); });
+    if (!empty.length) break;
+    empty.forEach(o => o.parent && o.parent.remove(o));
+  }
+  const lb = built.getObjectByName('comb_latch_bar');
+  if (lb) lb.rotation.z = 2.05;      // latch flipped open on its hinge
+}
+
+function layout(g) {
+  g.updateMatrixWorld(true);
+  const b = new THREE.Box3().setFromObject(g);
+  const c = b.getCenter(new THREE.Vector3());
+  const root = new THREE.Group();
+  root.name = g.name;
+  g.position.set(-c.x, -b.min.y, -c.z);
+  root.add(g);
+  root.scale.setScalar(0.001);
+  root.userData.spec = g.userData.spec;
+  return root;
+}
+
+function applyExplode(g, t) {
+  // staged: lids/covers lift first, boards pop out second
+  const e1 = Math.min(t * 1.6, 1), e2 = Math.max((t - 0.35) / 0.65, 0);
+  g.traverse(o => {
+    const e = o.userData.explode;
+    if (!e) return;
+    if (!o.userData.base) o.userData.base = o.position.clone();
+    const k = o.userData.kind === 'board' ? e2 : e1;
+    const s = k * k * (3 - 2 * k);
+    o.position.copy(o.userData.base).addScaledVector(e, s);
+  });
+}
+let builtGroup = null, expT = 0;
+(function animLoop() {
+  requestAnimationFrame(animLoop);
+  const target = state.exp ? 1 : 0;
+  if (builtGroup && Math.abs(expT - target) > 0.002) {
+    expT += (target - expT) * 0.09;
+    applyExplode(builtGroup, expT);
+  }
+})();
+
+function render() {
+  if (state.parts) {
+    const p = buildParts();
+    applyExplode(p, 0);
+    builtGroup = null;
+    current = layout(p);
+    stage.setObject(current);
+    writeSpec(current.userData.spec);
+    stage.setAttribute('name', 'arm-mount-keel-parts');
+    return;
+  }
+  const built = CONCEPTS[state.c]({ boards: state.comb ? true : state.boards, context: state.arm && !state.comb,
+    clamps: state.clamps ? 'mounted' : 'stowed',
+    cables: { pwr: state.pwr, i2c: state.i2c, servo: state.servo } });
+  if (state.comb) isolateComb(built);
+  if (!state.base && !state.comb) {
+    // base clicked off: drop the floor + feet away to open the underside
+    const b = built.getObjectByName('keel_base_assembly');
+    if (b) { b.position.y -= 42; b.rotation.z = 0.06; }
+  }
+  if (state.adp) {
+    // isolate the adapter: hide the arm, lift the plate + its M4s
+    const armStub = built.getObjectByName('arm_context_stub');
+    if (armStub) armStub.visible = false;
+    const plate = built.getObjectByName('arm_adapter_plate');
+    if (plate) plate.position.y += 30;
+    built.traverse(o => {
+      if (o.name === 'adapter_m4_from_below') o.position.y += 14;
+    });
+  }
+  if (state.xray) {
+    built.traverse(o => {
+      if (o.isMesh && /^(keel_shell|keel_floor|keel_lid|keel_ballast_cap|arm_)/.test(o.name)) {
+        o.material = o.material.clone();
+        o.material.transparent = true;
+        o.material.opacity = o.name.startsWith('keel_lid') ? 0.1 :
+          o.name.startsWith('arm_') ? 0.12 : 0.2;
+        o.material.depthWrite = false;
+      }
+    });
+  }
+  applyExplode(built, state.comb ? 0 : expT);
+  builtGroup = state.comb ? null : built;
+  current = layout(built);
+  stage.setObject(current);
+  writeSpec(state.comb ? COMB_SPEC : current.userData.spec);
+  stage.setAttribute('name', 'arm-mount-' + state.c);
+}
+
+function writeSpec(s) {
+  document.getElementById('spec').innerHTML =
+    `<div class="eyebrow">${s.name} — ${s.tag}</div>
+     <div class="dim">${s.dims}</div>
+     <ul>${s.lines.map(l => `<li>${l}</li>`).join('')}</ul>
+     <p class="parts">${s.parts}</p>`;
+}
+
+const COMB_SPEC = {
+  name: 'COUPLER COMB', tag: '6 × 3-pin Dupont',
+  dims: '38 × 64 × 12 mm · 9.6 mm channel pitch',
+  lines: [
+    'Six servos, six leads, six <strong>3-pin Dupont</strong> joints (2.54 pitch: <span style="color:#d07023">signal</span> / <span style="color:#b32020">+6 V</span> / <span style="color:#1b1b1e">GND</span>) — one per channel, so nothing can be reassembled a channel out.',
+    'Aft half of each channel: the PCA drawer’s <strong>male</strong> pigtail plug, butted against a moulded <strong>end stop</strong>. It never comes out — pulling the arm side loads the stop, not the pigtail.',
+    'Fore half: the arm harness’s <strong>female</strong> plug, pushed on through a flared lead-in. Red key rib on top shows correct orientation at a glance.',
+    'The <strong>hinged latch bar</strong> (shown open) drops over all six with a hold-down pad per channel and one snap catch at the fore edge. Closed, nothing walks out under vibration; open, the arm detaches in six straight pulls.',
+    'Channels carry moulded <strong>index pips, 1–6</strong>, along the fore lip.',
+    'Two side tongues ride grooves in the junction-tray walls: lift the comb straight out — leads still attached — for full access to the WAGO lanes underneath.',
+    '<strong>Harness exit:</strong> ø10.4 mm bore straight up through the junction lid at x = −17, aqua slit <strong>TPU bushing</strong> pressed in — sited <strong>aft of the arm adapter plate and the arm’s aft bracket foot</strong>, so nothing overhangs it and the cables rise into open air directly above the comb’s fore lead-outs.',
+    '<strong>Service windows</strong> (dark) in the tunnel/tray wall pass the drawer pigtails through — each drawer rolls out without opening the tray.',
+  ],
+  parts: 'comb + latch bar (PETG red) · edge bushing (TPU aqua) · 12 × 3-pin Dupont housings (bought)',
+};
+
+document.getElementById('cards').addEventListener('click', e => {
+  const b = e.target.closest('button.card');
+  if (!b) return;
+  state.c = b.dataset.c;
+  [...document.querySelectorAll('button.card')].forEach(x =>
+    x.setAttribute('aria-pressed', String(x === b)));
+  render();
+});
+
+const tog = (id, key) => {
+  const el = document.getElementById(id);
+  el.addEventListener('click', () => {
+    state[key] = !state[key];
+    el.setAttribute('aria-pressed', String(state[key]));
+    render();
+  });
+};
+tog('tBoards', 'boards');
+tog('tArm', 'arm');
+tog('tExp', 'exp');
+tog('tAdp', 'adp');
+tog('tBase', 'base');
+tog('tXray', 'xray');
+tog('tClamp', 'clamps');
+tog('tPwr', 'pwr');
+tog('tI2c', 'i2c');
+tog('tSrv', 'servo');
+
+// the two special views are mutually exclusive
+for (const [id, key, other] of [['tComb', 'comb', 'parts'], ['tParts', 'parts', 'comb']]) {
+  const el = document.getElementById(id);
+  el.addEventListener('click', () => {
+    state[key] = !state[key];
+    if (state[key]) state[other] = false;
+    document.getElementById('tComb').setAttribute('aria-pressed', String(state.comb));
+    document.getElementById('tParts').setAttribute('aria-pressed', String(state.parts));
+    render();
+  });
+}
+
+const spin = document.getElementById('tSpin');
+let spinning = true;
+spin.addEventListener('click', () => {
+  spinning = !spinning;
+  spin.setAttribute('aria-pressed', String(spinning));
+  if (spinning) stage.setAttribute('autorotate', ''); else stage.removeAttribute('autorotate');
+});
+stage.setAttribute('autorotate', '');
+
+render();
+</script>
+</body>
+</html>
