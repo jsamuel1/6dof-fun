@@ -23,6 +23,7 @@ from pathlib import Path
 
 import rclpy
 from rclpy.node import Node
+from rclpy.qos import qos_profile_sensor_data
 from sensor_msgs.msg import JointState
 from std_msgs.msg import String
 
@@ -36,7 +37,9 @@ class CalRecorder(Node):
         self.status = {}
         self.positions = {}
         self.create_subscription(String, '/arm/status', self.on_status, 10)
-        self.create_subscription(JointState, '/joint_states', self.on_joints, 10)
+        # firmware publishes /joint_states best-effort; match it or get nothing
+        self.create_subscription(JointState, '/joint_states', self.on_joints,
+                                 qos_profile_sensor_data)
         self.create_subscription(String, '/arm/cal_mark', self.on_mark, 10)
         self.ack = self.create_publisher(String, '/arm/cal_mark/ack', 10)
         OUT.mkdir(parents=True, exist_ok=True)
