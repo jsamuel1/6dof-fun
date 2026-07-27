@@ -62,18 +62,20 @@ pca_cx = plate_l - 8 - pca_pcb_l / 2;    // 70.75
 // board openings: footprint + clearance, minus the four screw pads
 win_clear = 0.6;    // opening margin per side around the PCB outline
 win_r     = 4;      // opening corner radius
-// screw pads: quadrant gussets. The collar at the hole is capped at d6
-// by solder-side hardware (ESP32 boot buttons 3.9 from the hole, PCA
-// RA tails 3.5 — neither may rest on deck), then two outer lobes run
-// 90 degrees apart — one along the window's end edge, one along its
-// side edge — and the hull closes the whole corner square to the
-// hole's edge. The PCA's end-edge lobes are lifted 3 outward and kept
-// d8 so the fan's inner envelope clears the RA header tails by ~0.8.
-pad_d      = 6;             // collar at the screw hole
-pad_lobe_d = 10;            // side-edge lobe (both boards)
+// screw pads: L-shaped corner gussets, capped at the collar width so
+// nothing flares past 90 degrees. The collar at the hole is d6 (fixed
+// by solder-side hardware: ESP32 boot buttons 3.9 from the hole, PCA
+// RA tails 3.5 — neither may rest on deck); the two outer lobes are
+// the SAME d6, so the hull's edges leave the hole tangents parallel
+// to the window edges and meet the outer rectangle at exactly 90 —
+// two 6mm legs per corner, one along each edge, no wider than the
+// collar anywhere. The PCA's end-edge lobes lift 1.5 outward so the
+// leg's inner edge clears the RA header tails by ~0.6.
+pad_d      = 6;             // collar at the screw hole = leg width
+pad_lobe_d = 6;             // side-edge lobe (both boards)
 pad_run    = 5;             // lobe offset past the hole
-pca_xlobe  = [5, 3, 8];     // PCA end-edge lobe: [dx, dy-lift, dia]
-esp_xlobe  = [5, 0, 10];    // ESP end-edge lobe: nothing to dodge
+pca_xlobe  = [5, 1.5, 6];   // PCA end-edge lobe: [dx, dy-lift, dia]
+esp_xlobe  = [5, 0, 6];     // ESP end-edge lobe: nothing to dodge
 
 // USB-C deck slot: the ESP32's USB end faces x=0 (board end at x=53);
 // the plug body crosses the deck plane, so keep a full-depth stadium
