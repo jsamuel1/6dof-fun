@@ -36,6 +36,15 @@
 
 include <common_params.scad>
 
+// rounded-rect through-window centred on (cx, cy)
+module board_window(cx, cy, l, w) {
+    translate([cx, cy, 0])
+        hull()
+            for (px = [-1, 1], py = [-1, 1])
+                translate([px * (l / 2 - win_r), py * (w / 2 - win_r), -0.1])
+                    cylinder(h = plate_t + 0.2, r = win_r);
+}
+
 plate_l = 110;   plate_w = 97;   plate_t = 2;
 
 // board dims (local copies so this file stands alone; ruler-verified)
@@ -64,9 +73,14 @@ usb_slot_w   = 14;      // plug body 10.5 wide + slop
 usb_slot_x0  = 28;      // outer end — drop-in room ahead of the port
 usb_slot_x1  = 60;      // inner end — under the port shell
 
-// relief window under the flipped ESP32's RF can (~x 80-98 on the
-// antenna half); buttons (~2-2.5 tall) clear the 3mm standoffs on deck
-esp_win_c = 88;   esp_win_l = 24;   esp_win_w = 16;
+// full-open windows under each board: the whole area inside the screw
+// pattern is cut away, leaving a ~1.5mm web to each standoff base (the
+// standoffs must stay rooted to the deck — that web is the only limit).
+// The ESP32's USB shell zone (outside its window, at the hole-row line)
+// is covered by the USB slot instead.
+pca_win_l = 47;   pca_win_w = 10;   // holes 56 x 19
+esp_win_l = 37;   esp_win_w = 14;   // holes 46.5 x 23.3
+win_r = 4;                          // window corner radius
 
 difference() {
     union() {
@@ -96,11 +110,8 @@ difference() {
     // USB-C plug slot (closed stadium)
     translate([(usb_slot_x0 + usb_slot_x1) / 2, plate_w / 2 + esp_y, 0])
         vent_slot(usb_slot_x1 - usb_slot_x0, usb_slot_w, plate_t);
-    // relief window under the ESP32's RF can (closed stadium)
-    translate([esp_win_c, plate_w / 2 + esp_y, 0])
-        vent_slot(esp_win_l, esp_win_w, plate_t);
-    // vent/tie slots under the PCA9685
-    for (sx = [-18, 0, 18])
-        translate([pca_cx + sx, plate_w / 2 + pca_y, 0])
-            vent_slot(14, 4, plate_t);
+    // full-open windows under each board (rounded rects inside the
+    // standoff patterns)
+    board_window(pca_cx, plate_w / 2 + pca_y, pca_win_l, pca_win_w);
+    board_window(esp_cx, plate_w / 2 + esp_y, esp_win_l, esp_win_w);
 }
