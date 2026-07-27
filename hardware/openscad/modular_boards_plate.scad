@@ -84,6 +84,34 @@ usb_slot_w   = 14;      // plug body 10.5 wide + slop
 usb_slot_x0  = 28;      // outer end — drop-in room ahead of the port
 usb_slot_x1  = 60;      // inner end — under the port shell
 
+// ---------------------------------------------------------------------
+// Deck labels (embossed 0.6, Chalkboard). The ESP32 is flipped, so its
+// silkscreen faces the deck — the pin names are printed on the deck
+// beside each row instead, at true 2.54 pitch. Row identity for the
+// FLIPPED board, antenna at +x, pins up (verified against
+// CONNECTORS.md: D23 D22 TX0 RX0 D21 ... GND 3V3 from the antenna
+// end): the D23..3V3 row lands on the +y side, EN..VIN on the -y side.
+// ---------------------------------------------------------------------
+label_font   = "Chalkboard";
+name_font    = "Chalkboard:style=Bold";
+emboss_h     = 0.6;
+pin_size     = 1.9;    // fits the 2.54 pin pitch
+name_size    = 7;
+pin_pitch    = 2.54;
+esp_pin_x0   = 17.78;  // first pin (antenna end) offset from board centre
+esp_row_py   = ["D23","D22","TX0","RX0","D21","D19","D18","D5",
+                "TX2","RX2","D4","D2","D15","GND","3V3"];
+esp_row_ny   = ["EN","VP","VN","D34","D35","D32","D33","D25",
+                "D26","D27","D14","D12","D13","GND","VIN"];
+
+module deck_label(t, size, font, rot = 0, hal = "center") {
+    translate([0, 0, plate_t - 0.1])
+        linear_extrude(emboss_h + 0.1)
+            rotate(rot)
+                text(t, size = size, font = font,
+                     halign = hal, valign = "center");
+}
+
 // footprint opening minus quadrant screw pads, extruded through the deck
 module board_window(cx, cy, win_l, win_w, hole_dl, hole_dw, xlobe) {
     translate([cx, cy, -0.1])
@@ -131,4 +159,21 @@ difference() {
         translate([bd[0] + px * bd[2] / 2,
                    plate_w / 2 + bd[1] + py * bd[3] / 2, -0.1])
             cylinder(h = plate_t + 0.2, d = m25_pilot_d);
+}
+
+// ---- embossed labels ------------------------------------------------
+// board names beside each opening
+translate([pca_cx, plate_w / 2 + pca_y + pca_pcb_w / 2 + win_clear + 6, 0])
+    deck_label("PCA9685", name_size, name_font);
+translate([44, plate_w / 2 + esp_y - esp_pcb_w / 2 - win_clear - 6, 0])
+    deck_label("ESP32", name_size, name_font);
+
+// ESP32 pin names along both rows (labels read outward from the board)
+esp_win_ey = esp_pcb_w / 2 + win_clear;   // opening half-width
+for (i = [0 : 14]) {
+    px_i = esp_cx + esp_pin_x0 - pin_pitch * i;
+    translate([px_i, plate_w / 2 + esp_y + esp_win_ey + 1, 0])
+        deck_label(esp_row_py[i], pin_size, label_font, 90, "left");
+    translate([px_i, plate_w / 2 + esp_y - esp_win_ey - 1, 0])
+        deck_label(esp_row_ny[i], pin_size, label_font, 90, "right");
 }
