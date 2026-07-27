@@ -468,8 +468,8 @@ module coupler_comb() {
             // hinge knuckles on the stop's aft face: three lugs at
             // y = -22 / 0 / +22, bored Ø3.4 for the latch-bar pin
             for (ky = [-22, 0, 22])
-                translate([-22.5, ky - 3, 0])
-                    cube([3.5, 6, comb_plate_t + 5]);
+                translate([-25.2, ky - 3, 0])
+                    cube([6.2, 6, comb_plate_t + 5]);
             // 7 dividers with flared (tapered) fore lead-ins: full
             // 1.8 wide until x=11, thinning to 0.6 at the mouth so a
             // plug funnels itself into the channel
@@ -498,7 +498,7 @@ module coupler_comb() {
             translate([-9, (i - 2.5) * comb_pitch, 0])
                 vent_slot(6, 3.6, comb_plate_t);
         // hinge pin bore through the knuckle lugs (Ø3.4 pin)
-        translate([-20.7, -comb_plate_w / 2 - 0.1, comb_plate_t + 1.5])
+        translate([-22.2, -comb_plate_w / 2 - 0.1, comb_plate_t + 1.5])
             rotate([-90, 0, 0]) cylinder(h = comb_plate_w + 0.2, d = 3.5);
     }
 }
@@ -522,10 +522,10 @@ module comb_bar() {
     for (sy = [-1, 1]) difference() {
         union() {
             translate([-19.3, sy * 11 - 2.5, bar_z]) cube([2.5, 5, 2.6]);
-            translate([-22.4, sy * 11 - 2.5, comb_plate_t - 0.5])
-                cube([3.1, 5, comb_div_h + 3.1]);
+            translate([-25.6, sy * 11 - 2.5, comb_plate_t - 0.5])
+                cube([6.3, 5, comb_div_h + 3.1]);
         }
-        translate([-20.7, sy * 11 - 2.6, comb_plate_t + 1.5])
+        translate([-22.2, sy * 11 - 2.6, comb_plate_t + 1.5])
             rotate([-90, 0, 0]) cylinder(h = 5.2, d = 3.7);
     }
     // fore hook + barb over the catch ledge
