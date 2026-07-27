@@ -20,6 +20,13 @@
 # =====================================================================
 set -euo pipefail
 
+# The BambuStudio CLI aborts (backup-dir filesystem race, SIGABRT) when
+# the BambuStudio GUI is running. Refuse to start rather than crash.
+if pgrep -xq BambuStudio; then
+    echo "ERROR: quit the BambuStudio app first - its CLI crashes while the GUI is running." >&2
+    exit 1
+fi
+
 REPO="$(cd "$(dirname "$0")/.." && pwd)"
 SCAD="$REPO/hardware/openscad"
 OUT="$REPO/hardware/arm_electronics.3mf"
