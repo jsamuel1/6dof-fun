@@ -27,6 +27,17 @@
     <button id="stop" class="stop">STOP</button>
     <button id="cal-toggle" class="btn cal-toggle">CAL MODE</button>
     <button id="mic-toggle" class="btn mic-toggle">MIC</button>
+
+    <!-- Extent marks + snapshot (cal mode only): records cal_ch/cal_us,
+         joint angles, and a camera frame via /arm/cal_mark -->
+    <div id="marks" class="marks hidden">
+      <button id="mark-up"    class="btn mark">⬆ far up</button>
+      <button id="mark-down"  class="btn mark">⬇ far down</button>
+      <button id="mark-left"  class="btn mark">⬅ far left</button>
+      <button id="mark-right" class="btn mark">➡ far right</button>
+      <button id="mark-snap"  class="btn mark snap">📷 snapshot</button>
+      <div id="mark-ack" class="mark-ack"></div>
+    </div>
     <div class="status" id="status">
       <div><span class="dot" id="dot-ros"></span> rosbridge</div>
       <div><span class="dot" id="dot-agent"></span> agent</div>

@@ -4,6 +4,8 @@
 //   pub /arm/joint_commands  sensor_msgs/JointState  (one named joint, radians)
 //   pub /arm/cal             std_msgs/String         (firmware diag alphabet)
 //   pub /arm/audio/enable    std_msgs/Bool           (mic on/off)
+//   pub /arm/cal_mark        std_msgs/String (JSON)  (extent/snapshot marks)
+//   sub /arm/cal_mark/ack    std_msgs/String         (saved capture basename)
 //   sub /joint_states        sensor_msgs/JointState
 //   sub /arm/status          std_msgs/String (JSON @ 1 Hz)
 //   sub /arm/audio           std_msgs/String (JSON @ ~5 Hz, buzz detector)
@@ -36,7 +38,7 @@ let buzzHideAt = 0;                // latch: overlay visible until this time
 // rosbridge connection with backoff
 // ---------------------------------------------------------------------------
 let ros = null;
-let cmdTopic = null, calTopic = null, micTopic = null;
+let cmdTopic = null, calTopic = null, micTopic = null, markTopic = null;
 let retryDelay = 500;
 
 function connect() {
@@ -53,6 +55,19 @@ function connect() {
     });
     micTopic = new ROSLIB.Topic({
       ros, name: '/arm/audio/enable', messageType: 'std_msgs/Bool',
+    });
+    markTopic = new ROSLIB.Topic({
+      ros, name: '/arm/cal_mark', messageType: 'std_msgs/String',
+    });
+
+    const ack = new ROSLIB.Topic({
+      ros, name: '/arm/cal_mark/ack', messageType: 'std_msgs/String',
+    });
+    ack.subscribe((msg) => {
+      const el = document.getElementById('mark-ack');
+      el.textContent = `saved ${msg.data}`;
+      el.classList.add('ok');
+      setTimeout(() => el.classList.remove('ok'), 1500);
     });
 
     const audio = new ROSLIB.Topic({
@@ -101,7 +116,7 @@ function connect() {
   const onDown = () => {
     if (ros) { ros.close(); ros = null; }
     rosConnected = false;
-    cmdTopic = calTopic = micTopic = null;
+    cmdTopic = calTopic = micTopic = markTopic = null;
     renderConnection();
     setTimeout(connect, retryDelay);
     retryDelay = Math.min(retryDelay * 2, 5000);
@@ -241,6 +256,18 @@ function selectRow(i) {
 // ---------------------------------------------------------------------------
 document.getElementById('stop').addEventListener('click', () => sendCal('x'));
 
+function sendMark(label) {
+  if (!rosConnected || !markTopic) return;
+  markTopic.publish(new ROSLIB.Message({ data: JSON.stringify({ label }) }));
+  const el = document.getElementById('mark-ack');
+  el.textContent = 'saving…';
+  el.classList.remove('ok');
+}
+[['mark-up', 'far_up'], ['mark-down', 'far_down'], ['mark-left', 'far_left'],
+ ['mark-right', 'far_right'], ['mark-snap', 'snapshot']].forEach(([id, label]) => {
+  document.getElementById(id).addEventListener('click', () => sendMark(label));
+});
+
 document.getElementById('mic-toggle').addEventListener('click', () => {
   if (!rosConnected || !micTopic) return;
   const next = micOn === null ? false : !micOn;   // detector defaults on
@@ -250,6 +277,7 @@ document.getElementById('mic-toggle').addEventListener('click', () => {
 document.getElementById('cal-toggle').addEventListener('click', () => {
   calMode = !calMode;
   document.getElementById('cal-toggle').classList.toggle('on', calMode);
+  document.getElementById('marks').classList.toggle('hidden', !calMode);
   if (calMode) sendCal(String(selected));
   renderRows();
 });

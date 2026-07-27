@@ -119,6 +119,22 @@ services:
       - /dev/snd:/dev/snd
     restart: unless-stopped
 
+  calrec:
+    build: ./calrec
+    image: arduino-arm/calrec:jazzy
+    container_name: arm-calrec
+    # Calibration mark/snapshot recorder: /arm/cal_mark -> jpg+json in
+    # host/calibration/captures/ (gitignored). Ack on /arm/cal_mark/ack.
+    network_mode: host
+    ipc: host
+    environment:
+      - ROS_DOMAIN_ID=0
+    volumes:
+      - ../../host/calibration/captures:/captures
+    depends_on:
+      - web-video
+    restart: unless-stopped
+
   web:
     image: nginx:alpine
     container_name: arm-web

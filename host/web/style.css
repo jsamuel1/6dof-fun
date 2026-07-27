@@ -76,6 +76,15 @@ body {
 .mic-toggle { min-height: 60px; font-size: 22px; }
 .mic-toggle.on { background: #2c6e49; color: #eef2ee; }
 
+/* Extent-mark pad (cal mode only) */
+.marks { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.marks .mark { min-height: 52px; font-size: 16px; }
+.marks .snap { grid-column: 1 / -1; min-height: 60px; font-size: 18px;
+               background: #1c4a6e; }
+.mark-ack { grid-column: 1 / -1; min-height: 20px; font-size: 13px;
+            color: #5d6270; text-align: center; transition: color 0.3s; }
+.mark-ack.ok { color: #4caf7d; }
+
 /* Full-screen stall-buzz alert */
 .buzz-overlay {
   position: fixed; inset: 0; z-index: 20;
