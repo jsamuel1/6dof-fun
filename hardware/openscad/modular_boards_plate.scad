@@ -62,14 +62,18 @@ pca_cx = plate_l - 8 - pca_pcb_l / 2;    // 70.75
 // board openings: footprint + clearance, minus the four screw pads
 win_clear = 0.6;    // opening margin per side around the PCB outline
 win_r     = 4;      // opening corner radius
-// screw pads: the inner lobe is capped at d6 by solder-side hardware
-// (ESP32 boot buttons 3.9 from the hole, PCA RA tails 3.5 — both must
-// NOT rest on deck), but the outer lobe sits past the board edge where
-// nothing collides, so it fans out to d10: each pad ties to the frame
-// through an ~8.5mm-wide wedge instead of a 6mm capsule.
-pad_d      = 6;     // inner lobe (at the screw hole)
-pad_lobe_d = 10;    // outer lobe (in the frame corner)
-pad_run    = 5;     // outer lobe offset past the hole, diagonal
+// screw pads: quadrant gussets. The collar at the hole is capped at d6
+// by solder-side hardware (ESP32 boot buttons 3.9 from the hole, PCA
+// RA tails 3.5 — neither may rest on deck), then two outer lobes run
+// 90 degrees apart — one along the window's end edge, one along its
+// side edge — and the hull closes the whole corner square to the
+// hole's edge. The PCA's end-edge lobes are lifted 3 outward and kept
+// d8 so the fan's inner envelope clears the RA header tails by ~0.8.
+pad_d      = 6;             // collar at the screw hole
+pad_lobe_d = 10;            // side-edge lobe (both boards)
+pad_run    = 5;             // lobe offset past the hole
+pca_xlobe  = [5, 3, 8];     // PCA end-edge lobe: [dx, dy-lift, dia]
+esp_xlobe  = [5, 0, 10];    // ESP end-edge lobe: nothing to dodge
 
 // USB-C deck slot: the ESP32's USB end faces x=0 (board end at x=53);
 // the plug body crosses the deck plane, so keep a full-depth stadium
@@ -78,8 +82,8 @@ usb_slot_w   = 14;      // plug body 10.5 wide + slop
 usb_slot_x0  = 28;      // outer end — drop-in room ahead of the port
 usb_slot_x1  = 60;      // inner end — under the port shell
 
-// footprint opening minus teardrop screw pads, extruded through the deck
-module board_window(cx, cy, win_l, win_w, hole_dl, hole_dw) {
+// footprint opening minus quadrant screw pads, extruded through the deck
+module board_window(cx, cy, win_l, win_w, hole_dl, hole_dw, xlobe) {
     translate([cx, cy, -0.1])
         linear_extrude(plate_t + 0.2)
             difference() {
@@ -89,7 +93,12 @@ module board_window(cx, cy, win_l, win_w, hole_dl, hole_dw) {
                     hull() {
                         translate([px * hole_dl / 2, py * hole_dw / 2])
                             circle(d = pad_d);
-                        translate([px * (hole_dl / 2 + pad_run),
+                        // end-edge lobe (90 deg from the side-edge one)
+                        translate([px * (hole_dl / 2 + xlobe[0]),
+                                   py * (hole_dw / 2 + xlobe[1])])
+                            circle(d = xlobe[2]);
+                        // side-edge lobe
+                        translate([px * hole_dl / 2,
                                    py * (hole_dw / 2 + pad_run)])
                             circle(d = pad_lobe_d);
                     }
@@ -109,10 +118,10 @@ difference() {
     // full-footprint openings under each board
     board_window(pca_cx, plate_w / 2 + pca_y,
                  pca_pcb_l + 2 * win_clear, pca_pcb_w + 2 * win_clear,
-                 pca_hole_dl, pca_hole_dw);
+                 pca_hole_dl, pca_hole_dw, pca_xlobe);
     board_window(esp_cx, plate_w / 2 + esp_y,
                  esp_pcb_l + 2 * win_clear, esp_pcb_w + 2 * win_clear,
-                 esp_hole_dl, esp_hole_dw);
+                 esp_hole_dl, esp_hole_dw, esp_xlobe);
     // board screw pilots, self-tapping through the flush deck pads
     for (bd = [[pca_cx, pca_y, pca_hole_dl, pca_hole_dw],
                [esp_cx, esp_y, esp_hole_dl, esp_hole_dw]],
