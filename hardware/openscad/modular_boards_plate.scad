@@ -62,8 +62,14 @@ pca_cx = plate_l - 8 - pca_pcb_l / 2;    // 70.75
 // board openings: footprint + clearance, minus the four screw pads
 win_clear = 0.6;    // opening margin per side around the PCB outline
 win_r     = 4;      // opening corner radius
-pad_d     = 6;      // screw pad diameter (teardrops out to the frame)
-pad_run   = 4;      // how far the teardrop's outer lobe sits past the hole
+// screw pads: the inner lobe is capped at d6 by solder-side hardware
+// (ESP32 boot buttons 3.9 from the hole, PCA RA tails 3.5 — both must
+// NOT rest on deck), but the outer lobe sits past the board edge where
+// nothing collides, so it fans out to d10: each pad ties to the frame
+// through an ~8.5mm-wide wedge instead of a 6mm capsule.
+pad_d      = 6;     // inner lobe (at the screw hole)
+pad_lobe_d = 10;    // outer lobe (in the frame corner)
+pad_run    = 5;     // outer lobe offset past the hole, diagonal
 
 // USB-C deck slot: the ESP32's USB end faces x=0 (board end at x=53);
 // the plug body crosses the deck plane, so keep a full-depth stadium
@@ -85,7 +91,7 @@ module board_window(cx, cy, win_l, win_w, hole_dl, hole_dw) {
                             circle(d = pad_d);
                         translate([px * (hole_dl / 2 + pad_run),
                                    py * (hole_dw / 2 + pad_run)])
-                            circle(d = pad_d);
+                            circle(d = pad_lobe_d);
                     }
             }
 }
