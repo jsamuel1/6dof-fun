@@ -8,12 +8,12 @@
 // Design rationale + honest review: hardware/keel-concept/.
 //
 // v3.6 coupler comb is a real Dupont CONNECTOR RACK (six channels,
-// captive PCA-side plugs, clip-off latch bar); v3.7 harness egress is a
+// captive PCA-side plugs, hinged latch bar); v3.7 harness egress is a
 // plain bore + TPU bushing through the junction lid at x = -17.
-// LATCH DECISION (was open in the handoff): the latch bar is a
-// SEPARATE CLIP-OFF part — no hinge pin in the BOM, prints flat,
-// matches the zero-hardware drawer detents. Revisit if it gets lost in
-// practice.
+// LATCH DECISION (was open in the handoff): PINNED HINGE — the bar
+// swings open on a Ø3.4 pin through knuckles aft of the end stop and
+// can never be mislaid; closure is the fore hook over the catch ledge.
+// One Ø3.4 x ~60 pin in the BOM (a nail or rod stock works).
 //
 // Drop this next to common_params.scad in hardware/openscad/.
 //
@@ -92,8 +92,9 @@ comb_pitch  = 9.6;   // channel pitch (6 channels, 7 dividers)
 comb_ch_w   = 7.8;   // clear channel width (divider 1.8)
 comb_div_h  = 9;     // divider height above the plate
 // standard 3-pin 2.54 Dupont housings: male ~9 x 6.2 x 7.4, female
-// ~14.5 x 6.4 x 7.5 + 1 key rib   *** MEASURE ME: re-cut channels once
-// the real servo-extension housings are measured ***
+// ~14.5 x 6.4 x 7.5 + 1 key rib. RESOLVED 2026-07-26: the extensions
+// are per-spec 2.54 mm Dupont — channels sized to the spec dims
+// (7.8 clear vs 6.4 housings) stand; no re-measure needed.
 
 // --- arm adapter plate (SEPARATE PRINT) --------------------------------------
 // The two stock L-bracket feet bolt to this plate; the plate screws to the
@@ -464,10 +465,11 @@ module coupler_comb() {
             // aft end stop: the male plugs butt against it (captive)
             translate([-19, -comb_plate_w / 2, comb_plate_t])
                 cube([3, comb_plate_w, comb_div_h]);
-            // retention lip on the stop's aft face for the latch bar's
-            // aft tabs (clip-off bar decision)
-            translate([-19.9, -comb_plate_w / 2 + 4, comb_plate_t + comb_div_h - 2])
-                cube([0.9, comb_plate_w - 8, 2]);
+            // hinge knuckles on the stop's aft face: three lugs at
+            // y = -22 / 0 / +22, bored Ø3.4 for the latch-bar pin
+            for (ky = [-22, 0, 22])
+                translate([-22.5, ky - 3, 0])
+                    cube([3.5, 6, comb_plate_t + 5]);
             // 7 dividers with flared (tapered) fore lead-ins: full
             // 1.8 wide until x=11, thinning to 0.6 at the mouth so a
             // plug funnels itself into the channel
@@ -495,26 +497,37 @@ module coupler_comb() {
         for (i = [0 : 5])
             translate([-9, (i - 2.5) * comb_pitch, 0])
                 vent_slot(6, 3.6, comb_plate_t);
+        // hinge pin bore through the knuckle lugs (Ø3.4 pin)
+        translate([-20.7, -comb_plate_w / 2 - 0.1, comb_plate_t + 1.5])
+            rotate([-90, 0, 0]) cylinder(h = comb_plate_w + 0.2, d = 3.5);
     }
 }
 
-// --- comb latch bar (v3.6, CLIP-OFF variant — see header) -------------------
-// Separate flat print (pads up as modelled; flip to print pads-down flat).
-// Closes over all six channels: per-channel hold-down pads press the
-// housings; aft tabs snap under the end stop's retention lip; the fore
-// hook + barb snaps over the catch ledge. Pops off with a fingernail
-// under the fore hook.
+// --- comb latch bar (v3.6, PINNED HINGE — see header) -----------------------
+// Modelled in the CLOSED position over the comb (same local frame).
+// The bar rides the divider tops with a per-channel hold-down pad
+// pressing each pair of housings; two aft arms drop past the end stop
+// to knuckles on the Ø3.4 pin axis (interleaved with the comb's three
+// lugs); the fore hook + barb closes over the catch ledge. Flip the
+// latch: the bar swings up and aft on the pin, staying captive.
+// Print: flat, pads-up (flip 180° about x in the slicer).
 module comb_bar() {
     bar_z = comb_plate_t + comb_div_h;          // rides the divider tops
     translate([-17, -comb_plate_w / 2, bar_z]) cube([34, comb_plate_w, 2.6]);
     for (i = [0 : 5])                            // hold-down pads
         translate([-15, (i - 2.5) * comb_pitch - 3.7, bar_z - 1.6])
             cube([30, 7.4, 1.6]);
-    for (sy = [-1, 1])                           // aft snap tabs
-        translate([-19.8, sy * 22 - 3, comb_plate_t + comb_div_h - 3.4]) {
-            cube([1.4, 6, 6]);                   // tab
-            translate([1.4, 0, 0]) cube([1.2, 6, 1.2]);   // nub under the lip
+    // aft hinge arms at y = ±11: bridge over the end stop, drop aft of
+    // it to the pin axis; bored Ø3.6 (free) on the comb's Ø3.4 pin line
+    for (sy = [-1, 1]) difference() {
+        union() {
+            translate([-19.3, sy * 11 - 2.5, bar_z]) cube([2.5, 5, 2.6]);
+            translate([-22.4, sy * 11 - 2.5, comb_plate_t - 0.5])
+                cube([3.1, 5, comb_div_h + 3.1]);
         }
+        translate([-20.7, sy * 11 - 2.6, comb_plate_t + 1.5])
+            rotate([-90, 0, 0]) cylinder(h = 5.2, d = 3.7);
+    }
     // fore hook + barb over the catch ledge
     translate([17.2, -7, comb_plate_t + 1]) {
         translate([2.9, 0, 0]) cube([1.6, 14, 1.6 + comb_div_h]);  // drop wall
@@ -537,9 +550,13 @@ module clamp_spine(throat = clamp_throat) {
         // 21 x 11 body slot
         translate([-31, -(throat + 4 + H) + 4, 2 + (clamp_w - 8) / 2])
             cube([18, throat + 4 + H + 1, 8]);
-        for (y = [-(throat + 4 + H) + 12, -(throat + 4 + H) + 26])
-            translate([-31.1, y, 2 + clamp_w / 2])
-                rotate([0, 90, 0]) cylinder(h = 18.4, d = 4.4);  // splice holes
+        // splice-hole LADDER, pairs every 14: the jaw bolts at whichever
+        // rung puts it just under the benchtop, so one spine handles
+        // benches from ~10 mm to the full 2" throat (M6 closes <=14 +
+        // pad; clamp_ext extends past 2" to ~4")
+        for (r = [0 : 5])
+            translate([-31.1, -(throat + 4 + H) + 12 + r * 14, 2 + clamp_w / 2])
+                rotate([0, 90, 0]) cylinder(h = 18.4, d = 4.4);
     }
 }
 module clamp_jaw() {
