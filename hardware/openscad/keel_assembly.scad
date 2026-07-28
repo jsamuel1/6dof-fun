@@ -1,7 +1,7 @@
 // =====================================================================
 // keel_assembly.scad — the keel's SERVICE VIEW: the click-off base
 // with every board, connector and cable run placed. This is the layer
-// you see with the base popped off the shell (drawers, WAGO rails and
+// you see with the base popped off the shell (drawers, WAGO clamps and
 // the transom power wall all ride the base); the comb floats at its
 // installed height in the (absent) shell grooves. Documentation model —
 // nothing here is printed.
@@ -50,23 +50,22 @@ color("silver") {                 // two USB-C panel extension flanges
 }
 tag("USB-C PD", [-104, 34, 24], 3.4);
 
-// ---- three-tier WAGOs (v3.9b) ----------------------------------------
-// baseplate pair: the supplies' 6V egress hub, under the comb
-for (sy = [-1, 1])
-    color(sy < 0 ? "#cc4444" : "#444444")
-        translate([-44.2, sy * 17 - wago_w / 2, floor_h + 0.2])
-            cube([wago_l, wago_w, wago_h]);
-tag("BASE PAIR (hub)", [-34, -46, 14], 3, "#cc4444");
-// comb servo stations: 2x 221-415 per polarity, riding the comb
-for (sy = [-1, 1], wx = [-1, 1])
-    color(sy < 0 ? "#cc4444" : "#444444")
-        translate([jt_x + wx * (wago_l / 2 + 0.6) - wago_l / 2,
-                   sy * 29.5 - wago_w / 2, comb_y + 3.2])
-            cube([wago_l, wago_w, wago_h]);
-tag("SERVO + x2", [-30, -48, 30], 3, "#cc4444");
-tag("SERVO - x2", [-30, 44, 30], 3, "#444444");
+// ---- two-tier servo WAGOs (v3.10) ------------------------------------
+// one 221-415 per side per tier; + pair on -y (floor + comb wing),
+// - pair on +y. Entries face the open centre; wire tails get the
+// full centre span + the open sky above to approach and bend.
+for (sy = [-1, 1]) {
+    color(sy < 0 ? "#cc4444" : "#444444") {
+        translate([-45, sy * 34.1 - 9.3, floor_h + 0.2])          // floor tier
+            cube([30, 18.6, wago_h]);
+        translate([-45, sy * 34.1 - 9.3, comb_y + 3.2])           // comb tier
+            cube([30, 18.6, wago_h]);
+    }
+}
+tag("SERVO + x2 (stacked)", [-30, -52, 30], 3, "#cc4444");
+tag("SERVO - x2 (stacked)", [-30, 48, 30], 3, "#444444");
 
-// ---- coupler comb (v3.9: the lift-out junction) ----------------------
+// ---- coupler comb (v3.10: the lift-out junction) ---------------------
 // latch bar omitted (shown open/serviced)
 color("#cc3333") translate([jt_x, 0, comb_y]) coupler_comb();
 // THREE 2-pin signal pairs: male (aft, captive) + female (fore) — two
@@ -107,31 +106,35 @@ color("#111111") wire([[-113, jack_y - 3, jack_z], [-113, -6, 21.5]], 2.2);
 color("#555555") wire([[-117, usbc_pd_y, jack_z], [-113, -14, 21.5]], 3);
 color("red")     wire([[-107, 6, 21.5], [-104, -6, 12], [-104, -14, 9.5]], 2.2);
 color("#111111") wire([[-107, 12, 21.5], [-102, 0, 12], [-102, -10, 9.5]], 2.2);
-// buck 6V OUT -> chamber port -> BASE PAIR (fixed hub)
-color("red")     wire([[-56, -6, 9], [-48, -4, 8], [-30, -14, 7]], 2.4);
-color("#111111") wire([[-56, 2, 9], [-46, 0, 8], [-30, 17, 7]], 2.4);
-tag("6V FEED", [-52, -30, 4], 3, "#cc2222");
-// jumper pair: base pair -> comb servo stations (unclip these two to
-// lift the whole comb out safely)
-color("red")     wire([[-36, -22, 9], [-32, -24, 16], [-30, -26, comb_y + 5]], 2);
-color("#111111") wire([[-36, 22, 9], [-32, 24, 16], [-30, 26, comb_y + 5]], 2);
-tag("jumpers", [-44, 26, 12], 2.8, "#cc2222");
-// jumper pair: base pair -> drawer BOARD PAIR (the drawer's only
-// power umbilical)
-color("red")     wire([[-33, -12, 9], [-6, -8, 6], [26, -8, 8]], 2);
-color("#111111") wire([[-33, 12, 9], [-4, -4, 6], [28, -4, 8]], 2);
-// arm servo power: 6x +/- clip DIRECTLY into the comb stations
-for (i = [0 : 5]) {
-    color("red")     wire([[-34 + (i % 2) * 9, -22 - (i % 3), comb_y + 12],
-                           [-24, -10 + i * 2, 40], [-17, 0, 52]], 1.5);
-    color("#111111") wire([[-34 + (i % 2) * 9, 22 + (i % 3), comb_y + 12],
-                           [-24, 10 - i * 2, 40], [-17, 0, 52]], 1.5);
+// buck 6V OUT -> chamber port -> the two FLOOR-tier clamps (entries
+// face the centre, so the feed lands straight in along the floor)
+color("red")     wire([[-56, -6, 9], [-46, -8, 7], [-36, -22, 7]], 2.4);
+color("#111111") wire([[-56, 2, 9], [-44, 4, 7], [-36, 22, 7]], 2.4);
+tag("6V FEED", [-56, -30, 4], 3, "#cc2222");
+// risers: floor tier -> comb tier through the comb's riser slots
+// (unclip these two to lift the whole comb out safely)
+color("red")     wire([[-34, -23, 9], [-30, -20, comb_y], [-32, -23, comb_y + 6]], 2);
+color("#111111") wire([[-34, 23, 9], [-30, 20, comb_y], [-32, 23, comb_y + 6]], 2);
+tag("risers", [-16, 26, 20], 2.8, "#cc2222");
+// arm servo power: 4 tails per polarity into the comb tier, 2 into
+// the floor tier via the comb's chamfered corners
+for (i = [0 : 3]) {
+    color("red")     wire([[-42 + i * 7, -26, comb_y + 12],
+                           [-26, -12 + i * 2, 40], [-17, 0, 52]], 1.5);
+    color("#111111") wire([[-42 + i * 7, 26, comb_y + 12],
+                           [-26, 12 - i * 2, 40], [-17, 0, 52]], 1.5);
 }
-// PCA drawer pigtails: signal bundle through the 19x14 service window
-// to the comb's male plugs
-color("#cc6600") wire([[30, pca_lane + 9, 12], [-4, 22, 10],
-                       [-16, 8, comb_y - 2], [-20, 0, comb_y + 4]], 3.4);
-tag("3x 2-pin signal", [8, 34, 16], 3, "#cc6600");
+for (i = [0 : 1]) {
+    color("red")     wire([[-36 + i * 6, -24, 9], [-13 + i * 2, -42, comb_y + 4],
+                           [-14, -20, 40], [-17, 0, 52]], 1.5);
+    color("#111111") wire([[-36 + i * 6, 24, 9], [-13 + i * 2, 42, comb_y + 4],
+                           [-14, 20, 40], [-17, 0, 52]], 1.5);
+}
+tag("corner tails x2", [-4, -46, 22], 2.8, "#cc2222");
+// board power: drawer taps off the FLOOR-tier clamps through the ESP
+// window to the drawer's BOARD PAIR (the drawer's only umbilical)
+color("red")     wire([[-34, -25, 9], [-6, -14, 6], [26, -8, 8]], 2);
+color("#111111") wire([[-34, 25, 9], [-4, 8, 6], [28, -4, 8]], 2);
 // board power taps off the drawer pair to each board
 color("red")     wire([[30, -6, 12], [18, esp_lane + 2, 10]], 1.6);
 color("#111111") wire([[46, -6, 12], [40, pca_lane - 10, 8]], 1.6);
