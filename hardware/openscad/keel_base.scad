@@ -78,29 +78,34 @@ buck_hole_dl = 57;  buck_hole_dw = 42;
 // --- ballast lobes ---------------------------------------------------------
 lobe_x = -76;  lobe_z = 40;  lobe_l = 30;  lobe_w = 14;
 
-// --- servo power junction tray (WAGO 221-415 rails), CENTRELINE ------------
-// Pixelwave-style: TWO separated angled rails in their own lanes — + rail
-// aft, − rail fore, wire gully between. Each rail = two bridged 5-ways
-// leaning at jt_angle, levers up: every clamp opens and re-wires with just
-// the tray lid off. 10 entries per polarity = feed + jumper + 6 servos + 2.
-jt_x = -30;  jt_l = 40;  jt_w = 66;               // tray opening at z = 0
+// --- servo power junction tray (WAGOs ride the comb), CENTRELINE -----------
+// Each polarity = two bridged 5-way 221-415s in a comb-mounted station:
+// 10 entries = feed + jumper + 6 servos + 2 spare. Every clamp opens
+// and re-wires with just the tray lid off.
+jt_x = -30;  jt_l = 40;  jt_w = 86;               // tray opening at z = 0
 wago_l = 18.6;  wago_w = 30;  wago_h = 8.3;       // 221-415 body
-jt_lane_dx = 19;  jt_angle = 40;
-// v3.6 servo COUPLER COMB — a lift-out Dupont CONNECTOR RACK dropped
-// into grooves across the tray ABOVE the WAGO lanes. Per channel,
-// aft->fore: [end stop][PCA-side MALE pigtail plug]--pins-->[ARM-side
-// FEMALE plug]--> arm harness. The male plug butts the aft end stop and
-// is captive: pulling the arm plug can never drag the drawer pigtail
-// out. Six channels; unplug at the comb -> PCA drawer slides out; lift
-// the comb (leads attached) for full WAGO access below.
-comb_y      = 20;    // plate underside height in the tray
-comb_pitch  = 9.6;   // channel pitch (6 channels, 7 dividers)
-comb_ch_w   = 7.8;   // clear channel width (divider 1.8)
+// v3.9 servo wiring strategy: the WAGOs LIVE ON THE COMB. Servo + and
+// - wires clip DIRECTLY into the levers (a WAGO grips stripped wire
+// better than any connector), and only the SIGNALS couple through
+// Dupont: 3x 2-pin plugs, two servos per plug. The comb is the whole
+// lift-out junction: two flat WAGO stations (2x 221-415 each, levers
+// up, entries inboard) on its wings, a slim 3-channel signal rack
+// between them, captive-male end stop + hinged latch bar. Lift the
+// comb and the ENTIRE junction comes out in one piece, wires attached.
+// v3.9b THREE-TIER POWER: the supplies' egress terminates on a FIXED
+// baseplate WAGO pair (the hub, under the comb); one jumper pair feeds
+// the comb's servo stations, another feeds a DRAWER-mounted pair that
+// powers the boards (ESP32 VIN, PCA V+ logic). Each removable layer
+// disconnects at its own jumpers: the comb lifts after unclipping two
+// wires, the drawer pulls after unclipping two — the supply wiring is
+// never touched. 8x 221-415 total (4 comb, 2 base, 2 drawer).
+comb_y      = 16;    // plate underside height (base pair lives below)
+comb_pitch  = 8;     // signal channel pitch (3 channels, 4 dividers)
+comb_ch_w   = 6.6;   // clear width: 2-pin Dupont ~6.2 wide (per spec)
 comb_div_h  = 9;     // divider height above the plate
-// standard 3-pin 2.54 Dupont housings: male ~9 x 6.2 x 7.4, female
-// ~14.5 x 6.4 x 7.5 + 1 key rib. RESOLVED 2026-07-26: the extensions
-// are per-spec 2.54 mm Dupont — channels sized to the spec dims
-// (7.8 clear vs 6.4 housings) stand; no re-measure needed.
+// 2-pin 2.54 Dupont: male ~9 x 6.2, female ~14.5 x 6.4 (per spec).
+// FIT-CHECK item: WAGO entries are inboard-horizontal — confirm wire
+// access over the centre rack on the printed tray.
 
 // --- arm adapter plate (SEPARATE PRINT) --------------------------------------
 // The two stock L-bracket feet bolt to this plate; the plate screws to the
@@ -240,18 +245,16 @@ module keel_floor() {
     for (e = [-1, 1])
         translate([76, e * (drw_w_all / 2 - 2.5 - guide_w / 2), floor_h + 2])
             sphere(d = detent_d, $fn = 16);
-    // junction rails on the base too (WAGOs come away with it).
-    // v3.3 (pixelwave-style junction, our own geometry): one clip fin at
-    // each end of EACH 221-415 — any single clamp unsnaps alone.
-    for (r = [0 : 1]) {
-        translate([jt_x - jt_lane_dx / 2 + r * jt_lane_dx - 8, -(jt_w - 4) / 2, floor_h])
-            rotate([0, -jt_angle, 0]) cube([2.5, jt_w - 4, 15]);
-        translate([jt_x - jt_lane_dx / 2 + r * jt_lane_dx + 4, -(jt_w - 4) / 2, floor_h])
-            cube([2.5, jt_w - 4, 4]);
-        for (cy = [-0.8, wago_w + 0.2, 2 * wago_w + 1.2])
-            translate([jt_x - jt_lane_dx / 2 + r * jt_lane_dx - 8,
-                       -(jt_w - 4) / 2 + cy, floor_h])
-                rotate([0, -jt_angle, 0]) cube([4.5, 1.6, 17]);
+    // v3.9b BASEPLATE WAGO PAIR — the supplies' 6V egress hub. Buck
+    // feed in; jumper pairs out to the comb's servo stations and the
+    // drawer's board-power pair. Lives under the comb: lift the comb
+    // (2 jumper wires) for lever access. Entries face FORE.
+    for (sy = [-1, 1]) difference() {
+        translate([-46, sy * 17 - wago_w / 2 - 1.8, floor_h])
+            cube([wago_l + 3.6, wago_w + 3.6, 4]);
+        translate([-44.4, sy * 17 - wago_w / 2 - 0.2, floor_h - 0.1])
+            cube([wago_l + 0.4, wago_w + 0.4, 4.2]);
+        translate([-27, sy * 17 - 4, floor_h - 0.1]) cube([4, 8, 4.2]);
     }
 }
 
@@ -442,6 +445,18 @@ module drawer_boards() {
         translate([sled_l - 0.1, esp_lane - 5.25, sled_t + 12])
             cube([2.7, 10.5, 5.5]);
     }
+    // v3.9b DRAWER WAGO PAIR: board power rides the drawer — ESP32
+    // VIN and PCA V+ clip here; the jumper pair from the base pair is
+    // the drawer's only power umbilical (unclip it to pull the drawer
+    // fully out). Sits in the middle band, well under the deck rib.
+    for (sx = [-1, 1]) difference() {
+        translate([sled_l / 2 + sx * 17 - wago_w / 2 - 1.8, -13.2, sled_t])
+            cube([wago_w + 3.6, wago_l + 3.6, 4]);
+        translate([sled_l / 2 + sx * 17 - wago_w / 2 - 0.2, -11.6, sled_t - 0.1])
+            cube([wago_w + 0.4, wago_l + 0.4, 4.2]);
+        translate([sled_l / 2 + sx * 17 - 4, -14, sled_t - 0.1])
+            cube([8, 4, 4.2]);
+    }
     // PCA9685 flat standoffs, servo row outboard (+y)
     for (px = [-1, 1], pz = [-1, 1])
         translate([sled_l / 2 + px * pca_hole_dl / 2,
@@ -462,40 +477,63 @@ module sled_buck() {
 // Local frame: origin = tray centre (place with translate([jt_x,0,comb_y]));
 // +x fore. Aft->fore per channel: end stop | male PCA pigtail plug
 // (captive against the stop) | female arm plug | out to the harness.
-comb_plate_l = 38;  comb_plate_w = 64;  comb_plate_t = 3;
+comb_plate_l = 38;  comb_plate_w = 84;  comb_plate_t = 3;
 module coupler_comb() {
     difference() {
         union() {
             translate([-comb_plate_l / 2, -comb_plate_w / 2, 0])
                 cube([comb_plate_l, comb_plate_w, comb_plate_t]);
-            // side tongues ride the tray-wall grooves (30 x 3 x 2.6)
+            // side tongues ride the tray-wall grooves
             for (sy = [-1, 1])
                 translate([-15, sy * comb_plate_w / 2 - (sy > 0 ? 0 : 3), 0])
-                    cube([30, 3 + comb_plate_w / 2 - 32, 2.6]);
-            // aft end stop: the male plugs butt against it (captive)
-            translate([-19, -comb_plate_w / 2, comb_plate_t])
-                cube([3, comb_plate_w, comb_div_h]);
-            // hinge knuckles on the stop's aft face: three lugs at
-            // y = -22 / 0 / +22, bored Ø3.4 for the latch-bar pin
-            for (ky = [-22, 0, 22])
-                translate([-25.2, ky - 3, 0])
-                    cube([6.2, 6, comb_plate_t + 5]);
-            // 7 dividers with flared (tapered) fore lead-ins: full
-            // 1.8 wide until x=11, thinning to 0.6 at the mouth so a
-            // plug funnels itself into the channel
-            for (i = [0 : 6]) {
-                dy = (i - 3) * comb_pitch;
-                translate([-16, dy - 0.9, comb_plate_t]) cube([27, 1.8, comb_div_h]);
+                    cube([30, 3 + comb_plate_w / 2 - 42, 2.6]);
+            // WAGO stations on the wings (v3.9): two 221-415 pockets
+            // per polarity, flat, levers up, entries INBOARD; low
+            // walls + clip nubs — any one clamp pops out alone
+            for (sy = [-1, 1], wx = [-1, 1]) {
+                px = wx * (wago_l / 2 + 0.6);
+                py = sy * (12.4 + wago_w / 2);
+                difference() {
+                    translate([px - wago_l / 2 - 1.8, py - wago_w / 2 - 1.8,
+                               comb_plate_t])
+                        cube([wago_l + 3.6, wago_w + 3.6, 4]);
+                    translate([px - wago_l / 2 - 0.2, py - wago_w / 2 - 0.2,
+                               comb_plate_t - 0.1])
+                        cube([wago_l + 0.4, wago_w + 0.4, 4.2]);
+                    translate([px - wago_l / 2 - 2,
+                               py - sy * (wago_w / 2 + 2) - 2,
+                               comb_plate_t - 0.1])
+                        cube([wago_l + 4, 4, 4.2]);      // entry face open
+                }
+                for (nx = [-1, 1])                        // clip nubs
+                    translate([px + nx * (wago_l / 2 + 0.1) - 0.6, py - 3,
+                               comb_plate_t + 3.2])
+                        cube([1.2, 6, 0.8]);
+            }
+            // aft end stop for the signal rack (captive male plugs)
+            translate([-19, -13, comb_plate_t]) cube([3, 26, comb_div_h]);
+            // hinge knuckles: lugs at y = -9 / 0 / +9, bored O3.4
+            for (ky = [-9, 0, 9])
+                translate([-25.2, ky - 2.5, 0])
+                    cube([6.2, 5, comb_plate_t + 5]);
+            // 4 dividers with flared fore lead-ins (3 signal channels,
+            // one 2-pin Dupont pair per channel = two servos' signals)
+            for (i = [0 : 3]) {
+                dy = (i - 1.5) * comb_pitch;
+                translate([-16, dy - 0.7, comb_plate_t])
+                    cube([27, 1.4, comb_div_h]);
                 hull() {
-                    translate([11, dy - 0.9, comb_plate_t]) cube([0.1, 1.8, comb_div_h]);
-                    translate([15.9, dy - 0.3, comb_plate_t]) cube([0.1, 0.6, comb_div_h]);
+                    translate([11, dy - 0.7, comb_plate_t])
+                        cube([0.1, 1.4, comb_div_h]);
+                    translate([15.9, dy - 0.25, comb_plate_t])
+                        cube([0.1, 0.5, comb_div_h]);
                 }
             }
-            // fore catch ledge for the latch bar's hook, on the lip centre
-            translate([16.2, -7, comb_plate_t]) cube([2.5, 14, 2.5]);
-            // index pips 1..6 on the fore lip: count pips = channel number
-            for (i = [0 : 5], p = [0 : i])
-                translate([17.2, (i - 2.5) * comb_pitch - i * 1.2 + p * 2.4 - 0.5,
+            // fore catch ledge for the latch bar hook
+            translate([16.2, -5, comb_plate_t]) cube([2.5, 10, 2.5]);
+            // index pips 1..3 on the fore lip
+            for (i = [0 : 2], q = [0 : i])
+                translate([17.2, (i - 1) * comb_pitch - i * 1.2 + q * 2.4 - 0.5,
                            comb_plate_t])
                     cube([1.4, 1, 1.4]);
             // finger lifts at the fore corners
@@ -503,45 +541,41 @@ module coupler_comb() {
                 translate([13, sy * (comb_plate_w / 2 - 3) - 3, comb_plate_t])
                     cube([6, 6, 9]);
         }
-        // lead drop-throughs to the WAGO lanes below, one per channel
-        for (i = [0 : 5])
-            translate([-9, (i - 2.5) * comb_pitch, 0])
+        // signal-lead drop-throughs, one per channel
+        for (i = [0 : 2])
+            translate([-9, (i - 1) * comb_pitch, 0])
                 vent_slot(6, 3.6, comb_plate_t);
-        // hinge pin bore through the knuckle lugs (Ø3.4 pin)
-        translate([-22.2, -comb_plate_w / 2 - 0.1, comb_plate_t + 1.5])
-            rotate([-90, 0, 0]) cylinder(h = comb_plate_w + 0.2, d = 3.5);
+        // 6V feed slots up through the plate at each station's inboard end
+        for (sy = [-1, 1])
+            translate([-12, sy * 15, 0]) vent_slot(8, 4, comb_plate_t);
+        // hinge pin bore through the knuckle lugs (O3.4 pin, ~40 long)
+        translate([-22.2, -14, comb_plate_t + 1.5])
+            rotate([-90, 0, 0]) cylinder(h = 28, d = 3.5);
     }
 }
 
-// --- comb latch bar (v3.6, PINNED HINGE — see header) -----------------------
-// Modelled in the CLOSED position over the comb (same local frame).
-// The bar rides the divider tops with a per-channel hold-down pad
-// pressing each pair of housings; two aft arms drop past the end stop
-// to knuckles on the Ø3.4 pin axis (interleaved with the comb's three
-// lugs); the fore hook + barb closes over the catch ledge. Flip the
-// latch: the bar swings up and aft on the pin, staying captive.
-// Print: flat, pads-up (flip 180° about x in the slicer).
+// --- comb latch bar (v3.9, PINNED HINGE over the 3 signal channels) ---------
+// Modelled CLOSED. Rides the divider tops with a pad per channel; two
+// hinge arms drop to the O3.4 pin through the comb's lugs; fore hook
+// over the catch ledge. Print flat, pads-up (flip 180 about x).
 module comb_bar() {
-    bar_z = comb_plate_t + comb_div_h;          // rides the divider tops
-    translate([-17, -comb_plate_w / 2, bar_z]) cube([34, comb_plate_w, 2.6]);
-    for (i = [0 : 5])                            // hold-down pads
-        translate([-15, (i - 2.5) * comb_pitch - 3.7, bar_z - 1.6])
-            cube([30, 7.4, 1.6]);
-    // aft hinge arms at y = ±11: bridge over the end stop, drop aft of
-    // it to the pin axis; bored Ø3.6 (free) on the comb's Ø3.4 pin line
+    bar_z = comb_plate_t + comb_div_h;
+    translate([-17, -14, bar_z]) cube([34, 28, 2.6]);
+    for (i = [0 : 2])
+        translate([-15, (i - 1) * comb_pitch - 3.3, bar_z - 1.6])
+            cube([30, 6.6, 1.6]);
     for (sy = [-1, 1]) difference() {
         union() {
-            translate([-19.3, sy * 11 - 2.5, bar_z]) cube([2.5, 5, 2.6]);
-            translate([-25.6, sy * 11 - 2.5, comb_plate_t - 0.5])
-                cube([6.3, 5, comb_div_h + 3.1]);
+            translate([-19.3, sy * 4.5 - 2, bar_z]) cube([2.5, 4, 2.6]);
+            translate([-25.6, sy * 4.5 - 2, comb_plate_t - 0.5])
+                cube([6.3, 4, comb_div_h + 3.1]);
         }
-        translate([-22.2, sy * 11 - 2.6, comb_plate_t + 1.5])
-            rotate([-90, 0, 0]) cylinder(h = 5.2, d = 3.7);
+        translate([-22.2, sy * 4.5 - 2.1, comb_plate_t + 1.5])
+            rotate([-90, 0, 0]) cylinder(h = 4.2, d = 3.7);
     }
-    // fore hook + barb over the catch ledge
-    translate([17.2, -7, comb_plate_t + 1]) {
-        translate([2.9, 0, 0]) cube([1.6, 14, 1.6 + comb_div_h]);  // drop wall
-        cube([3, 14, 1.4]);                       // barb under the ledge
+    translate([16.2, -5, comb_plate_t + 1]) {
+        translate([2.9, 0, 0]) cube([1.6, 10, 1.6 + comb_div_h]);
+        cube([3, 10, 1.4]);
     }
 }
 

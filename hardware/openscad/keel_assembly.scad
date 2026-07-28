@@ -50,29 +50,35 @@ color("silver") {                 // two USB-C panel extension flanges
 }
 tag("USB-C PD", [-104, 34, 24], 3.4);
 
-// ---- WAGO junction rails (on the base) -------------------------------
-// two angled lanes: + rail aft, - rail fore; 2x 221-415 per lane
-for (r = [0 : 1], w = [0 : 1])
-    color(r == 0 ? "#cc4444" : "#444444")
-        translate([jt_x - jt_lane_dx / 2 + r * jt_lane_dx - 6,
-                   -29 + w * (wago_w + 1), floor_h + 2])
-            rotate([0, -jt_angle, 0]) cube([wago_h, wago_w, wago_l]);
-tag("+ RAIL", [-48, -44, 20], 3.2, "#cc4444");
-tag("- RAIL", [-16, -44, 20], 3.2, "#444444");
+// ---- three-tier WAGOs (v3.9b) ----------------------------------------
+// baseplate pair: the supplies' 6V egress hub, under the comb
+for (sy = [-1, 1])
+    color(sy < 0 ? "#cc4444" : "#444444")
+        translate([-44.2, sy * 17 - wago_w / 2, floor_h + 0.2])
+            cube([wago_l, wago_w, wago_h]);
+tag("BASE PAIR (hub)", [-34, -46, 14], 3, "#cc4444");
+// comb servo stations: 2x 221-415 per polarity, riding the comb
+for (sy = [-1, 1], wx = [-1, 1])
+    color(sy < 0 ? "#cc4444" : "#444444")
+        translate([jt_x + wx * (wago_l / 2 + 0.6) - wago_l / 2,
+                   sy * (12.4 + wago_w / 2) - wago_w / 2, comb_y + 3.2])
+            cube([wago_l, wago_w, wago_h]);
+tag("SERVO + x2", [-30, -48, 30], 3, "#cc4444");
+tag("SERVO - x2", [-30, 44, 30], 3, "#444444");
 
-// ---- coupler comb at its installed height ----------------------------
-// latch bar omitted from this view (shown open/serviced) so the
-// channels, plugs and WAGO lanes below stay visible
+// ---- coupler comb (v3.9: the lift-out junction) ----------------------
+// latch bar omitted (shown open/serviced)
 color("#cc3333") translate([jt_x, 0, comb_y]) coupler_comb();
-// six Dupont pairs in the channels: male (aft, captive) + female (fore)
-for (i = [0 : 5]) {
-    dy = (i - 2.5) * comb_pitch;
+// THREE 2-pin signal pairs: male (aft, captive) + female (fore) — two
+// servos' signals per plug; power never touches a Dupont
+for (i = [0 : 2]) {
+    dy = (i - 1) * comb_pitch;
     color("#181818")
-        translate([jt_x - 15.5, dy - 3.1, comb_y + 3]) cube([9, 6.2, 7.4]);
+        translate([jt_x - 15.5, dy - 3.1, comb_y + 3]) cube([9, 6.2, 5.2]);
     color("#303030")
-        translate([jt_x - 6, dy - 3.2, comb_y + 3]) cube([14.5, 6.4, 7.5]);
+        translate([jt_x - 6, dy - 3.2, comb_y + 3]) cube([14.5, 6.4, 5.3]);
 }
-tag("COMB", [-30, 40, 34], 3.4, "#cc3333");
+tag("COMB", [-52, 0, 34], 3.4, "#cc3333", 90);
 
 // ---- THE drawer (v3.8: one drawer, both boards, rides the base) ------
 color("#cc3333") translate([7, 0, floor_h]) drawer_boards();
@@ -85,6 +91,12 @@ color("#2255aa")                  // PCA9685 flat in its lane, servo row outboar
 color("#181818")                  // its 16-channel header row, outboard
     translate([24, pca_lane + 7, floor_h + 5.6]) cube([41, 5, 8]);
 tag("PCA9685", [42, 50, 34], 3.4, "#2255aa");
+for (sx = [-1, 1])                // drawer pair: board power
+    color(sx < 0 ? "#cc4444" : "#444444")
+        translate([7 + sled_l / 2 + sx * 17 - wago_w / 2, -11.4,
+                   floor_h + sled_t + 0.2])
+            cube([wago_w, wago_l, wago_h]);
+tag("BOARD PAIR", [43, 2, 16], 3, "#cc4444");
 
 // =====================================================================
 // CABLE RUNS
@@ -95,24 +107,34 @@ color("#111111") wire([[-113, jack_y - 3, jack_z], [-113, -6, 21.5]], 2.2);
 color("#555555") wire([[-117, usbc_pd_y, jack_z], [-113, -14, 21.5]], 3);
 color("red")     wire([[-107, 6, 21.5], [-104, -6, 12], [-104, -14, 9.5]], 2.2);
 color("#111111") wire([[-107, 12, 21.5], [-102, 0, 12], [-102, -10, 9.5]], 2.2);
-// buck 6V OUT -> through the chamber->junction port -> WAGO feed entries
-color("red")     wire([[-56, -6, 9], [-48, -4, 8], [-40, -22, 13]], 2.4);
-color("#111111") wire([[-56, 2, 9], [-46, 0, 8], [-21, -22, 13]], 2.4);
-tag("6V FEED", [-46, -34, 4], 3, "#cc2222");
-// WAGO lanes -> servo power pairs rising to the comb drop slots
+// buck 6V OUT -> chamber port -> BASE PAIR (fixed hub)
+color("red")     wire([[-56, -6, 9], [-48, -4, 8], [-30, -14, 7]], 2.4);
+color("#111111") wire([[-56, 2, 9], [-46, 0, 8], [-30, 17, 7]], 2.4);
+tag("6V FEED", [-52, -30, 4], 3, "#cc2222");
+// jumper pair: base pair -> comb servo stations (unclip these two to
+// lift the whole comb out safely)
+color("red")     wire([[-36, -22, 9], [-32, -24, 16], [-30, -26, comb_y + 5]], 2);
+color("#111111") wire([[-36, 22, 9], [-32, 24, 16], [-30, 26, comb_y + 5]], 2);
+tag("jumpers", [-44, 26, 12], 2.8, "#cc2222");
+// jumper pair: base pair -> drawer BOARD PAIR (the drawer's only
+// power umbilical)
+color("red")     wire([[-33, -12, 9], [-6, -8, 6], [26, -8, 8]], 2);
+color("#111111") wire([[-33, 12, 9], [-4, -4, 6], [28, -4, 8]], 2);
+// arm servo power: 6x +/- clip DIRECTLY into the comb stations
 for (i = [0 : 5]) {
-    dy = (i - 2.5) * comb_pitch;
-    color("red")     wire([[-39, min(dy, 26) - 2, 16], [-39, dy, comb_y + 1]], 1.4);
-    color("#111111") wire([[-20.5, min(dy, 26) - 1, 16], [-38, dy + 1.5, comb_y + 1]], 1.4);
+    color("red")     wire([[-34 + (i % 2) * 9, -22 - (i % 3), comb_y + 12],
+                           [-24, -10 + i * 2, 40], [-17, 0, 52]], 1.5);
+    color("#111111") wire([[-34 + (i % 2) * 9, 22 + (i % 3), comb_y + 12],
+                           [-24, 10 - i * 2, 40], [-17, 0, 52]], 1.5);
 }
 // PCA drawer pigtails: signal bundle through the 19x14 service window
 // to the comb's male plugs
 color("#cc6600") wire([[30, pca_lane + 9, 12], [-4, 22, 10],
                        [-16, 8, comb_y - 2], [-20, 0, comb_y + 4]], 3.4);
-tag("6x signal", [8, 34, 16], 3, "#cc6600");
-// WAGO VIN pair + I2C to the ESP32 drawer through the 14x12 window
-color("red")     wire([[-39, -27, 14], [-8, -14, 8], [10, esp_lane - 4, 8]], 1.8);
-color("#111111") wire([[-20.5, -27, 14], [-6, -16, 8], [12, esp_lane - 6, 8]], 1.8);
+tag("3x 2-pin signal", [8, 34, 16], 3, "#cc6600");
+// board power taps off the drawer pair to each board
+color("red")     wire([[30, -6, 12], [18, esp_lane + 2, 10]], 1.6);
+color("#111111") wire([[46, -6, 12], [40, pca_lane - 10, 8]], 1.6);
 color("#8844cc") wire([[20, pca_lane - 10, 8], [18, 2, 10],
                        [18, esp_lane + 2, 12]], 2.6);
 tag("I2C rides the drawer", [30, 2, 14], 3, "#8844cc");
@@ -123,12 +145,12 @@ color("#555555") wire([[-117, usbc_srv_y, jack_z], [-70, 20, 6],
                        [-48, 4, 8], [-30, 0, 6], [-8, -14, 7],
                        [20, -30, 6], [70, esp_lane - 8, 12], [79, esp_lane, 14]], 3.2);
 tag("USB-C service ext", [-64, 42, 10], 3.2, "#555555");
-// servo harness: six trios leave the comb's female plugs and rise
-// through the lid egress bore (bushing shown at height)
-for (i = [0 : 5]) {
-    dy = (i - 2.5) * comb_pitch;
-    color(i % 2 == 0 ? "#cc6600" : "#553311")
-        wire([[jt_x + 9, dy, comb_y + 6], [-17, dy / 3, 40], [-17, 0, 52]], 2.6);
+// signal harness: three 2-pin leads leave the female plugs and rise
+// with the power wires through the lid egress bore
+for (i = [0 : 2]) {
+    dy = (i - 1) * comb_pitch;
+    color("#cc6600")
+        wire([[jt_x + 9, dy, comb_y + 6], [-17, dy / 3, 40], [-17, 0, 52]], 2.2);
 }
 color("aqua") translate([egress_x, 0, H - lid_t - 1.6]) edge_bushing();
 tag("HARNESS UP THRU LID", [-17, -46, 44], 3.4);
