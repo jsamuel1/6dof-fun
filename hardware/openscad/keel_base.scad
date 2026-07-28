@@ -45,9 +45,9 @@ floor_h  = 2.5;
 lid_t    = 2.4;
 deck_t   = 2.4;
 
-// --- plan: slim delta, 208 x 124 ---------------------------------------
+// --- plan: slim delta, 234 x 124 (v3.11: +26 at the tray) ---------------------------------------
 front_x   = 88;
-rear_x    = -120;
+rear_x    = -146;
 half_w    = 62;
 
 // --- drawer (under the arm) ----------------------------------------------
@@ -72,40 +72,39 @@ pca_seat_h  = 2.4;
 // --- aft power chamber ----------------------------------------------------
 // Buck (65 x 48, holes 57 x 42 *** MEASURE ME ***) on a slide-in sled;
 // HUSB238 STEMMA QT (~22 x 18) + Pololu ORing pair (~20 x 15) on a shelf.
-ch_x = -85;  ch_l = 66;  ch_w = 52;
+ch_x = -111;  ch_l = 66;  ch_w = 52;
 buck_hole_dl = 57;  buck_hole_dw = 42;
 
 // --- ballast lobes ---------------------------------------------------------
-lobe_x = -76;  lobe_z = 40;  lobe_l = 30;  lobe_w = 14;
+lobe_x = -102;  lobe_z = 40;  lobe_l = 30;  lobe_w = 14;
 
 // --- servo power junction tray (WAGOs ride the comb), CENTRELINE -----------
 // Each polarity = two bridged 5-way 221-415s in a comb-mounted station:
 // 10 entries = feed + jumper + 6 servos + 2 spare. Every clamp opens
 // and re-wires with just the tray lid off.
-jt_x = -30;  jt_l = 40;  jt_w = 96;               // tray opening at z = 0
+jt_x = -43;  jt_l = 66;  jt_w = 96;               // tray opening at z = 0
 wago_l = 18.6;  wago_w = 30;  wago_h = 8.3;       // 221-415 body
-// v3.9 servo wiring strategy: the WAGOs LIVE ON THE COMB. Servo + and
-// - wires clip DIRECTLY into the levers (a WAGO grips stripped wire
-// better than any connector), and only the SIGNALS couple through
-// Dupont: 3x 2-pin plugs, two servos per plug. The comb is the whole
-// lift-out junction: two flat WAGO stations (2x 221-415 each, levers
-// up, entries inboard) on its wings, a slim 3-channel signal rack
-// between them, captive-male end stop + hinged latch bar. Lift the
-// comb and the ENTIRE junction comes out in one piece, wires attached.
-// v3.9b THREE-TIER POWER: the supplies' egress terminates on a FIXED
-// baseplate WAGO pair (the hub, under the comb); one jumper pair feeds
-// the comb's servo stations, another feeds a DRAWER-mounted pair that
-// powers the boards (ESP32 VIN, PCA V+ logic). Each removable layer
-// disconnects at its own jumpers: the comb lifts after unclipping two
-// wires, the drawer pulls after unclipping two — the supply wiring is
-// never touched. 8x 221-415 total (4 comb, 2 base, 2 drawer).
+// v3.11 servo wiring: WAGOs LIVE ON THE COMB, side-by-side, ENTRIES
+// OUTBOARD. The tray deepened 40 -> 66 so each wing carries its two
+// 221-415s abreast along x (60 + walls) with a ~14 clear corridor
+// between the entry faces and the tray wall for the wire tails (a
+// tail is ~13 of rigid strip + grip before it can bend, then it
+// curves up the wall toward the egress). + pair on -y, - pair on +y;
+// servo +/- clip straight into the levers, signals couple through
+// 3x 2-pin Duponts on the centre rack. THREE-TIER POWER (v3.9b rule
+// stands): supplies terminate on a FIXED baseplate hub pair under
+// the comb (entries FORE, 31 of floor corridor); one jumper pair
+// rises through the comb's wing slots to the stations (unclip those
+// two and the comb lifts out, junction complete); another pair feeds
+// the drawer's board-power WAGOs. 8x 221-415 total (4 comb, 2 base,
+// 2 drawer).
 comb_y      = 16;    // plate underside height (base pair lives below)
 comb_pitch  = 8;     // signal channel pitch (3 channels, 4 dividers)
 comb_ch_w   = 6.6;   // clear width: 2-pin Dupont ~6.2 wide (per spec)
 comb_div_h  = 9;     // divider height above the plate
 // 2-pin 2.54 Dupont: male ~9 x 6.2, female ~14.5 x 6.4 (per spec).
-// FIT-CHECK item: WAGO entries are inboard-horizontal — confirm wire
-// access over the centre rack on the printed tray.
+// FIT-CHECK item: confirm a 16 AWG tail seats in a station entry and
+// clears the tray wall on the printed tray (corridor is ~14.2).
 
 // --- arm adapter plate (SEPARATE PRINT) --------------------------------------
 // The two stock L-bracket feet bolt to this plate; the plate screws to the
@@ -124,12 +123,12 @@ usbc_pd_y = 2;    usbc_srv_y = 17;
 
 // --- harness egress (v3.7): plain bore + TPU bushing through the lid --
 // The 6 x 3-wire harness rises STRAIGHT UP through the junction lid at
-// x = -17: aft of the adapter plate's edge (x = -8) and the arm's aft
+// x = -27: aft of the adapter plate's edge (x = -8) and the arm's aft
 // bracket foot (x = -6), so the bore exits into open air, directly over
 // the comb's fore lead-outs — no sideways load on the connectors. The
 // v3.5 U-notch + shell rim relief are deleted; lid removal is: unplug
 // the six comb joints, lift the lid clear.
-egress_x     = -17;
+egress_x     = -27;
 lid_bore_d   = 10.8;        // bore in the lid (r 5.4)
 grom_bore_d  = 9.0;         // harness bore (6 x 3-wire ~ 8.5 bundled)
 grom_waist_d = 11.2;        // bushing waist: 0.4 press in the lid bore
@@ -159,14 +158,14 @@ clamp_screw_d  = 6;       // M6 through a heat-set nut in the jaw
 clamp_pad_d    = 14;      // TPU pressure pad
 
 // --- feet ------------------------------------------------------------------
-feet = [[-106, -26], [-106, 26], [56, -50], [56, 50]];  // front pair inboard of the bench edge when clamped (v3.2)
+feet = [[-132, -26], [-132, 26], [56, -50], [56, 50]];  // front pair inboard of the bench edge when clamped (v3.2)
 foot_d = 22;  foot_h = 4;
 
 // =====================================================================
 module plan() {
     hull() for (sy = [-1, 1]) {
         translate([rear_x + 8,  sy * 34])           circle(r = 8);
-        translate([-100,        sy * 42])           circle(r = 8);
+        translate([-126,        sy * 42])           circle(r = 8);
         translate([-40,         sy * (half_w - 8)]) circle(r = 8);
         translate([front_x - 14, sy * (half_w - 14)]) circle(r = 14);
     }
@@ -186,7 +185,7 @@ module slot_plan(s) translate([slot_x, s * slot_z]) rrect(slot_l, slot_w, 4);
 // USB-C extensions wire to boards on the base, so the whole power end
 // comes away with the floor. Pop the base and all wiring is open.
 base_lip_h = 3;
-base_screws = [[-70, -51.8], [-70, 51.8], [40, -57.8], [40, 57.8]];  // boss centres
+base_screws = [[-96, -51.8], [-96, 51.8], [40, -57.8], [40, 57.8]];  // boss centres
 
 module keel_floor() {
     difference() {
@@ -245,22 +244,20 @@ module keel_floor() {
     for (e = [-1, 1])
         translate([76, e * (drw_w_all / 2 - 2.5 - guide_w / 2), floor_h + 2])
             sphere(d = detent_d, $fn = 16);
-    // v3.10 FLOOR-TIER SERVO CLAMPS - one 221-415 per side under the
-    // comb wings (+ on -y, - on +y), entries facing the open centre.
-    // Buck feed, riser to the comb-tier partner, drawer tap and two
-    // servo tails land here; lift the comb for lever access.
+    // v3.11 BASEPLATE HUB PAIR - the supplies' 6V egress terminates
+    // here, under the comb. Entries face FORE into 31 of floor
+    // corridor; jumpers rise to the comb stations and run out to the
+    // drawer's board pair. Lift the comb for lever access.
     for (sy = [-1, 1]) {
         difference() {
-            translate([-46.8, sy * 34.1 - 11.1, floor_h])
-                cube([33.6, 22.2, 4]);
-            translate([-45.2, sy * 34.1 - 9.5, floor_h - 0.1])
-                cube([30.4, 19, 4.2]);
-            translate([-45.2, sy * 23.7 - 2.5, floor_h - 0.1])
-                cube([30.4, 5, 4.2]);
+            translate([-61.8, sy * 17 - 16.8, floor_h])
+                cube([20.4, 33.6, 4]);
+            translate([-60.2, sy * 17 - 15.2, floor_h - 0.1])
+                cube([20.5, 30.4, 4.2]);
         }
-        for (nx = [-1, 1])
-            translate([-30 + nx * 15.1 - 0.6, sy * 34.1 - 3, floor_h + 3.2])
-                cube([1.2, 6, 0.8]);
+        for (ny = [-1, 1])
+            translate([-53, sy * 17 + ny * 15.1 - 0.6, floor_h + 3.2])
+                cube([6, 1.2, 0.8]);
     }
 }
 
@@ -483,20 +480,13 @@ module sled_buck() {
 // Local frame: origin = tray centre (place with translate([jt_x,0,comb_y]));
 // +x fore. Aft->fore per channel: end stop | male PCA pigtail plug
 // (captive against the stop) | female arm plug | out to the harness.
-comb_plate_l = 38;  comb_plate_w = 94;  comb_plate_t = 3;
-// v3.10 WAGO layout: 2 clamps PER SIDE, + pair on -y, - pair on +y --
-// but STACKED IN TWO TIERS, not abreast: one on the comb wing, its
-// partner on the tray floor directly below. A 221-415 is 30 wide and
-// its wire tails need ~15 of straight approach past the entry face;
-// the 40-deep tray can't give two abreast that corridor in any flat
-// arrangement, so each tier gets ONE clamp per side with its entries
-// facing the open centre (approach cone opens upward past the rack).
-// The old baseplate hub pair is DELETED - its jobs (buck feed in,
-// drawer tap out) move onto the floor-tier clamps. 6 WAGOs total.
-// Per polarity: floor clamp = buck feed + riser + drawer tap + 2
-// servos; comb clamp = riser + 4 servos. Unclip the two risers to
-// lift the comb; floor-tier servo wires pass OUTSIDE the plate via
-// chamfered corners, so the comb lifts past them.
+comb_plate_l = 64;  comb_plate_w = 94;  comb_plate_t = 3;
+// v3.11 comb: each wing carries TWO 221-415s side-by-side along x,
+// flat, levers up, entries facing OUTBOARD into the corridor between
+// the entry faces (y 33.8) and the tray wall. + wing on -y, - wing
+// on +y. Centre: the 3-channel signal rack with the knuckle hinge on
+// its end stop (inside the plate footprint) and the latch bar. Per
+// polarity: 10 entries = 6 servos + hub jumper + drawer-free spare x3.
 module coupler_comb() {
     difference() {
         union() {
@@ -506,24 +496,22 @@ module coupler_comb() {
             for (sy = [-1, 1])
                 translate([-15, sy * comb_plate_w / 2 - (sy > 0 ? 0 : 3), 0])
                     cube([30, 3, 2.6]);
-            // comb-tier WAGO pocket per wing, entries open INBOARD
-            for (sy = [-1, 1]) {
+            // WAGO stations: 2 abreast per wing, entry end OPEN to the
+            // outboard corridor; clip nubs hold each clamp individually
+            for (sy = [-1, 1], wx = [-1, 1]) {
+                cx = wx * 15.8;
                 difference() {
-                    translate([-16.8, sy * 34.1 - 11.1, comb_plate_t])
-                        cube([33.6, 22.2, 4]);
-                    translate([-15.2, sy * 34.1 - 9.5, comb_plate_t - 0.1])
-                        cube([30.4, 19, 4.2]);
-                    translate([-15.2, sy * 23.7 - 2.5, comb_plate_t - 0.1])
-                        cube([30.4, 5, 4.2]);
+                    translate([cx - 16.2, sy * 23.6 - 10.2, comb_plate_t])
+                        cube([32.4, 20.4, 4]);
+                    translate([cx - 15.2, sy * 24.95 - 9.95, comb_plate_t - 0.1])
+                        cube([30.4, 19.9, 4.2]);
                 }
                 for (nx = [-1, 1])
-                    translate([nx * 15.1 - 0.6, sy * 34.1 - 3,
+                    translate([cx + nx * 15.1 - 0.6, sy * 24.5 - 3,
                                comb_plate_t + 3.2])
                         cube([1.2, 6, 0.8]);
             }
             // signal rack: central aft end stop + knuckle hinge on top
-            // (v3.10: knuckles live ON the stop, inside the plate
-            // footprint - the old outboard lugs overran the tray wall)
             translate([-19, -13, comb_plate_t]) cube([3, 26, comb_div_h]);
             for (k = [[-13, 5.8], [-1, 2], [7.2, 5.8]])
                 translate([-19, k[0], 10]) cube([3, k[1], 5.5]);
@@ -546,28 +534,23 @@ module coupler_comb() {
                            comb_plate_t])
                     cube([1.4, 1, 1.4]);
             for (sy = [-1, 1])
-                translate([14, sy * 18 - 2.5, comb_plate_t]) cube([4, 5, 8]);
+                translate([27, sy * 44.5 - 2.5, comb_plate_t]) cube([4, 5, 8]);
         }
         // signal-lead drop-throughs under the rack channels
         for (i = [0 : 2])
             translate([-9, (i - 1) * comb_pitch, 0])
                 vent_slot(6, 3.6, comb_plate_t);
-        // riser slots: floor-tier clamp feeds its comb-tier partner up
-        // through here (unclip these two wires to lift the comb)
+        // hub jumper slots: the baseplate pair's jumpers rise through
+        // here into the corridors (unclip these two to lift the comb)
         for (sy = [-1, 1])
-            translate([0, sy * 20, 0]) vent_slot(10, 4.6, comb_plate_t);
-        // chamfered corners: floor-tier servo tails run down OUTSIDE
-        // the plate here, so the comb lifts past them
-        for (sx = [-1, 1], sy = [-1, 1])
-            translate([sx * 17.05 - 2.05, sy * 42.5 - 4.55, -0.1])
-                cube([4.1, 9.1, comb_plate_t + 0.2]);
+            translate([8, sy * 38, 0]) vent_slot(10, 4.6, comb_plate_t);
         // hinge pin bore through the knuckles (O3.4 pin, ~30 long)
         translate([-17.7, -13.5, 13.3])
             rotate([-90, 0, 0]) cylinder(h = 27, d = 3.5);
     }
 }
 
-// --- comb latch bar (v3.10, pinned on the end-stop knuckles) ----------
+// --- comb latch bar (v3.11, pinned on the end-stop knuckles) ----------
 module comb_bar() {
     bar_z = comb_plate_t + comb_div_h;
     difference() {
