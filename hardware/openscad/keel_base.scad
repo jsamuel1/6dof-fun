@@ -520,10 +520,13 @@ module coupler_comb() {
                 translate([cx - 15.2, sy * 34.6 - 0.6, comb_plate_t])
                     cube([30.4, 1.2, 1.5]);
             }
-            // signal rack: central aft end stop + knuckle hinge on top
+            // signal rack: central aft end stop; hinge lugs aft of it
+            // (low pin at z 4.5 - the 64-wide plate has room for real
+            // 6.2-deep lugs with 1.3+ walls around the bore)
             translate([-19, -13, comb_plate_t]) cube([3, 26, comb_div_h]);
             for (k = [[-13, 5.8], [-1, 2], [7.2, 5.8]])
-                translate([-19, k[0], 10]) cube([3, k[1], 5.5]);
+                translate([-25.2, k[0], comb_plate_t - 0.2])
+                    cube([6.2, k[1], 5]);
             // 4 dividers with flared fore lead-ins (3 channels)
             for (i = [0 : 3]) {
                 dy = (i - 1.5) * comb_pitch;
@@ -536,10 +539,13 @@ module coupler_comb() {
                         cube([0.1, 0.5, comb_div_h]);
                 }
             }
-            // fore catch ledge + channel index pips + lift tabs
-            translate([16.2, -5, comb_plate_t]) cube([2.5, 10, 2.5]);
+            // fore catch: ledge raised on a stem so the bar's hook nub
+            // can tuck beneath it; channel index pips sit fore of the
+            // hook finger's landing zone; lift tabs at the corners
+            translate([16.2, -5, comb_plate_t]) cube([1.2, 10, 1.5]);
+            translate([16.2, -5, comb_plate_t + 1.5]) cube([2.5, 10, 2]);
             for (i = [0 : 2], q = [0 : i])
-                translate([17.2, (i - 1) * comb_pitch + q * 2.4 - i * 1.2 - 0.5,
+                translate([21, (i - 1) * comb_pitch + q * 2.4 - i * 1.2 - 0.5,
                            comb_plate_t])
                     cube([1.4, 1, 1.4]);
             for (sy = [-1, 1])
@@ -553,8 +559,13 @@ module coupler_comb() {
         // here into the corridors (unclip these two to lift the comb)
         for (sy = [-1, 1])
             translate([8, sy * 38, 0]) vent_slot(10, 4.6, comb_plate_t);
-        // hinge pin bore through the knuckles (O3.4 pin, ~30 long)
-        translate([-17.7, -13.5, 13.3])
+        // hinge-arm slots through the plate: the bar's arms drop past
+        // the plate here and sweep below it when the bar opens
+        for (ay = [-4.1, 4.1])
+            translate([-26, ay - 2.2, -0.1])
+                cube([7.6, 4.4, comb_plate_t + 0.2]);
+        // hinge pin bore through the lugs (O3.4 pin, ~30 long)
+        translate([-22.2, -13.5, comb_plate_t + 1.5])
             rotate([-90, 0, 0]) cylinder(h = 27, d = 3.5);
     }
 }
@@ -565,20 +576,32 @@ module comb_bar() {
     difference() {
         union() {
             translate([-17, -16, bar_z]) cube([34, 32, 2.6]);
-            // aft ears wrap the pin between the knuckles
-            for (ey = [-1, 1])
-                translate([-19.2, ey * 4.1 - 2.5, bar_z]) cube([2.2, 5, 2.6]);
+            // hinge arms: blades dropping through the comb's plate
+            // slots to wrap the low pin; aft-top corner chamfered so
+            // its swing arc clears the tray wall
+            for (ay = [-4.1, 4.1])
+                translate([0, ay + 2, 0]) rotate([90, 0, 0])
+                    linear_extrude(4)
+                        polygon([[-19.15, 2.5], [-19.15, bar_z],
+                                 [-16.5, bar_z], [-16.5, bar_z + 2.5],
+                                 [-19.15, bar_z + 2.5], [-19.15, bar_z + 2.6],
+                                 [-23.35, bar_z + 2.6], [-25.35, bar_z + 0.6],
+                                 [-25.35, 2.5]]);
         }
-        translate([-17.7, -7.5, 13.3])
-            rotate([-90, 0, 0]) cylinder(h = 15, d = 3.7);
+        translate([-22.2, -6.6, comb_plate_t + 1.5])
+            rotate([-90, 0, 0]) cylinder(h = 13.2, d = 3.7);
     }
     for (i = [0 : 2])
         translate([-15, (i - 1) * comb_pitch - 3.3, bar_z - 1.6])
             cube([30, 6.6, 1.6]);
-    translate([16.2, -5, comb_plate_t + 1]) {
-        translate([2.9, 0, 0]) cube([1.6, 10, 1.6 + comb_div_h]);
-        cube([3, 10, 1.4]);
-    }
+    // fore latch hook (one piece with the bar): roof continues off
+    // the plate edge, a spring finger drops outside the comb's catch
+    // ledge and its nub snaps into the undercut beneath it (0.2
+    // interference on the way past; fingernail under the finger to
+    // release). Prints support-free in the bar's flipped orientation.
+    translate([17, -5, bar_z]) cube([3.7, 10, 2.6]);
+    translate([19.2, -5, 3.4]) cube([1.5, 10, bar_z - 3.4]);
+    translate([18.5, -5, 3.4]) cube([0.7, 10, 1.0]);
 }
 
 // --- desk edge clamp (through-body) ---------------------------------------
