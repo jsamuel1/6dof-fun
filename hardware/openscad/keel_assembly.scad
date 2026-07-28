@@ -74,18 +74,16 @@ for (i = [0 : 5]) {
 }
 tag("COMB", [-30, 40, 34], 3.4, "#cc3333");
 
-// ---- drawers (ride the base) -----------------------------------------
-color("#cc3333") {
-    translate([7, -drw_z - (drw_w - 6) / 2, floor_h]) drawer_esp();
-    translate([7,  drw_z - (drw_w - 6) / 2, floor_h]) drawer_pca();
-}
-color("#233a5e")                  // ESP32 on its side, pins inboard
-    translate([16, -drw_z + 6, floor_h + sled_t]) cube([52, 1.6, 28.9]);
+// ---- THE drawer (v3.8: one drawer, both boards, rides the base) ------
+color("#cc3333") translate([7, 0, floor_h]) drawer_boards();
+color("#233a5e")                  // ESP32 on its side in its lane
+    translate([16, esp_lane - 0.8, floor_h + sled_t]) cube([52, 1.6, 28.9]);
 tag("ESP32", [42, -50, 34], 3.4, "#233a5e");
-color("#2255aa")                  // PCA9685 flat, servo row outboard
-    translate([14, drw_z - 12, floor_h + sled_t + pca_seat_h]) cube([62.5, 25.4, 1.6]);
+color("#2255aa")                  // PCA9685 flat in its lane, servo row outboard
+    translate([14, pca_lane - 12.7, floor_h + sled_t + pca_seat_h])
+        cube([62.5, 25.4, 1.6]);
 color("#181818")                  // its 16-channel header row, outboard
-    translate([24, drw_z + 8, floor_h + 5.6]) cube([41, 5, 8]);
+    translate([24, pca_lane + 7, floor_h + 5.6]) cube([41, 5, 8]);
 tag("PCA9685", [42, 50, 34], 3.4, "#2255aa");
 
 // =====================================================================
@@ -109,21 +107,21 @@ for (i = [0 : 5]) {
 }
 // PCA drawer pigtails: signal bundle through the 19x14 service window
 // to the comb's male plugs
-color("#cc6600") wire([[30, drw_z + 10, 12], [-4, 22, 10],
+color("#cc6600") wire([[30, pca_lane + 9, 12], [-4, 22, 10],
                        [-16, 8, comb_y - 2], [-20, 0, comb_y + 4]], 3.4);
 tag("6x signal", [8, 34, 16], 3, "#cc6600");
 // WAGO VIN pair + I2C to the ESP32 drawer through the 14x12 window
-color("red")     wire([[-39, -27, 14], [-8, -14, 8], [10, -22, 8]], 1.8);
-color("#111111") wire([[-20.5, -27, 14], [-6, -16, 8], [12, -24, 8]], 1.8);
-color("#8844cc") wire([[28, drw_z + 8, 10], [-2, 16, 8], [-4, -14, 9],
-                       [14, -22, 11]], 2.6);
-tag("I2C", [8, -6, 12], 3, "#8844cc");
+color("red")     wire([[-39, -27, 14], [-8, -14, 8], [10, esp_lane - 4, 8]], 1.8);
+color("#111111") wire([[-20.5, -27, 14], [-6, -16, 8], [12, esp_lane - 6, 8]], 1.8);
+color("#8844cc") wire([[20, pca_lane - 10, 8], [18, 2, 10],
+                       [18, esp_lane + 2, 12]], 2.6);
+tag("I2C rides the drawer", [30, 2, 14], 3, "#8844cc");
 // USB-C service extension: transom -> chamber -> tray gully -> ESP
 // window -> tunnel -> drawer face (the 200mm run; plug ends thread the
 // enlarged ports)
 color("#555555") wire([[-117, usbc_srv_y, jack_z], [-70, 20, 6],
                        [-48, 4, 8], [-30, 0, 6], [-8, -14, 7],
-                       [20, -30, 6], [70, -30, 12], [79, -27, 14]], 3.2);
+                       [20, -30, 6], [70, esp_lane - 8, 12], [79, esp_lane, 14]], 3.2);
 tag("USB-C service ext", [-64, 42, 10], 3.2, "#555555");
 // servo harness: six trios leave the comb's female plugs and rise
 // through the lid egress bore (bushing shown at height)

@@ -20,7 +20,7 @@
 // Parts (-D 'part="..."'):
 //   "floor" | "shell" | "body" (floor+shell merged: single-print
 //   fallback — the click-off base is the primary architecture)
-//   | "lid_pwr" | "lid_jct" | "cap" | "drawer_esp" | "drawer_pca"
+//   | "lid_pwr" | "lid_jct" | "cap" | "drawer" (both boards, v3.8)
 //   | "sled_buck" | "comb" | "comb_bar" | "grommet" (TPU!) | "adapter"
 //   | "clamp_spine" | "clamp_jaw" | "clamp" (assembled ref) | "clamp_ext"
 //   | "clamp_knob" | "all"
@@ -50,11 +50,17 @@ front_x   = 88;
 rear_x    = -120;
 half_w    = 62;
 
-// --- drawers (under the arm) --------------------------------------------
-// Tunnels at z = +-drw_z, open at the front wall. The ESP32 stands on its
-// side in a cradle (pins inboard, USB-C to the face); the PCA9685 lies
-// flat, servo row outboard, I2C end aft toward the junction.
-drw_z = 27;   drw_w = 34;   drw_l = 94;
+// --- drawer (under the arm) ----------------------------------------------
+// v3.8: ONE full-width drawer carries BOTH boards, pulling out
+// together — the ESP32<->PCA9685 interconnects (I2C, VIN) travel with
+// the drawer, so sliding it can never pull those wires out. The ESP32
+// stands on its side in a cradle (pins inboard, USB-C to the face) in
+// its lane; the PCA9685 lies flat, servo row outboard, in its lane; a
+// KEEP-CLEAR centre lane (|y| < 5) and the two boss lanes (y = +-30
+// above plug height) let the deck rib and M4 columns pass overhead.
+drw_z = 27;   drw_w = 34;   drw_l = 94;   // legacy refs (windows etc.)
+drw_w_all = 88;                            // the single bay's width
+esp_lane = -16;  pca_lane = 22;            // board lane centrelines
 sled_t = 1.6;
 sled_l = drw_l - 22;   // sled stops short of the tunnel rear: service-loop space
 guide_w = 2.5;  guide_h = 5;   // floor-level side guides the sled runs between
@@ -163,7 +169,7 @@ module plan() {
 module rrect(l, w, r) offset(r = r) square([l - 2 * r, w - 2 * r], center = true);
 module ch_plan()   translate([ch_x, 0]) rrect(ch_l, ch_w, 6);
 module jt_plan()   translate([jt_x, 0]) rrect(jt_l, jt_w, 5);
-module drw_plan(s) translate([42, s * drw_z]) rrect(drw_l, drw_w, 4);
+module drw_plan() translate([42, 0]) rrect(drw_l, drw_w_all, 4);
 module lobe_plan(s) translate([lobe_x, s * lobe_z]) rrect(lobe_l, lobe_w, 5);
 module slot_plan(s) translate([slot_x, s * slot_z]) rrect(slot_l, slot_w, 4);
 
@@ -206,9 +212,8 @@ module keel_floor() {
             offset(delta = -wall_t - 2.5) plan();
             for (p = base_screws)
                 translate([p[0], p[1]]) square([16, 22], center = true);
-            // v3.3: lip breaks at the drawer mouths so the faces pass
-            for (s = [-1, 1])
-                translate([85, s * drw_z]) square([12, drw_w + 2], center = true);
+            // v3.3: lip breaks at the drawer mouth so the face passes
+            translate([85, 0]) square([12, drw_w_all + 2], center = true);
         }
     // v3.2: TRANSOM POWER WALL — part of the base. Rises into the shell's
     // rear notch; the chamber lid caps the joint at the top.
@@ -227,13 +232,13 @@ module keel_floor() {
     // nothing under them (unprintable) and lifted the sled out of the
     // height budget. Sleds now bear directly ON the floor between solid
     // side guides; guides ride the base so drawers come away with it.
-    for (s = [-1, 1], e = [-1, 1])
-        translate([9, s * drw_z + e * (drw_w / 2 - guide_w / 2) - guide_w / 2, floor_h])
+    for (e = [-1, 1])
+        translate([9, e * (drw_w_all / 2 - 2.5) - guide_w / 2, floor_h])
             cube([drw_l - 16, guide_w, guide_h]);
     // drawer detents: a bump on each guide's inner face snaps into a
     // scallop in the sled edge when the drawer is home (review §2)
-    for (s = [-1, 1], e = [-1, 1])
-        translate([76, s * drw_z + e * (drw_w / 2 - guide_w), floor_h + 2])
+    for (e = [-1, 1])
+        translate([76, e * (drw_w_all / 2 - 2.5 - guide_w / 2), floor_h + 2])
             sphere(d = detent_d, $fn = 16);
     // junction rails on the base too (WAGOs come away with it).
     // v3.3 (pixelwave-style junction, our own geometry): one clip fin at
@@ -267,14 +272,13 @@ module keel_shell() {
         // ballast lobes
         translate([0, 0, floor_h]) linear_extrude(H)
             for (s = [-1, 1]) lobe_plan(s);
-        // drawer tunnels: open to the FRONT, roofed by the deck
-        for (s = [-1, 1]) {
-            translate([0, 0, floor_h]) linear_extrude(H - floor_h - deck_t) drw_plan(s);
-            // front wall opening — open at the BOTTOM (shell starts at
-            // floor_h): no sill, the drawers ride the base out (v3.2)
-            translate([front_x - wall_t - 2, s * drw_z - drw_w / 2, floor_h])
-                cube([wall_t + 6, drw_w, H - floor_h - deck_t]);
-        }
+        // drawer bay (v3.8: ONE full-width tunnel), open to the FRONT,
+        // roofed by the deck
+        translate([0, 0, floor_h]) linear_extrude(H - floor_h - deck_t) drw_plan();
+        // front wall opening — open at the BOTTOM (shell starts at
+        // floor_h): no sill, the drawer rides the base out (v3.2)
+        translate([front_x - wall_t - 2, -drw_w_all / 2, floor_h])
+            cube([wall_t + 6, drw_w_all, H - floor_h - deck_t]);
         // clamp through-slots + T-head recess on the deck
         for (s = [-1, 1]) {
             translate([0, 0, -0.1]) linear_extrude(H + 0.2) slot_plan(s);
@@ -328,6 +332,10 @@ module keel_shell() {
     }
     // (drawer ledge rails + junction rails moved to keel_floor — the
     //  click-off base carries drawers, PCBs and WAGO rails with it)
+    // v3.8: with the tunnel centre spine gone, a centreline rib
+    // stiffens the deck along the keep-clear lane (drawer contents stay
+    // out of |y| < 5 at full height; it clears the PCA plug tops by 4)
+    translate([-4, -4, H - deck_t - 6]) cube([front_x - wall_t - 4 + 4, 8, 6]);
     // v3.1: M4 boss columns under the deck at the adapter screw points.
     // The head recess above finally has plastic around it, and the four
     // columns stiffen the 2.4 mm deck at the arm-foot rows (review §5 —
@@ -406,41 +414,38 @@ module keel_cap(z) {
     }
 }
 
-// --- drawers -------------------------------------------------------------
-// Sled rides the ledge rails; red face plate closes the front opening with
-// a finger pull. ESP32 version carries a vertical cradle (board on its
-// side, pins inboard, USB-C to the face); PCA version has flat standoffs.
-module drawer_base() {
+// --- drawer (v3.8: ONE drawer, both boards) --------------------------------
+// Centred on y = 0. The sled rides the floor between the edge guides;
+// one red face closes the full-width mouth with a centre finger pull.
+// ESP32 lane: vertical cradle at esp_lane (board on its side, pins
+// inboard, USB-C to the face). PCA lane: flat standoffs at pca_lane,
+// servo row outboard. Keep-clear: |y| < 5 (deck rib) and the y = +-30
+// boss lanes above plug height.
+module drawer_boards() {
     difference() {
         union() {
-            cube([sled_l, drw_w - 6, sled_t]);                   // sled
-            translate([sled_l, -3, 0]) cube([2.4, drw_w + 2, H - floor_h - deck_t - 2]);
-            translate([sled_l + 2, drw_w / 2 - 8 - 3, 10]) cube([4, 16, 4]);  // pull
+            translate([0, -(drw_w_all - 6) / 2, 0])
+                cube([sled_l, drw_w_all - 6, sled_t]);           // sled
+            translate([sled_l, -drw_w_all / 2 - 1, 0])
+                cube([2.4, drw_w_all + 2, H - floor_h - deck_t - 2]);  // face
+            translate([sled_l + 2, -8, 10]) cube([4, 16, 4]);    // pull
+            // ESP32 vertical cradle: two pockets grip the PCB edges
+            for (x = [10, 62])
+                translate([x, esp_lane - 4.5, sled_t]) cube([6, 4, 26]);
+            translate([8, esp_lane - 6.5, sled_t]) cube([62, 2, 30]);  // back wall
         }
         // detent scallops: mate the guide bumps when the drawer is home
-        for (y = [0, drw_w - 6])
+        for (y = [-(drw_w_all - 6) / 2 + 3, (drw_w_all - 6) / 2 - 3])
             translate([sled_l - 3, y, -0.1]) cylinder(h = sled_t + 0.2, d = 2.2);
+        // face window for the USB-C panel extension at the ESP32 lane —
+        // flange size drives the final cutout *** MEASURE ME ***
+        translate([sled_l - 0.1, esp_lane - 5.25, sled_t + 12])
+            cube([2.7, 10.5, 5.5]);
     }
-}
-module drawer_esp() {
-    difference() {
-        union() {
-            drawer_base();
-            // vertical cradle: two pockets grip the PCB edges, pins inboard
-            for (x = [10, 62])
-                translate([x, 4, sled_t]) cube([6, 4, 26]);
-            translate([8, 2, sled_t]) cube([62, 2, 30]);         // back wall
-        }
-        // face window for the USB-C panel extension (v3.1) — flange size
-        // drives the final cutout *** MEASURE ME ***
-        translate([sled_l - 0.1, 9, sled_t + 12]) cube([2.7, 10.5, 5.5]);
-    }
-}
-module drawer_pca() {
-    drawer_base();
+    // PCA9685 flat standoffs, servo row outboard (+y)
     for (px = [-1, 1], pz = [-1, 1])
         translate([sled_l / 2 + px * pca_hole_dl / 2,
-                   (drw_w - 6) / 2 + pz * pca_hole_dw / 2, sled_t])
+                   pca_lane + pz * pca_hole_dw / 2, sled_t])
             standoff(pca_seat_h, m25_pilot_d);
 }
 module sled_buck() {
@@ -622,8 +627,7 @@ if (part == "comb_bar")   comb_bar();
 if (part == "lid_pwr")    keel_lid_power();
 if (part == "lid_jct")    keel_lid_junction();
 if (part == "cap")        keel_cap(lobe_z);
-if (part == "drawer_esp") drawer_esp();
-if (part == "drawer_pca") drawer_pca();
+if (part == "drawer")     drawer_boards();
 if (part == "sled_buck")  sled_buck();
 if (part == "comb")       coupler_comb();
 if (part == "grommet")    edge_bushing();
@@ -645,8 +649,7 @@ if (part == "all") {
     }
     color("red") {
         translate([jt_x, 0, comb_y]) { coupler_comb(); comb_bar(); }
-        translate([7, -drw_z - (drw_w - 6) / 2, floor_h]) drawer_esp();
-        translate([7,  drw_z - (drw_w - 6) / 2, floor_h]) drawer_pca();
+        translate([7, 0, floor_h]) drawer_boards();
         translate([ch_x - (ch_l - 10) / 2, -(ch_w - 8) / 2, floor_h]) sled_buck();
         translate([0, 0, H]) arm_adapter();
     }
