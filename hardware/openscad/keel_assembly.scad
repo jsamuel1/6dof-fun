@@ -61,7 +61,7 @@ tag("BASE PAIR (hub)", [-34, -46, 14], 3, "#cc4444");
 for (sy = [-1, 1], wx = [-1, 1])
     color(sy < 0 ? "#cc4444" : "#444444")
         translate([jt_x + wx * (wago_l / 2 + 0.6) - wago_l / 2,
-                   sy * (12.4 + wago_w / 2) - wago_w / 2, comb_y + 3.2])
+                   sy * 29.5 - wago_w / 2, comb_y + 3.2])
             cube([wago_l, wago_w, wago_h]);
 tag("SERVO + x2", [-30, -48, 30], 3, "#cc4444");
 tag("SERVO - x2", [-30, 44, 30], 3, "#444444");

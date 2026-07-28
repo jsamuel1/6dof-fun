@@ -82,7 +82,7 @@ lobe_x = -76;  lobe_z = 40;  lobe_l = 30;  lobe_w = 14;
 // Each polarity = two bridged 5-way 221-415s in a comb-mounted station:
 // 10 entries = feed + jumper + 6 servos + 2 spare. Every clamp opens
 // and re-wires with just the tray lid off.
-jt_x = -30;  jt_l = 40;  jt_w = 86;               // tray opening at z = 0
+jt_x = -30;  jt_l = 40;  jt_w = 96;               // tray opening at z = 0
 wago_l = 18.6;  wago_w = 30;  wago_h = 8.3;       // 221-415 body
 // v3.9 servo wiring strategy: the WAGOs LIVE ON THE COMB. Servo + and
 // - wires clip DIRECTLY into the levers (a WAGO grips stripped wire
@@ -477,7 +477,7 @@ module sled_buck() {
 // Local frame: origin = tray centre (place with translate([jt_x,0,comb_y]));
 // +x fore. Aft->fore per channel: end stop | male PCA pigtail plug
 // (captive against the stop) | female arm plug | out to the harness.
-comb_plate_l = 38;  comb_plate_w = 84;  comb_plate_t = 3;
+comb_plate_l = 38;  comb_plate_w = 94;  comb_plate_t = 3;
 module coupler_comb() {
     difference() {
         union() {
@@ -486,13 +486,15 @@ module coupler_comb() {
             // side tongues ride the tray-wall grooves
             for (sy = [-1, 1])
                 translate([-15, sy * comb_plate_w / 2 - (sy > 0 ? 0 : 3), 0])
-                    cube([30, 3 + comb_plate_w / 2 - 42, 2.6]);
-            // WAGO stations on the wings (v3.9): two 221-415 pockets
-            // per polarity, flat, levers up, entries INBOARD; low
-            // walls + clip nubs — any one clamp pops out alone
+                    cube([30, 3, 2.6]);
+            // WAGO stations on the wings (v3.9c): two 221-415 pockets
+            // per polarity, flat, levers up, ENTRIES OUTWARD to the
+            // open fore/aft edges (the first cut faced them into the
+            // signal rack — blocked); low walls + clip nubs — any one
+            // clamp pops out alone
             for (sy = [-1, 1], wx = [-1, 1]) {
                 px = wx * (wago_l / 2 + 0.6);
-                py = sy * (12.4 + wago_w / 2);
+                py = sy * 29.5;
                 difference() {
                     translate([px - wago_l / 2 - 1.8, py - wago_w / 2 - 1.8,
                                comb_plate_t])
@@ -500,15 +502,15 @@ module coupler_comb() {
                     translate([px - wago_l / 2 - 0.2, py - wago_w / 2 - 0.2,
                                comb_plate_t - 0.1])
                         cube([wago_l + 0.4, wago_w + 0.4, 4.2]);
-                    translate([px - wago_l / 2 - 2,
-                               py - sy * (wago_w / 2 + 2) - 2,
-                               comb_plate_t - 0.1])
-                        cube([wago_l + 4, 4, 4.2]);      // entry face open
+                    // entry face open toward the pocket's own edge
+                    translate([px + wx * (wago_l / 2 + 1) - 2,
+                               py - wago_w / 2 - 2, comb_plate_t - 0.1])
+                        cube([4, wago_w + 4, 4.2]);
                 }
-                for (nx = [-1, 1])                        // clip nubs
-                    translate([px + nx * (wago_l / 2 + 0.1) - 0.6, py - 3,
+                for (ny = [-1, 1])                        // clip nubs
+                    translate([px - 3, py + ny * (wago_w / 2 + 0.1) - 0.6,
                                comb_plate_t + 3.2])
-                        cube([1.2, 6, 0.8]);
+                        cube([6, 1.2, 0.8]);
             }
             // aft end stop for the signal rack (captive male plugs)
             translate([-19, -13, comb_plate_t]) cube([3, 26, comb_div_h]);
@@ -545,9 +547,9 @@ module coupler_comb() {
         for (i = [0 : 2])
             translate([-9, (i - 1) * comb_pitch, 0])
                 vent_slot(6, 3.6, comb_plate_t);
-        // 6V feed slots up through the plate at each station's inboard end
+        // 6V jumper slots up through the plate beside each station
         for (sy = [-1, 1])
-            translate([-12, sy * 15, 0]) vent_slot(8, 4, comb_plate_t);
+            translate([-12, sy * 17, 0]) vent_slot(8, 4, comb_plate_t);
         // hinge pin bore through the knuckle lugs (O3.4 pin, ~40 long)
         translate([-22.2, -14, comb_plate_t + 1.5])
             rotate([-90, 0, 0]) cylinder(h = 28, d = 3.5);
