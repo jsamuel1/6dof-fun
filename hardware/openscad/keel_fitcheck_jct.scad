@@ -26,13 +26,18 @@ module jct_crop() {
     }
 }
 
-if (fpart == "crop") jct_crop();
-if (fpart == "plate") {
+// Each part exports SEPARATELY (own object in the 3mf, so per-object
+// print settings work); positions here are just the initial layout.
+if (fpart == "crop") translate([85, 55, 0]) jct_crop();
+// junction lid: top face down, clips up (inlay-style, like the
+// spine lids)
+if (fpart == "lid") translate([165, 60, lid_t]) rotate([180, 0, 0]) keel_lid_junction();
+if (fpart == "comb") translate([200, 50, 0]) coupler_comb();
+// latch bar: flipped so its top plate is on the bed, ears/pads up
+if (fpart == "bar") translate([200, 150, 14.6]) rotate([180, 0, 0]) comb_bar();
+if (fpart == "plate") {                       // debug view: everything
     translate([85, 55, 0]) jct_crop();
-    // junction lid: top face down, clips up (inlay-style, like the
-    // spine lids)
     translate([165, 60, lid_t]) rotate([180, 0, 0]) keel_lid_junction();
     translate([200, 50, 0]) coupler_comb();
-    // latch bar: flipped so its top plate is on the bed, ears/pads up
     translate([200, 150, 14.6]) rotate([180, 0, 0]) comb_bar();
 }

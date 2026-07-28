@@ -19,10 +19,15 @@ MACHINE="$PROF/machine/Bambu Lab P2S 0.4 nozzle.json"
 PROCESS="$PROF/process/0.20mm Standard @BBL P2S.json"
 FILAMENT="$PROF/filament/Bambu PETG Basic @BBL P2S 0.4 nozzle.json"
 
-echo "== exporting STL =="
-openscad -o "$TMP/plate.stl" -D 'fpart="plate"' \
-    "$REPO/hardware/openscad/keel_fitcheck_jct.scad" 2>/dev/null
-[ -s "$TMP/plate.stl" ] || { echo "export failed" >&2; exit 1; }
+echo "== exporting STLs (one object per part) =="
+STLS=()
+for part in tray_crop:crop junction_lid:lid coupler_comb:comb latch_bar:bar; do
+    name="${part%%:*}"; fp="${part##*:}"
+    openscad -o "$TMP/$name.stl" -D "fpart=\"$fp\"" \
+        "$REPO/hardware/openscad/keel_fitcheck_jct.scad" 2>/dev/null
+    [ -s "$TMP/$name.stl" ] || { echo "export failed: $name" >&2; exit 1; }
+    STLS+=("$TMP/$name.stl")
+done
 
 echo "== slic3r project assembly =="
 "$BAMBU" \
@@ -30,7 +35,7 @@ echo "== slic3r project assembly =="
     --load-filaments "$FILAMENT" \
     --arrange 0 \
     --export-3mf "$TMP/out.3mf" \
-    "$TMP/plate.stl" >/dev/null
+    "${STLS[@]}" >/dev/null
 
 echo "== patching project settings =="
 python3 - "$TMP/out.3mf" "$PROF/filament" <<'EOF'
