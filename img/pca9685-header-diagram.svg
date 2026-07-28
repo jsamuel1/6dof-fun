@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE svg
+  PUBLIC '-//W3C//DTD SVG 1.0//EN'
+  'http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd'>
+<svg width="470" height="120" preserveAspectRatio="xMinYMin meet" viewBox="0 0 470 120" xmlns="http://www.w3.org/2000/svg" version="1.0" fill-rule="evenodd" xmlns:xlink="http://www.w3.org/1999/xlink">
+	<title>...</title>
+	<desc>...</desc>
+	<clipPath id="clip">
+		<rect x="0" y="0" width="470" height="120"/>
+	</clipPath>
+	<g id="group" transform="scale(1,-1) translate(0,-120)" style="clip-path: url(#clip)">
+		<g transform="">
+			<rect x="30" y="26" width="360" height="44" rx="4" ry="0" style="stroke: rgb(0%,0%,0%); stroke-linecap: butt; stroke-width: 1; fill: rgb(18%,36%,54%); fill-rule: evenodd;"/>
+			<rect x="79.42857142857143" y="70" width="4.0" height="8" style="stroke: none; stroke-linecap: butt; stroke-width: 1; fill: rgb(78%,62%,9%); fill-rule: evenodd;"/>
+			<text x="71.68157142857143" y="45.0" style="font-family: Times-Roman; font-size: 9px;fill: rgb(100%,100%,100%); stroke:none;" transform="translate(0,90) scale(1,-1)">GND</text>
+			<path d="M 81.428571,78 L 81.428571,96 Z" style="stroke: rgb(47%,29%,11%); stroke-linecap: butt; stroke-width: 3.5;"/>
+			<text x="71.84732142857143" y="100" style="font-family: Times-Roman; font-size: 7.5px;fill: rgb(47%,29%,11%); stroke:none;" transform="translate(0,200) scale(1,-1)">brown</text>
+			<text x="59.84407142857143" y="109" style="font-family: Times-Roman; font-size: 7px;fill: rgb(20%,20%,20%); stroke:none;" transform="translate(0,218) scale(1,-1)">to ESP32 GND</text>
+			<rect x="130.85714285714286" y="70" width="4.0" height="8" style="stroke: none; stroke-linecap: butt; stroke-width: 1; fill: rgb(78%,62%,9%); fill-rule: evenodd;"/>
+			<text x="126.85864285714285" y="45.0" style="font-family: Times-Roman; font-size: 9px;fill: rgb(100%,100%,100%); stroke:none;" transform="translate(0,90) scale(1,-1)">OE</text>
+			<path d="M 132.857143,78 L 132.857143,96 Z" style="stroke: rgb(80%,13%,13%); stroke-linecap: butt; stroke-width: 3.5;"/>
+			<text x="128.06839285714287" y="100" style="font-family: Times-Roman; font-size: 7.5px;fill: rgb(80%,13%,13%); stroke:none;" transform="translate(0,200) scale(1,-1)">red</text>
+			<text x="105.53964285714287" y="109" style="font-family: Times-Roman; font-size: 7px;fill: rgb(54%,6%,6%); stroke:none;" transform="translate(0,218) scale(1,-1)">PARK (unplugged)</text>
+			<rect x="182.28571428571428" y="70" width="4.0" height="8" style="stroke: none; stroke-linecap: butt; stroke-width: 1; fill: rgb(78%,62%,9%); fill-rule: evenodd;"/>
+			<text x="176.0327142857143" y="45.0" style="font-family: Times-Roman; font-size: 9px;fill: rgb(100%,100%,100%); stroke:none;" transform="translate(0,90) scale(1,-1)">SCL</text>
+			<path d="M 184.285714,78 L 184.285714,96 Z" style="stroke: rgb(87%,47%,12%); stroke-linecap: butt; stroke-width: 3.5;"/>
+			<text x="174.08196428571426" y="100" style="font-family: Times-Roman; font-size: 7.5px;fill: rgb(87%,47%,12%); stroke:none;" transform="translate(0,200) scale(1,-1)">orange</text>
+			<text x="174.66071428571428" y="109" style="font-family: Times-Roman; font-size: 7px;fill: rgb(20%,20%,20%); stroke:none;" transform="translate(0,218) scale(1,-1)">to D22</text>
+			<rect x="233.71428571428572" y="70" width="4.0" height="8" style="stroke: none; stroke-linecap: butt; stroke-width: 1; fill: rgb(78%,62%,9%); fill-rule: evenodd;"/>
+			<text x="226.71428571428572" y="45.0" style="font-family: Times-Roman; font-size: 9px;fill: rgb(100%,100%,100%); stroke:none;" transform="translate(0,90) scale(1,-1)">SDA</text>
+			<path d="M 235.714286,78 L 235.714286,96 Z" style="stroke: rgb(83%,70%,0%); stroke-linecap: butt; stroke-width: 3.5;"/>
+			<text x="225.5067857142857" y="100" style="font-family: Times-Roman; font-size: 7.5px;fill: rgb(83%,70%,0%); stroke:none;" transform="translate(0,200) scale(1,-1)">yellow</text>
+			<text x="226.08928571428572" y="109" style="font-family: Times-Roman; font-size: 7px;fill: rgb(20%,20%,20%); stroke:none;" transform="translate(0,218) scale(1,-1)">to D21</text>
+			<rect x="285.14285714285717" y="70" width="4.0" height="8" style="stroke: none; stroke-linecap: butt; stroke-width: 1; fill: rgb(78%,62%,9%); fill-rule: evenodd;"/>
+			<text x="277.89085714285716" y="45.0" style="font-family: Times-Roman; font-size: 9px;fill: rgb(100%,100%,100%); stroke:none;" transform="translate(0,90) scale(1,-1)">VCC</text>
+			<path d="M 287.142857,78 L 287.142857,96 Z" style="stroke: rgb(18%,54%,18%); stroke-linecap: butt; stroke-width: 3.5;"/>
+			<text x="278.81410714285715" y="100" style="font-family: Times-Roman; font-size: 7.5px;fill: rgb(18%,54%,18%); stroke:none;" transform="translate(0,200) scale(1,-1)">green</text>
+			<text x="277.51785714285717" y="109" style="font-family: Times-Roman; font-size: 7px;fill: rgb(20%,20%,20%); stroke:none;" transform="translate(0,218) scale(1,-1)">to 3V3</text>
+			<rect x="336.57142857142856" y="70" width="4.0" height="8" style="stroke: none; stroke-linecap: butt; stroke-width: 1; fill: rgb(78%,62%,9%); fill-rule: evenodd;"/>
+			<text x="332.7844285714286" y="45.0" style="font-family: Times-Roman; font-size: 9px;fill: rgb(100%,100%,100%); stroke:none;" transform="translate(0,90) scale(1,-1)">V+</text>
+			<path d="M 338.571429,78 L 338.571429,96 Z" style="stroke: rgb(13%,33%,80%); stroke-linecap: butt; stroke-width: 3.5;"/>
+			<text x="332.1139285714286" y="100" style="font-family: Times-Roman; font-size: 7.5px;fill: rgb(13%,33%,80%); stroke:none;" transform="translate(0,200) scale(1,-1)">blue</text>
+			<text x="322.62892857142856" y="109" style="font-family: Times-Roman; font-size: 7px;fill: rgb(54%,6%,6%); stroke:none;" transform="translate(0,218) scale(1,-1)">REMOVE!</text>
+			<path d="M 333.571429,79 L 343.571429,95 Z" style="stroke: rgb(100%,0%,0%); stroke-linecap: butt; stroke-width: 2;"/>
+			<path d="M 333.571429,95 L 343.571429,79 Z" style="stroke: rgb(100%,0%,0%); stroke-linecap: butt; stroke-width: 2;"/>
+			<circle cx="418" cy="48.0" r="16" style="stroke: rgb(53%,53%,53%); stroke-linecap: butt; stroke-width: 1.5; fill: rgb(10%,10%,10%); fill-rule: evenodd;"/>
+			<text x="412.795" y="45.0" style="font-family: Times-Roman; font-size: 7.5px;fill: rgb(100%,100%,100%); stroke:none;" transform="translate(0,90) scale(1,-1)">cap</text>
+			<text x="389.195" y="14" style="font-family: Times-Roman; font-size: 7px;fill: rgb(0%,0%,0%); stroke:none;" transform="translate(0,28) scale(1,-1)">V+ is always the pin</text>
+			<text x="390.203" y="5" style="font-family: Times-Roman; font-size: 7px;fill: rgb(0%,0%,0%); stroke:none;" transform="translate(0,10) scale(1,-1)">beside the capacitor</text>
+			<text x="26" y="12" style="font-family: Times-Roman; font-size: 7px;fill: rgb(46%,46%,46%); stroke:none;" transform="translate(0,24) scale(1,-1)">start counting here (away from cap)</text>
+		</g>
+	</g>
+</svg>

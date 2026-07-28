@@ -1,0 +1,1034 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="A hand-built 6DOF robot arm driven by an ESP32 running micro-ROS, a PCA9685 PWM driver, and six MG996R servos — ROS2-native from day one.">
+      
+      
+      
+      
+      
+      
+        
+      
+      
+      
+      
+        
+        
+        
+          <link rel="icon" href="../../../assets/images/favicon.png">
+        
+      
+      <meta name="generator" content="mkdocs-ProperDocs 1.6.7, mkdocs-materialx-10.2.0">
+    
+    
+      
+        <title>Touchscreen Jog + Calibrate UI — Design - 6DOF Robot Arm</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.d7aee198.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.a45159b5.min.css">
+      
+    
+    
+
+    
+
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo" data-mx-topbar="glass">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="toc" type="checkbox" id="__toc" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <label class="md-overlay" for="__toc"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#touchscreen-jog-calibrate-ui-design" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="6DOF Robot Arm" class="md-header__button md-logo" aria-label="6DOF Robot Arm" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            6DOF Robot Arm
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Touchscreen Jog + Calibrate UI — Design
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10.25 2a8.25 8.25 0 0 1 6.34 13.53l5.69 5.69a.749.749 0 0 1-.326 1.275.75.75 0 0 1-.734-.215l-5.69-5.69A8.25 8.25 0 1 1 10.25 2M3.5 10.25a6.75 6.75 0 1 0 13.5 0 6.75 6.75 0 0 0-13.5 0"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10.25 2a8.25 8.25 0 0 1 6.34 13.53l5.69 5.69a.749.749 0 0 1-.326 1.275.75.75 0 0 1-.734-.215l-5.69-5.69A8.25 8.25 0 1 1 10.25 2M3.5 10.25a6.75 6.75 0 1 0 13.5 0 6.75 6.75 0 0 0-13.5 0"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0">
+        <div class="md-search-result md-search-result--pagefind" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="6DOF Robot Arm" class="md-nav__button md-logo" aria-label="6DOF Robot Arm" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    6DOF Robot Arm
+  </label>
+  
+  <ul class="md-nav__list">
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../parts-list/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Parts List
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Install Guide
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Install Guide
+  
+
+          </label>
+          <ul class="md-nav__list">
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../install/1-hardware/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1. Hardware
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../install/2-firmware/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    2. Firmware
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../install/3-host/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    3. Host Software
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../install/4-first-motion/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    4. First Motion
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../install/5-raspberry-pi/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    5. Raspberry Pi Host
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../install/6-touchscreen/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    6. Touchscreen Panel
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../design-decisions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Design Decisions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../3d-printing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    3D Printing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../gallery/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Gallery
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc">
+      
+        <li class="md-nav__item">
+  <a href="#goal" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Goal
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#non-goals-v1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Non-goals (v1)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Architecture
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#web-page-hostweb" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Web page (host/web/)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#data-flow-topics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Data flow &amp; topics
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#error-handling" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Error handling
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#kiosk-on-armdell-outside-docker" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Kiosk on armdell (outside Docker)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#testing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Testing
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#risks-notes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Risks / notes
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              
+              
+              <article class="md-content__inner md-typeset" data-pagefind-body>
+                
+                  
+
+<h1 id="touchscreen-jog-calibrate-ui-design">Touchscreen Jog + Calibrate UI — Design<a class="headerlink" href="#touchscreen-jog-calibrate-ui-design" title="Permanent link">&para;</a></h1>
+<p>Date: 2026-07-19
+Status: approved approach (A) — custom web UI + rosbridge, Chromium kiosk
+Target: Magedok T101F (1540×720, Elan touch) attached to <code>armdell</code>
+(Ubuntu Server 24.04 ROS2 host, stack in <code>host/pi/docker-compose.yml</code>)</p>
+<h2 id="goal">Goal<a class="headerlink" href="#goal" title="Permanent link">&para;</a></h2>
+<p>A touch-first control panel on the arm's bench screen for the work we do
+most right now: jogging joints, re-indexing horns, and running the
+<code>/arm/cal</code> microsecond calibration — with the camera view beside it and
+an e-stop you can slap. The same URL must work from any browser on the
+LAN (Mac included); the kiosk is just one client.</p>
+<h2 id="non-goals-v1">Non-goals (v1)<a class="headerlink" href="#non-goals-v1" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Saved poses, trajectory playback, kinematics/IK, speech, auth.</li>
+<li>Multi-user arbitration (last writer wins — single-operator bench tool).</li>
+<li>Replacing Foxglove for plotting/inspection on the Mac.</li>
+</ul>
+<h2 id="architecture">Architecture<a class="headerlink" href="#architecture" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code>Magedok (touch) ── cage + Chromium kiosk (systemd, boots fullscreen)
+                        │  http://localhost:8088
+                        ▼
+   arm-web (nginx:alpine, :8088) ── serves host/web/ static files
+   arm-rosbridge (:9090 ws)      ── roslibjs topics pub/sub
+   arm-web-video (:8080 http)    ── MJPEG stream of /image_raw
+                        │
+              (existing) arm-micro-ros-agent ◄── UDP 8888 ── ESP32
+                         arm-camera, arm-foxglove-bridge unchanged
+</code></pre></div>
+<p>Three additions to <code>host/pi/docker-compose.yml</code>, all <code>network_mode: host</code>
+like the rest of the stack:</p>
+<table>
+<thead>
+<tr>
+<th>Service</th>
+<th>Image</th>
+<th>Port</th>
+<th>Role</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>arm-rosbridge</code></td>
+<td><code>ros:jazzy-ros-core</code> + <code>ros-jazzy-rosbridge-server</code> (small Dockerfile)</td>
+<td>9090/ws</td>
+<td>JSON⇄DDS bridge for the page</td>
+</tr>
+<tr>
+<td><code>arm-web-video</code></td>
+<td>same base + <code>ros-jazzy-web-video-server</code> (can share the Dockerfile/image with rosbridge)</td>
+<td>8080</td>
+<td><code>GET /stream?topic=/image_raw&amp;type=mjpeg</code></td>
+</tr>
+<tr>
+<td><code>arm-web</code></td>
+<td><code>nginx:alpine</code>, bind-mount <code>host/web/</code></td>
+<td>8088</td>
+<td>static page</td>
+</tr>
+</tbody>
+</table>
+<h2 id="web-page-hostweb">Web page (<code>host/web/</code>)<a class="headerlink" href="#web-page-hostweb" title="Permanent link">&para;</a></h2>
+<p>Single static page, no build tooling: <code>index.html</code> + <code>app.js</code> +
+<code>style.css</code>, with <code>roslib.min.js</code> vendored into <code>host/web/vendor/</code>
+(no CDN — the bench must work without internet).</p>
+<p>Layout, 1540×720 landscape, dark theme, three columns:</p>
+<ol>
+<li><strong>Left (~500 px): camera</strong> — <code>&lt;img&gt;</code> of the MJPEG stream. Tap to
+   cycle 90° rotation (CSS transform; camera mounting is uncontrolled).</li>
+<li><strong>Middle (~740 px): six joint rows</strong> — each row:
+   <code>◀◀  ◀  [joint1  −12.3°]  ▶  ▶▶</code></li>
+<li>◀/▶ = 2° step, ◀◀/▶▶ = 10° step. Discrete taps only — no sliders
+     (a stray swipe must never command a large motion).</li>
+<li>Steps apply to the <em>last commanded/known position</em> from
+     <code>/joint_states</code> and publish a full <code>sensor_msgs/JointState</code> to
+     <code>/arm/joint_commands</code> (single named joint in the message).</li>
+<li>Center readout shows live position from <code>/joint_states</code>; row is
+     visually dimmed until that joint is armed (per <code>/arm/status</code>).</li>
+<li><strong>Right (~300 px): safety + cal + status</strong></li>
+<li><strong>STOP</strong>: ≥120 px tall, red; publishes <code>"x"</code> to <code>/arm/cal</code>
+     (firmware e-stop) — no confirmation dialog.</li>
+<li><strong>Cal mode toggle</strong>: when on, the <em>selected</em> joint row swaps its
+     jog buttons for µs nudges publishing to <code>/arm/cal</code>:
+     <code>&lt;</code>(−50) <code>-</code>(−10) <code>[1550 µs]</code> <code>+</code>(+10) <code>&gt;</code>(+50), plus <code>c</code> (center)
+     and channel select <code>0</code>–<code>5</code> (tap a joint row to select).</li>
+<li><strong>Status strip</strong>: agent link state, RSSI, uptime, <code>cal_ch</code>/<code>cal_us</code>
+     (parsed from the <code>/arm/status</code> JSON), rosbridge connection state.</li>
+</ol>
+<p>Touch details: <code>&lt;meta name="viewport" ... user-scalable=no&gt;</code>, buttons
+≥ 72 px hit targets, <code>touch-action: manipulation</code> (kills double-tap
+zoom delay), no hover-dependent affordances.</p>
+<h2 id="data-flow-topics">Data flow &amp; topics<a class="headerlink" href="#data-flow-topics" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Topic</th>
+<th>Dir</th>
+<th>Type</th>
+<th>Use</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>/arm/joint_commands</code></td>
+<td>UI → arm</td>
+<td><code>sensor_msgs/JointState</code></td>
+<td>jog targets (radians; UI works in degrees, converts)</td>
+</tr>
+<tr>
+<td><code>/arm/cal</code></td>
+<td>UI → arm</td>
+<td><code>std_msgs/String</code></td>
+<td>single-char cal commands (<code>0</code>-<code>5 - + &lt; &gt; c x</code>), same alphabet as the serial diag console</td>
+</tr>
+<tr>
+<td><code>/joint_states</code></td>
+<td>arm → UI</td>
+<td><code>sensor_msgs/JointState</code></td>
+<td>live readouts (best-effort QoS; rosbridge must subscribe best-effort)</td>
+</tr>
+<tr>
+<td><code>/arm/status</code></td>
+<td>arm → UI</td>
+<td><code>std_msgs/String</code> (JSON)</td>
+<td>link/RSSI/estop/cal state at 1 Hz</td>
+</tr>
+<tr>
+<td><code>/image_raw</code></td>
+<td>camera → UI</td>
+<td>via web_video_server MJPEG</td>
+<td>not a rosbridge topic — plain <code>&lt;img&gt;</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="error-handling">Error handling<a class="headerlink" href="#error-handling" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong>rosbridge socket lost</strong>: all command buttons disable, banner shows
+  "reconnecting…", auto-retry with backoff. Never queue taps.</li>
+<li><strong><code>/arm/status</code> stale &gt; 3 s</strong>: agent indicator goes red — commands
+  stay enabled (rosbridge may be fine while the ESP32 rebooted; the
+  firmware ignores commands it can't act on).</li>
+<li><strong>Jog clamping</strong>: UI clamps to the same ±90° soft limits as
+  <code>config.h</code>; firmware clamps again regardless (UI limits are cosmetic,
+  firmware limits are authoritative).</li>
+<li><strong>Camera stream dead</strong>: <code>&lt;img&gt;</code> <code>onerror</code> → placeholder + retry
+  button; never blocks the control column.</li>
+</ul>
+<h2 id="kiosk-on-armdell-outside-docker">Kiosk on armdell (outside Docker)<a class="headerlink" href="#kiosk-on-armdell-outside-docker" title="Permanent link">&para;</a></h2>
+<ul>
+<li><code>apt install cage</code>; Chromium via snap (Ubuntu's only packaging).</li>
+<li><code>kiosk.service</code> (systemd, <code>After=docker.service</code>): runs
+  <code>cage -- chromium --kiosk --noerrdialogs --disable-pinch http://localhost:8088</code>
+  as user <code>jsamuel</code> on tty1; <code>Restart=always</code>.</li>
+<li>The Magedok is HDMI-A-1 @ native 1540×720 (EDID read works on this
+  box — no mode forcing needed). Elan touch works as a standard input
+  device under Wayland/cage.</li>
+<li>Laptop's built-in eDP panel: lid is typically closed (logind ignores
+  it); if open, cage extends across both — acceptable v1 quirk.</li>
+</ul>
+<h2 id="testing">Testing<a class="headerlink" href="#testing" title="Permanent link">&para;</a></h2>
+<ol>
+<li>Compose services up on armdell; open <code>http://armdell:8088</code> from the
+   Mac: verify status strip, joint rows live-update, STOP publishes.</li>
+<li>With PCA9685 + one servo wired: jog CH0 ±2°, verify motion + readout.</li>
+<li>Cal mode: select ch, nudge µs, watch <code>cal_us</code> in status strip echo.</li>
+<li>Kill rosbridge container: buttons disable, banner appears; restart:
+   auto-reconnect.</li>
+<li>Enable kiosk.service, reboot armdell: UI appears on Magedok without
+   interaction; touch jog works.</li>
+</ol>
+<h2 id="risks-notes">Risks / notes<a class="headerlink" href="#risks-notes" title="Permanent link">&para;</a></h2>
+<ul>
+<li>rosbridge + best-effort QoS on <code>/joint_states</code> needs an explicit QoS
+  override in the subscribe call (roslibjs supports this); otherwise the
+  readouts stay empty.</li>
+<li>The 2012-era Dell renders one MJPEG 640×480@15 stream + a static page
+  easily; no GPU concerns under cage.</li>
+<li>Chromium-snap under cage on a headless-boot server is the fiddliest
+  piece (seat/permissions); if it fights back, fallback is
+  <code>chromium --kiosk</code> under a minimal X + <code>xinit</code> instead of Wayland.</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+          <div class="md-top" data-md-component="top" hidden>
+  <div class="md-top__center">
+    <button type="button" class="md-top__button md-top__button--main" data-md-action="top">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+      <span>Back to top</span>
+    </button>
+    
+      
+      
+      <label class="md-top__button md-top__side md-top__side--nav" for="__drawer" >
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="lucide lucide-panel-left" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 3v18"/></svg>
+      </label>
+    
+    
+      
+      
+      <label class="md-top__button md-top__side md-top__side--toc" for="__toc" >
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="lucide lucide-panel-right" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M15 3v18"/></svg>
+      </label>
+    
+  </div>
+</div>
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://jaywhj.github.io/mkdocs-materialx/" target="_blank" rel="noopener">
+      MaterialX
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      
+      
+        
+        
+          
+          
+        
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "code": null, "features": ["navigation.sections", "navigation.top", "content.code.copy"], "search": {"options": {"baseUrl": "../../..", "bundleUrl": "../../../search/", "highlight": false, "searchOptions": {}}, "provider": "pagefind"}, "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "code.collapse": "Collapse", "code.download": "Download", "code.expand": "Expand remaining # lines", "code.select": "Toggle line selection", "search.offline": "Switch to Lunr for offline search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.44453a05.min.js"></script>
+      
+    
+  </body>
+</html>
