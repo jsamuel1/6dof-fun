@@ -289,12 +289,17 @@ module keel_shell() {
         }
         snap_sockets(ch_x, 0, ch_l / 2 - 8, ch_w / 2 + 0.5);
         snap_sockets(jt_x, 0, 16, jt_w / 2 + 0.5);
-        // wire pass-throughs: chamber->junction; junction->each drawer;
-        // PCA drawer->grommet channel
-        translate([ch_x + ch_l / 2 - 0.1, -5, floor_h + 2]) cube([8, 10, 8]);
-        // ESP32 side: VIN + I2C pass-through
-        translate([jt_x + jt_l / 2 - 0.1, -(drw_z - 14) - 4, floor_h + 2])
-            cube([10, 8, 8]);
+        // wire pass-throughs. Connector ENDS thread through these
+        // end-first (runs lie open from below with the base popped),
+        // so each port is sized for the largest END on its route, not
+        // just the wires:
+        // chamber->junction: buck 6V pair AND the ESP32's USB-C
+        // service extension pass here - a USB-C plug is ~10.5 x 6.5
+        translate([ch_x + ch_l / 2 - 0.1, -6.5, floor_h + 2]) cube([8, 13, 10]);
+        // junction->ESP tunnel: VIN + I2C + that same USB-C extension
+        // continuing to the drawer face - window, not a wire hole
+        translate([jt_x + jt_l / 2 - 0.1, -(drw_z - 14) - 8, floor_h + 2])
+            cube([10, 14, 12]);
         // PCA side (v3.1): widened to a service WINDOW — the six pigtails
         // to the coupler comb and the power pair route through here, and
         // a finger reaches the drawer's leads with the tray lid off
