@@ -258,6 +258,8 @@ module keel_floor() {
         for (ny = [-1, 1])
             translate([-53, sy * 17 + ny * 15.1 - 0.6, floor_h + 3.2])
                 cube([6, 1.2, 0.8]);
+        // entry-end lip (see comb stations): blocks fore slide-out
+        translate([-41.2, sy * 17 - 15.2, floor_h]) cube([1.2, 30.4, 1.5]);
     }
 }
 
@@ -457,8 +459,11 @@ module drawer_boards() {
             cube([wago_w + 3.6, wago_l + 3.6, 4]);
         translate([sled_l / 2 + sx * 17 - wago_w / 2 - 0.2, -11.6, sled_t - 0.1])
             cube([wago_w + 0.4, wago_l + 0.4, 4.2]);
-        translate([sled_l / 2 + sx * 17 - 4, -14, sled_t - 0.1])
-            cube([8, 4, 4.2]);
+        // wire notch: 22 wide so 4 of the 5 funnels are reachable
+        // (was 8 - it exposed barely two); corner stubs + full side
+        // walls still box the clamp in on all four sides
+        translate([sled_l / 2 + sx * 17 - 11, -14, sled_t - 0.1])
+            cube([22, 4, 4.2]);
     }
     // PCA9685 flat standoffs, servo row outboard (+y)
     for (px = [-1, 1], pz = [-1, 1])
@@ -510,6 +515,10 @@ module coupler_comb() {
                     translate([cx + nx * 15.1 - 0.6, sy * 24.5 - 3,
                                comb_plate_t + 3.2])
                         cube([1.2, 6, 0.8]);
+                // entry-end lip: catches the housing base so wire tugs
+                // can't slide the clamp out; sits below the funnels
+                translate([cx - 15.2, sy * 34.6 - 0.6, comb_plate_t])
+                    cube([30.4, 1.2, 1.5]);
             }
             // signal rack: central aft end stop + knuckle hinge on top
             translate([-19, -13, comb_plate_t]) cube([3, 26, comb_div_h]);
